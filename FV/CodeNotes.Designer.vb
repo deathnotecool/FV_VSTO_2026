@@ -63,5 +63,14 @@ Namespace My.Resources
                 resourceCulture = value
             End Set
         End Property
+        
+        '''<summary>
+        '''  查找类似 智能调整行高|GN001|一键调整当前工作表已用区域的行高，支持混合换行|Sub 智能调整行高()\n    Dim rng As Range\n    Dim cell As Range\n    \n    Set rng = ActiveSheet.UsedRange\n    rng.Rows.AutoFit\n    \n    For Each cell In rng\n        If cell.WrapText = True Then\n            cell.RowHeight = cell.RowHeight * 1.5\n        End If\n    Next cell\nEnd Sub 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property Snippet_001() As String
+            Get
+                Return ResourceManager.GetString("Snippet_001", resourceCulture)
+            End Get
+        End Property
     End Class
 End Namespace
