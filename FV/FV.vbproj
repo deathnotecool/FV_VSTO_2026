@@ -304,6 +304,11 @@
     <Compile Include="B03_保养设备信息.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="CodeNotes.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CodeNotes.resx</DependentUpon>
+    </Compile>
     <Compile Include="D01_资质证书信息.Designer.vb">
       <DependentUpon>D01_资质证书信息.vb</DependentUpon>
     </Compile>
@@ -620,6 +625,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="C07_物品信息查询与导出.resx">
       <DependentUpon>C07_物品信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeNotes.resx">
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CodeNotes.Designer.vb</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="D01_资质证书信息.resx">
       <DependentUpon>D01_资质证书信息.vb</DependentUpon>
