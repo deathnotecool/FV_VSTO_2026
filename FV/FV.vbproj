@@ -1,0 +1,886 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <!--
+    This section defines project-level properties.
+
+    AssemblyName
+      Name of the output assembly.
+    Configuration
+      Specifies a default value for debug.
+    OutputType
+      Must be "Library" for VSTO.
+    Platform
+      Specifies what CPU the output of this project can run on.
+    NoStandardLibraries
+      Set to "false" for VSTO.
+    RootNamespace
+      In C#, this specifies the namespace given to new files. In VB, all objects are
+      wrapped in this namespace at runtime.
+  -->
+  <PropertyGroup>
+    <ProjectTypeGuids>{BAA0C2D2-18E2-41B9-852F-F413020CAA33};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9A03F1F3-352F-4E5D-8CC4-5BF32323FF15}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FV</RootNamespace>
+    <AssemblyName>FV</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DefineConstants>VSTO40</DefineConstants>
+    <StartupObject>
+    </StartupObject>
+    <TargetFrameworkProfile />
+    <IsWebBootstrapper>True</IsWebBootstrapper>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <PublishUrl>C:\inetpub\Publish\</PublishUrl>
+    <InstallUrl>http://192.168.3.12/</InstallUrl>
+    <TargetCulture>zh-chs</TargetCulture>
+    <ApplicationVersion>2.1.0.115</ApplicationVersion>
+    <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateInterval>0</UpdateInterval>
+    <UpdateIntervalUnits>days</UpdateIntervalUnits>
+    <ProductName>FV</ProductName>
+    <PublisherName>王飞</PublisherName>
+    <SupportUrl />
+    <FriendlyName>FV</FriendlyName>
+    <OfficeApplicationDescription />
+    <LoadBehavior>3</LoadBehavior>
+  </PropertyGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.1 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.VSTORuntime.4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft Visual Studio 2010 Tools for Office Runtime %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <PropertyGroup>
+    <!--
+      OfficeApplication
+        Add-in host application
+    -->
+    <OfficeApplication>Excel</OfficeApplication>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <!--
+    This section defines properties that are set when the "Debug" configuration is selected.
+
+    DebugSymbols
+      If "true", create symbols (.pdb). If "false", do not create symbols.
+    DefineConstants
+      Constants defined for the preprocessor.
+    EnableUnmanagedDebugging
+      If "true", starting the debugger will attach both managed and unmanaged debuggers.
+    Optimize
+      If "true", optimize the build output. If "false", do not optimize.
+    OutputPath
+      Output path of project relative to the project file.
+    WarningLevel
+      Warning level for the compiler.
+  -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>FV.xml</DocumentationFile>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <!--
+    This section defines properties that are set when the "Release" configuration is selected.
+
+    DebugSymbols
+      If "true", create symbols (.pdb). If "false", do not create symbols.
+    DefineConstants
+      Constants defined for the preprocessor.
+    EnableUnmanagedDebugging
+      If "true", starting the debugger will attach both managed and unmanaged debuggers.
+    Optimize
+      If "true", optimize the build output. If "false", do not optimize.
+    OutputPath
+      Output path of project relative to the project file.
+    WarningLevel
+      Warning level for the compiler.
+  -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DefineConstants>
+    </DefineConstants>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>FV.xml</DocumentationFile>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <!--
+    This section specifies references for the project.
+  -->
+  <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="Microsoft.Vbe.Interop, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="zxing, Version=0.16.5.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.5\lib\net40\zxing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.16.5.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.5\lib\net40\zxing.presentation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Tools.v4.0.Framework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Tools.Applications.Runtime, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Office.Tools, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Office.Tools.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Office.Tools.Excel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Tools.Common.v4.0.Utilities, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Office, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <Private>False</Private>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <Private>False</Private>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- Visual Basic supports importing namespaces (equivalent to "using" statements in C#). -->
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Text" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="Office = Microsoft.Office.Core" />
+    <Import Include="Excel = Microsoft.Office.Interop.Excel" />
+    <Import Include="Microsoft.Office.Tools.Excel" />
+  </ItemGroup>
+  <!--
+    This section defines the user source files that are part of the project.
+     
+    A "Compile" element specifies a source file to compile.
+    An "EmbeddedResource" element specifies an .resx file for embedded resources.
+    A "None" element specifies a file that is not to be passed to the compiler (for instance, 
+    a text file or XML file).
+    The "AppDesigner" element specifies the directory where the application properties files
+    can be found.
+  -->
+  <ItemGroup>
+    <AppDesigner Include="My Project\" />
+    <Compile Include="A01_文件基本信息.Designer.vb">
+      <DependentUpon>A01_文件基本信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="A01_文件基本信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="A02_文件信息查询与导出.Designer.vb">
+      <DependentUpon>A02_文件信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="A02_文件信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="A03_文件创建更改管理.Designer.vb">
+      <DependentUpon>A03_文件创建更改管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="A03_文件创建更改管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="B01_设备基本信息.Designer.vb">
+      <DependentUpon>B01_设备基本信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="B01_设备基本信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="B02_维修设备信息.Designer.vb">
+      <DependentUpon>B02_维修设备信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="B02_维修设备信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="B04_设备信息查询与导出.Designer.vb">
+      <DependentUpon>B04_设备信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="B04_设备信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C01_供应商资料管理.Designer.vb">
+      <DependentUpon>C01_供应商资料管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C01_供应商资料管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C02_采购进货信息管理.Designer.vb">
+      <DependentUpon>C02_采购进货信息管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C02_采购进货信息管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C03_采购物品信息管理.Designer.vb">
+      <DependentUpon>C03_采购物品信息管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C03_采购物品信息管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C04_物品消耗使用信息管理.Designer.vb">
+      <DependentUpon>C04_物品消耗使用信息管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C04_物品消耗使用信息管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C05_物品库存信息.Designer.vb">
+      <DependentUpon>C05_物品库存信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C05_物品库存信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C06_物品消耗使用成本统计分析.Designer.vb">
+      <DependentUpon>C06_物品消耗使用成本统计分析.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C06_物品消耗使用成本统计分析.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="C07_物品信息查询与导出.Designer.vb">
+      <DependentUpon>C07_物品信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="C07_物品信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="B03_保养设备信息.Designer.vb">
+      <DependentUpon>B03_保养设备信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="B03_保养设备信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="D01_资质证书信息.Designer.vb">
+      <DependentUpon>D01_资质证书信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="D01_资质证书信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="D02_人员信息查询与导出.Designer.vb">
+      <DependentUpon>D02_人员信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="D02_人员信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="D03_调休节假日信息.Designer.vb">
+      <DependentUpon>D03_调休节假日信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="D03_调休节假日信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DataGirdViewTest.Designer.vb">
+      <DependentUpon>DataGirdViewTest.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DataGirdViewTest.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="E01_电能消耗统计.Designer.vb">
+      <DependentUpon>E01_电能消耗统计.vb</DependentUpon>
+    </Compile>
+    <Compile Include="E01_电能消耗统计.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="F01_不良品基本信息.Designer.vb">
+      <DependentUpon>F01_不良品基本信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="F01_不良品基本信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="F02_不良品信息查询与导出.Designer.vb">
+      <DependentUpon>F02_不良品信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="F02_不良品信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="F03_不良品发生分析.Designer.vb">
+      <DependentUpon>F03_不良品发生分析.vb</DependentUpon>
+    </Compile>
+    <Compile Include="F03_不良品发生分析.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="F04_供应商索赔信息.Designer.vb">
+      <DependentUpon>F04_供应商索赔信息.vb</DependentUpon>
+    </Compile>
+    <Compile Include="F04_供应商索赔信息.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="F05_索赔信息查询与导出.Designer.vb">
+      <DependentUpon>F05_索赔信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="F05_索赔信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="G01_CostApply.Designer.vb">
+      <DependentUpon>G01_CostApply.vb</DependentUpon>
+    </Compile>
+    <Compile Include="G01_CostApply.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="G02_质量花费查询.Designer.vb">
+      <DependentUpon>G02_质量花费查询.vb</DependentUpon>
+    </Compile>
+    <Compile Include="G02_质量花费查询.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="H01_产品质量证明书管理.Designer.vb">
+      <DependentUpon>H01_产品质量证明书管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="H01_产品质量证明书管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="H02_产品证明书信息导出.Designer.vb">
+      <DependentUpon>H02_产品证明书信息导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="H02_产品证明书信息导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="I01_检测试验信息管理.Designer.vb">
+      <DependentUpon>I01_检测试验信息管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="I01_检测试验信息管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="I02_检测测试信息查询与导出.Designer.vb">
+      <DependentUpon>I02_检测测试信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="I02_检测测试信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="J01_产品合格检信息确认.Designer.vb">
+      <DependentUpon>J01_产品合格检信息确认.vb</DependentUpon>
+    </Compile>
+    <Compile Include="J01_产品合格检信息确认.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="J02_产品合格检信息确认SqlServer.Designer.vb">
+      <DependentUpon>J02_产品合格检信息确认SqlServer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="J02_产品合格检信息确认SqlServer.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="J02_产品合格检信息确认SqlServerNew.Designer.vb">
+      <DependentUpon>J02_产品合格检信息确认SqlServerNew.vb</DependentUpon>
+    </Compile>
+    <Compile Include="J02_产品合格检信息确认SqlServerNew.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="J03_合格检信息查询与导出.Designer.vb">
+      <DependentUpon>J03_合格检信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="J03_合格检信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="J03_合格检信息查询与导出New.Designer.vb">
+      <DependentUpon>J03_合格检信息查询与导出New.vb</DependentUpon>
+    </Compile>
+    <Compile Include="J03_合格检信息查询与导出New.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="K01_入库编号信息管理.Designer.vb">
+      <DependentUpon>K01_入库编号信息管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="K01_入库编号信息管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="K02_入库编号信息查询与导出.Designer.vb">
+      <DependentUpon>K02_入库编号信息查询与导出.vb</DependentUpon>
+    </Compile>
+    <Compile Include="K02_入库编号信息查询与导出.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="K03_发注订单信息查看.Designer.vb">
+      <DependentUpon>K03_发注订单信息查看.vb</DependentUpon>
+    </Compile>
+    <Compile Include="K03_发注订单信息查看.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="K04_发注编号信息管理.Designer.vb">
+      <DependentUpon>K04_发注编号信息管理.vb</DependentUpon>
+    </Compile>
+    <Compile Include="K04_发注编号信息管理.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Spec.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Spec.resx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControl2.Designer.vb">
+      <DependentUpon>UserControl2.vb</DependentUpon>
+    </Compile>
+    <Compile Include="UserControl2.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WIN140117_批量转换PDF.Designer.vb">
+      <DependentUpon>WIN140117_批量转换PDF.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN140117_批量转换PDF.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN190119_Frequency.Designer.vb">
+      <DependentUpon>WIN190119_Frequency.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN190119_Frequency.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN190119_数据选择.Designer.vb">
+      <DependentUpon>WIN190119_数据选择.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN190119_数据选择.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN190324_重复数据分析提取.Designer.vb">
+      <DependentUpon>WIN190324_重复数据分析提取.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN190324_重复数据分析提取.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN190512_二维码.Designer.vb">
+      <DependentUpon>WIN190512_二维码.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN190512_二维码.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN190515_孔间距计算.Designer.vb">
+      <DependentUpon>WIN190515_孔间距计算.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN190515_孔间距计算.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN190810_VBA代码笔记.Designer.vb">
+      <DependentUpon>WIN190810_VBA代码笔记.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN190810_VBA代码笔记.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN191102_条形码.Designer.vb">
+      <DependentUpon>WIN191102_条形码.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN191102_条形码.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN2020119_加班费计算.Designer.vb">
+      <DependentUpon>WIN2020119_加班费计算.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN2020119_加班费计算.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN20220117_锻造比计算公式.Designer.vb">
+      <DependentUpon>WIN20220117_锻造比计算公式.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN20220117_锻造比计算公式.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN210913_图片放置定位.Designer.vb">
+      <DependentUpon>WIN210913_图片放置定位.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN210913_图片放置定位.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN231210_多图排放.Designer.vb">
+      <DependentUpon>WIN231210_多图排放.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN231210_多图排放.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WIN231222_图片尺寸统一.Designer.vb">
+      <DependentUpon>WIN231222_图片尺寸统一.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WIN231222_图片尺寸统一.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WN18081501_列和区域删除图.Designer.vb">
+      <DependentUpon>WN18081501_列和区域删除图.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WN18081501_列和区域删除图.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WN18081503_文件批量重命名.Designer.vb">
+      <DependentUpon>WN18081503_文件批量重命名.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WN18081503_文件批量重命名.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="M1_公共变量.vb" />
+    <Compile Include="M2_调用的任务.vb" />
+    <Compile Include="Ribbon1.Designer.vb">
+      <DependentUpon>Ribbon1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Ribbon1.vb">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThisAddIn.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="数据库测试.Designer.vb">
+      <DependentUpon>数据库测试.vb</DependentUpon>
+    </Compile>
+    <Compile Include="数据库测试.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WN18081502_随机数产生.Designer.vb">
+      <DependentUpon>WN18081502_随机数产生.vb</DependentUpon>
+    </Compile>
+    <Compile Include="WN18081502_随机数产生.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="A01_文件基本信息.resx">
+      <DependentUpon>A01_文件基本信息.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="A02_文件信息查询与导出.resx">
+      <DependentUpon>A02_文件信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="A03_文件创建更改管理.resx">
+      <DependentUpon>A03_文件创建更改管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="B01_设备基本信息.resx">
+      <DependentUpon>B01_设备基本信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="B02_维修设备信息.resx">
+      <DependentUpon>B02_维修设备信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="B03_保养设备信息.resx">
+      <DependentUpon>B03_保养设备信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="B04_设备信息查询与导出.resx">
+      <DependentUpon>B04_设备信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C01_供应商资料管理.resx">
+      <DependentUpon>C01_供应商资料管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C02_采购进货信息管理.resx">
+      <DependentUpon>C02_采购进货信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C03_采购物品信息管理.resx">
+      <DependentUpon>C03_采购物品信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C04_物品消耗使用信息管理.resx">
+      <DependentUpon>C04_物品消耗使用信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C05_物品库存信息.resx">
+      <DependentUpon>C05_物品库存信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C06_物品消耗使用成本统计分析.resx">
+      <DependentUpon>C06_物品消耗使用成本统计分析.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="C07_物品信息查询与导出.resx">
+      <DependentUpon>C07_物品信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="D01_资质证书信息.resx">
+      <DependentUpon>D01_资质证书信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="D02_人员信息查询与导出.resx">
+      <DependentUpon>D02_人员信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="D03_调休节假日信息.resx">
+      <DependentUpon>D03_调休节假日信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataGirdViewTest.resx">
+      <DependentUpon>DataGirdViewTest.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="E01_电能消耗统计.resx">
+      <DependentUpon>E01_电能消耗统计.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="F01_不良品基本信息.resx">
+      <DependentUpon>F01_不良品基本信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="F02_不良品信息查询与导出.resx">
+      <DependentUpon>F02_不良品信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="F03_不良品发生分析.resx">
+      <DependentUpon>F03_不良品发生分析.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="F04_供应商索赔信息.resx">
+      <DependentUpon>F04_供应商索赔信息.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="F05_索赔信息查询与导出.resx">
+      <DependentUpon>F05_索赔信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="G01_CostApply.resx">
+      <DependentUpon>G01_CostApply.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="G02_质量花费查询.resx">
+      <DependentUpon>G02_质量花费查询.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="H01_产品质量证明书管理.resx">
+      <DependentUpon>H01_产品质量证明书管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="H02_产品证明书信息导出.resx">
+      <DependentUpon>H02_产品证明书信息导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="I01_检测试验信息管理.resx">
+      <DependentUpon>I01_检测试验信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="I02_检测测试信息查询与导出.resx">
+      <DependentUpon>I02_检测测试信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="J01_产品合格检信息确认.resx">
+      <DependentUpon>J01_产品合格检信息确认.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="J02_产品合格检信息确认SqlServer.resx">
+      <DependentUpon>J02_产品合格检信息确认SqlServer.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="J02_产品合格检信息确认SqlServerNew.resx">
+      <DependentUpon>J02_产品合格检信息确认SqlServerNew.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="J03_合格检信息查询与导出.resx">
+      <DependentUpon>J03_合格检信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="J03_合格检信息查询与导出New.resx">
+      <DependentUpon>J03_合格检信息查询与导出New.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="K01_入库编号信息管理.resx">
+      <DependentUpon>K01_入库编号信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="K02_入库编号信息查询与导出.resx">
+      <DependentUpon>K02_入库编号信息查询与导出.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="K03_发注订单信息查看.resx">
+      <DependentUpon>K03_发注订单信息查看.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="K04_发注编号信息管理.resx">
+      <DependentUpon>K04_发注编号信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spec.resx">
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Spec.Designer.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControl2.resx">
+      <DependentUpon>UserControl2.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN140117_批量转换PDF.resx">
+      <DependentUpon>WIN140117_批量转换PDF.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN190119_Frequency.resx">
+      <DependentUpon>WIN190119_Frequency.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN190119_数据选择.resx">
+      <DependentUpon>WIN190119_数据选择.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN190324_重复数据分析提取.resx">
+      <DependentUpon>WIN190324_重复数据分析提取.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN190512_二维码.resx">
+      <DependentUpon>WIN190512_二维码.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN190515_孔间距计算.resx">
+      <DependentUpon>WIN190515_孔间距计算.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN190810_VBA代码笔记.resx">
+      <DependentUpon>WIN190810_VBA代码笔记.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN191102_条形码.resx">
+      <DependentUpon>WIN191102_条形码.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN2020119_加班费计算.resx">
+      <DependentUpon>WIN2020119_加班费计算.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN20220117_锻造比计算公式.resx">
+      <DependentUpon>WIN20220117_锻造比计算公式.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN210913_图片放置定位.resx">
+      <DependentUpon>WIN210913_图片放置定位.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN231210_多图排放.resx">
+      <DependentUpon>WIN231210_多图排放.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WIN231222_图片尺寸统一.resx">
+      <DependentUpon>WIN231222_图片尺寸统一.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WN18081501_列和区域删除图.resx">
+      <DependentUpon>WN18081501_列和区域删除图.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WN18081503_文件批量重命名.resx">
+      <DependentUpon>WN18081503_文件批量重命名.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ribbon1.resx">
+      <DependentUpon>Ribbon1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="数据库测试.resx">
+      <DependentUpon>数据库测试.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="随机数产生.resx">
+      <DependentUpon>WN18081502_随机数产生.vb</DependentUpon>
+    </EmbeddedResource>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="FV_1_TemporaryKey.pfx" />
+    <None Include="packages.config" />
+    <None Include="ThisAddIn.Designer.xml">
+      <DependentUpon>ThisAddIn.vb</DependentUpon>
+    </None>
+    <Compile Include="ThisAddIn.Designer.vb">
+      <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\冲击试棒.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\新罗图标.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\冲击功S48CG图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\拉伸试验S48CG图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\硬度试验S48CG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\晶粒度S48CG图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\非金属夹杂物S48CG图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\化学成分S48CG图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\化学成分VOLVO图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\拉伸试验S48CVOLVO图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\冲击功S48CVOLVO图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\晶粒度S48CVOLVO图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\非金属夹杂物S48CVOLVO图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\化学成分42CrMoG图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\锻造流程图.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\锻造流程图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\锻造流程图.jpg" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>FV_1_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>6665D79D3BD36532D7A772A88115AD197AAC0582</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <!-- Include the build rules for a Visual Basic project. -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- Include additional build rules for an Office application add-in. -->
+  <Import Project="$(VSToolsPath)\OfficeTools\Microsoft.VisualStudio.Tools.Office.targets" Condition="'$(VSToolsPath)' != ''" />
+  <!-- This section defines VSTO properties that describe the host-changeable project properties. -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{BAA0C2D2-18E2-41B9-852F-F413020CAA33}">
+        <ProjectProperties HostName="Excel" HostPackage="{29A7B9D7-A7F1-4328-8EF0-6B2D1A56B2C1}" OfficeVersion="15.0" VstxVersion="4.0" ApplicationType="Excel" Language="vb" TemplatesPath="" DebugInfoExeName="#Software\Microsoft\Office\16.0\Excel\InstallRoot\Path#excel.exe" DebugInfoCommandLine="/x" AddItemTemplatesGuid="{DCFE8D25-4715-4C33-9EAB-A34A9EBC9544}" />
+        <Host Name="Excel" PublishedHash="69C324AB27932AA2FBF2B7EA72250886FF164DE6" IconIndex="0">
+          <HostItem Name="ThisAddIn" Code="ThisAddIn.vb" CanonicalName="AddIn" PublishedHash="961F141A33684F464437421CF873654595BB83F2" CanActivate="false" IconIndex="1" Blueprint="ThisAddIn.Designer.xml" GeneratedCode="ThisAddIn.Designer.vb" />
+        </Host>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
