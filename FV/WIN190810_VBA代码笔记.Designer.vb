@@ -29,6 +29,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnSearch = New System.Windows.Forms.Button()
         Me.btnSave = New System.Windows.Forms.Button()
         Me.txtCodeDetail = New System.Windows.Forms.TextBox()
+        Me.btnCopyCode = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'ComboBox1
@@ -63,10 +64,11 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ListView1.FullRowSelect = True
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
         Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
         Me.ListView1.Name = "ListView1"
-        Me.ListView1.Size = New System.Drawing.Size(1084, 436)
+        Me.ListView1.Size = New System.Drawing.Size(1001, 479)
         Me.ListView1.TabIndex = 4
         Me.ListView1.UseCompatibleStateImageBehavior = False
         '
@@ -93,20 +95,31 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtCodeDetail
         '
-        Me.txtCodeDetail.Location = New System.Drawing.Point(1115, 51)
+        Me.txtCodeDetail.Location = New System.Drawing.Point(1021, 51)
         Me.txtCodeDetail.Multiline = True
         Me.txtCodeDetail.Name = "txtCodeDetail"
         Me.txtCodeDetail.ReadOnly = True
         Me.txtCodeDetail.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtCodeDetail.Size = New System.Drawing.Size(245, 436)
+        Me.txtCodeDetail.Size = New System.Drawing.Size(262, 479)
         Me.txtCodeDetail.TabIndex = 7
+        Me.txtCodeDetail.Text = "点击列表行查看完整代码"
         Me.txtCodeDetail.WordWrap = False
+        '
+        'btnCopyCode
+        '
+        Me.btnCopyCode.Location = New System.Drawing.Point(1021, 15)
+        Me.btnCopyCode.Name = "btnCopyCode"
+        Me.btnCopyCode.Size = New System.Drawing.Size(100, 29)
+        Me.btnCopyCode.TabIndex = 8
+        Me.btnCopyCode.Text = "复制代码"
+        Me.btnCopyCode.UseVisualStyleBackColor = True
         '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1372, 500)
+        Me.ClientSize = New System.Drawing.Size(1388, 543)
+        Me.Controls.Add(Me.btnCopyCode)
         Me.Controls.Add(Me.txtCodeDetail)
         Me.Controls.Add(Me.btnSave)
         Me.Controls.Add(Me.btnSearch)
@@ -129,4 +142,5 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents btnSearch As Windows.Forms.Button
     Friend WithEvents btnSave As Windows.Forms.Button
     Friend WithEvents txtCodeDetail As Windows.Forms.TextBox
+    Friend WithEvents btnCopyCode As Windows.Forms.Button
 End Class

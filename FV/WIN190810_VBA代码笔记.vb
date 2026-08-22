@@ -95,17 +95,18 @@ Public Class WIN190810_VBA代码笔记
         ' 调用刚才添加的 LoadNotesFromResource 方法
         allNotes = LoadNotesFromResource()
 
-        ' 在 allNotes = LoadNotesFromResource() 之后添加
-        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
-            MessageBox.Show("警告：未加载到任何笔记数据！")
-        Else
-            MessageBox.Show("成功加载 " & allNotes.Count & " 条笔记。")
-        End If
+        ' 调试代码已移除，无弹窗
 
         ' ★★★ 3. 刷新列表显示（显示全部笔记） ★★★
         ' 调用刷新的方法，传入全部笔记（不进行筛选）
         RefreshListView(allNotes)
         ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None)
+
+        If ListView1.Items.Count > 0 Then
+            ListView1.Items(0).Selected = True
+            ListView1.Focus()
+        End If
+
     End Sub
 
     ''' <summary>
@@ -226,8 +227,11 @@ Public Class WIN190810_VBA代码笔记
 
     Private Sub ListView1_ItemSelectionChanged(sender As Object, e As ListViewItemSelectionChangedEventArgs) Handles ListView1.ItemSelectionChanged
         If e.IsSelected Then
-            ' 获取选中行的第4列（索引3）的代码正文
+            ' 选中时，显示代码正文
             txtCodeDetail.Text = e.Item.SubItems(3).Text
+        Else
+            ' 取消选中时，清空代码文本框
+            txtCodeDetail.Text = ""
         End If
     End Sub
 
@@ -290,8 +294,22 @@ Public Class WIN190810_VBA代码笔记
         'f.Show()
     End Sub
 
+    ''' <summary>
+    ''' 复制代码按钮：将当前显示的代码正文复制到剪贴板
+    ''' </summary>
+    Private Sub btnCopyCode_Click(sender As Object, e As EventArgs) Handles btnCopyCode.Click
+        ' 1. 检查文本框是否有内容
+        If String.IsNullOrEmpty(txtCodeDetail.Text) Then
+            MessageBox.Show("没有可复制的代码，请先选择一条笔记。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
 
-
-
-
+        ' 2. 将文本框内容复制到剪贴板
+        Try
+            Clipboard.SetText(txtCodeDetail.Text)
+            MessageBox.Show("代码已复制到剪贴板！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As Exception
+            MessageBox.Show("复制失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
 End Class
