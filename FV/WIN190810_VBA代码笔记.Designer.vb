@@ -30,6 +30,13 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnSave = New System.Windows.Forms.Button()
         Me.txtCodeDetail = New System.Windows.Forms.TextBox()
         Me.btnCopyCode = New System.Windows.Forms.Button()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.txtNewTitle = New System.Windows.Forms.TextBox()
+        Me.Label2 = New System.Windows.Forms.Label()
+        Me.txtNewRemark = New System.Windows.Forms.TextBox()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.txtNewCode = New System.Windows.Forms.TextBox()
+        Me.btnAddNote = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'ComboBox1
@@ -68,7 +75,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
         Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
         Me.ListView1.Name = "ListView1"
-        Me.ListView1.Size = New System.Drawing.Size(1001, 479)
+        Me.ListView1.Size = New System.Drawing.Size(1032, 479)
         Me.ListView1.TabIndex = 4
         Me.ListView1.UseCompatibleStateImageBehavior = False
         '
@@ -84,7 +91,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(732, 15)
+        Me.btnSave.Location = New System.Drawing.Point(1226, 9)
         Me.btnSave.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(100, 29)
@@ -95,30 +102,99 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtCodeDetail
         '
-        Me.txtCodeDetail.Location = New System.Drawing.Point(1021, 51)
+        Me.txtCodeDetail.Location = New System.Drawing.Point(1110, 47)
         Me.txtCodeDetail.Multiline = True
         Me.txtCodeDetail.Name = "txtCodeDetail"
         Me.txtCodeDetail.ReadOnly = True
         Me.txtCodeDetail.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtCodeDetail.Size = New System.Drawing.Size(262, 479)
+        Me.txtCodeDetail.Size = New System.Drawing.Size(266, 188)
         Me.txtCodeDetail.TabIndex = 7
         Me.txtCodeDetail.Text = "点击列表行查看完整代码"
         Me.txtCodeDetail.WordWrap = False
         '
         'btnCopyCode
         '
-        Me.btnCopyCode.Location = New System.Drawing.Point(1021, 15)
+        Me.btnCopyCode.Location = New System.Drawing.Point(1110, 15)
         Me.btnCopyCode.Name = "btnCopyCode"
         Me.btnCopyCode.Size = New System.Drawing.Size(100, 29)
         Me.btnCopyCode.TabIndex = 8
         Me.btnCopyCode.Text = "复制代码"
         Me.btnCopyCode.UseVisualStyleBackColor = True
         '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Location = New System.Drawing.Point(1067, 251)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(37, 15)
+        Me.Label1.TabIndex = 9
+        Me.Label1.Text = "标题"
+        '
+        'txtNewTitle
+        '
+        Me.txtNewTitle.Location = New System.Drawing.Point(1110, 245)
+        Me.txtNewTitle.MaxLength = 100
+        Me.txtNewTitle.Name = "txtNewTitle"
+        Me.txtNewTitle.Size = New System.Drawing.Size(266, 25)
+        Me.txtNewTitle.TabIndex = 10
+        '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(1052, 287)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(52, 15)
+        Me.Label2.TabIndex = 11
+        Me.Label2.Text = "备注："
+        '
+        'txtNewRemark
+        '
+        Me.txtNewRemark.Location = New System.Drawing.Point(1110, 280)
+        Me.txtNewRemark.MaxLength = 200
+        Me.txtNewRemark.Name = "txtNewRemark"
+        Me.txtNewRemark.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.txtNewRemark.Size = New System.Drawing.Size(266, 25)
+        Me.txtNewRemark.TabIndex = 12
+        '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Location = New System.Drawing.Point(1052, 408)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(52, 15)
+        Me.Label3.TabIndex = 13
+        Me.Label3.Text = "代码："
+        '
+        'txtNewCode
+        '
+        Me.txtNewCode.Location = New System.Drawing.Point(1110, 315)
+        Me.txtNewCode.Multiline = True
+        Me.txtNewCode.Name = "txtNewCode"
+        Me.txtNewCode.Size = New System.Drawing.Size(266, 186)
+        Me.txtNewCode.TabIndex = 14
+        Me.txtNewCode.WordWrap = False
+        '
+        'btnAddNote
+        '
+        Me.btnAddNote.Location = New System.Drawing.Point(1110, 506)
+        Me.btnAddNote.Name = "btnAddNote"
+        Me.btnAddNote.Size = New System.Drawing.Size(100, 24)
+        Me.btnAddNote.TabIndex = 15
+        Me.btnAddNote.Text = "保存笔记"
+        Me.btnAddNote.UseVisualStyleBackColor = True
+        '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1388, 543)
+        Me.Controls.Add(Me.btnAddNote)
+        Me.Controls.Add(Me.txtNewCode)
+        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.txtNewRemark)
+        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.txtNewTitle)
+        Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.btnCopyCode)
         Me.Controls.Add(Me.txtCodeDetail)
         Me.Controls.Add(Me.btnSave)
@@ -143,4 +219,11 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents btnSave As Windows.Forms.Button
     Friend WithEvents txtCodeDetail As Windows.Forms.TextBox
     Friend WithEvents btnCopyCode As Windows.Forms.Button
+    Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents txtNewTitle As Windows.Forms.TextBox
+    Friend WithEvents Label2 As Windows.Forms.Label
+    Friend WithEvents txtNewRemark As Windows.Forms.TextBox
+    Friend WithEvents Label3 As Windows.Forms.Label
+    Friend WithEvents txtNewCode As Windows.Forms.TextBox
+    Friend WithEvents btnAddNote As Windows.Forms.Button
 End Class
