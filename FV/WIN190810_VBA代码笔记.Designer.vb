@@ -28,13 +28,14 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1 = New System.Windows.Forms.ListView()
         Me.btnSearch = New System.Windows.Forms.Button()
         Me.btnSave = New System.Windows.Forms.Button()
+        Me.txtCodeDetail = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
         'ComboBox1
         '
         Me.ComboBox1.FormattingEnabled = True
         Me.ComboBox1.Location = New System.Drawing.Point(16, 15)
-        Me.ComboBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.ComboBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(160, 23)
         Me.ComboBox1.TabIndex = 0
@@ -42,7 +43,7 @@ Partial Class WIN190810_VBA代码笔记
         'TextBox1
         '
         Me.TextBox1.Location = New System.Drawing.Point(185, 15)
-        Me.TextBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.TextBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(240, 25)
         Me.TextBox1.TabIndex = 1
@@ -50,7 +51,7 @@ Partial Class WIN190810_VBA代码笔记
         'btnExit
         '
         Me.btnExit.Location = New System.Drawing.Point(543, 15)
-        Me.btnExit.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnExit.Margin = New System.Windows.Forms.Padding(4)
         Me.btnExit.Name = "btnExit"
         Me.btnExit.Size = New System.Drawing.Size(100, 29)
         Me.btnExit.TabIndex = 2
@@ -63,16 +64,16 @@ Partial Class WIN190810_VBA代码笔记
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
-        Me.ListView1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
         Me.ListView1.Name = "ListView1"
-        Me.ListView1.Size = New System.Drawing.Size(1358, 436)
+        Me.ListView1.Size = New System.Drawing.Size(1084, 436)
         Me.ListView1.TabIndex = 4
         Me.ListView1.UseCompatibleStateImageBehavior = False
         '
         'btnSearch
         '
         Me.btnSearch.Location = New System.Drawing.Point(435, 15)
-        Me.btnSearch.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnSearch.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSearch.Name = "btnSearch"
         Me.btnSearch.Size = New System.Drawing.Size(100, 29)
         Me.btnSearch.TabIndex = 5
@@ -82,7 +83,7 @@ Partial Class WIN190810_VBA代码笔记
         'btnSave
         '
         Me.btnSave.Location = New System.Drawing.Point(732, 15)
-        Me.btnSave.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnSave.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(100, 29)
         Me.btnSave.TabIndex = 6
@@ -90,18 +91,30 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnSave.UseVisualStyleBackColor = True
         Me.btnSave.Visible = False
         '
+        'txtCodeDetail
+        '
+        Me.txtCodeDetail.Location = New System.Drawing.Point(1115, 51)
+        Me.txtCodeDetail.Multiline = True
+        Me.txtCodeDetail.Name = "txtCodeDetail"
+        Me.txtCodeDetail.ReadOnly = True
+        Me.txtCodeDetail.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.txtCodeDetail.Size = New System.Drawing.Size(245, 436)
+        Me.txtCodeDetail.TabIndex = 7
+        Me.txtCodeDetail.WordWrap = False
+        '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1372, 500)
+        Me.Controls.Add(Me.txtCodeDetail)
         Me.Controls.Add(Me.btnSave)
         Me.Controls.Add(Me.btnSearch)
         Me.Controls.Add(Me.ListView1)
         Me.Controls.Add(Me.btnExit)
         Me.Controls.Add(Me.TextBox1)
         Me.Controls.Add(Me.ComboBox1)
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "WIN190810_VBA代码笔记"
         Me.Text = "WIN190810_VBA代码笔记"
         Me.ResumeLayout(False)
@@ -115,4 +128,5 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents ListView1 As Windows.Forms.ListView
     Friend WithEvents btnSearch As Windows.Forms.Button
     Friend WithEvents btnSave As Windows.Forms.Button
+    Friend WithEvents txtCodeDetail As Windows.Forms.TextBox
 End Class

@@ -46,7 +46,7 @@ Public Class WIN190810_VBA代码笔记
                 '    arrFields(1) = 编号
                 '    arrFields(2) = 备注
                 '    arrFields(3) = 代码正文（含 \n 换行符）
-                Dim arrFields As String() = strValue.Split(New Char() {"|"c}, StringSplitOptions.None)
+                Dim arrFields As String() = strValue.Split(New Char() {"|"c, "｜"c}, StringSplitOptions.None)
 
                 ' 7. 确保拆分出来的字段数量至少是4个（防止数据不完整）
                 If arrFields.Length >= 4 Then
@@ -95,9 +95,17 @@ Public Class WIN190810_VBA代码笔记
         ' 调用刚才添加的 LoadNotesFromResource 方法
         allNotes = LoadNotesFromResource()
 
+        ' 在 allNotes = LoadNotesFromResource() 之后添加
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            MessageBox.Show("警告：未加载到任何笔记数据！")
+        Else
+            MessageBox.Show("成功加载 " & allNotes.Count & " 条笔记。")
+        End If
+
         ' ★★★ 3. 刷新列表显示（显示全部笔记） ★★★
         ' 调用刷新的方法，传入全部笔记（不进行筛选）
         RefreshListView(allNotes)
+        ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None)
     End Sub
 
     ''' <summary>
@@ -172,29 +180,42 @@ Public Class WIN190810_VBA代码笔记
     ''' </summary>
     ''' <param name="lstData">要显示的笔记列表，每条笔记是一个4元素字符串数组</param>
     Private Sub RefreshListView(lstData As List(Of String()))
+        ' 1. 清空 ListView 中现有的所有行和列
         ListView1.Items.Clear()
         ListView1.Columns.Clear()
 
-        ' ★★★ 改大列宽，确保文字完整显示 ★★★
+        ' 2. 设置 ListView 的显示模式为详细信息（表格样式）
+        ListView1.View = View.Details
+
+        ' 3. 添加列标题，并设置宽度
         ListView1.Columns.Add("标题", 300)
         ListView1.Columns.Add("编号", 100)
         ListView1.Columns.Add("备注", 300)
         ListView1.Columns.Add("代码正文", 600)
 
-        If lstData Is Nothing OrElse lstData.Count = 0 Then
+        ' 4. 检查传入的数据是否为空
+        If lstData Is Nothing Then
+            ' 如果数据为空，直接退出
             Return
         End If
 
+        ' 5. 遍历列表中的每一条笔记，添加到 ListView 中
         For Each arrNote As String() In lstData
-            Dim itm As New ListViewItem(arrNote(0))
-            itm.SubItems.Add(arrNote(1))
-            itm.SubItems.Add(arrNote(2))
-            itm.SubItems.Add(arrNote(3))
-            ListView1.Items.Add(itm)
+            ' 检查数组是否包含4个元素，并且第一个元素不为空
+            If arrNote IsNot Nothing AndAlso arrNote.Length >= 4 AndAlso Not String.IsNullOrEmpty(arrNote(0)) Then
+                ' 创建一行，第一列显示标题
+                Dim itm As New ListViewItem(arrNote(0))
+                ' 添加后续列
+                itm.SubItems.Add(arrNote(1))   ' 编号
+                itm.SubItems.Add(arrNote(2))   ' 备注
+                itm.SubItems.Add(arrNote(3))   ' 代码正文
+                ' 将整行添加到 ListView
+                ListView1.Items.Add(itm)
+            End If
         Next
 
-        ' ★★★ 注释掉自动调整，防止覆盖手动设置的宽度 ★★★
-        ' ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent)
+        ' 6. 强制禁止自动调整列宽（防止列宽被重置）
+        ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None)
     End Sub
 
 
@@ -204,36 +225,47 @@ Public Class WIN190810_VBA代码笔记
 
 
     Private Sub ListView1_ItemSelectionChanged(sender As Object, e As ListViewItemSelectionChangedEventArgs) Handles ListView1.ItemSelectionChanged
-        Dim Sht As Excel.Worksheet, Rng As Excel.Range, targetrng As Excel.Range, msg1 As MsgBoxResult '声明变量
-        'On Error Resume Next
-        For Each Sht In xlapp.Worksheets        '在工作表集合中循环
-            Sht.Activate()      '激活该活动工作表
-            For Each Rng In Sht.Range(xlapp.Cells(1, 2), xlapp.Cells(xlapp.Cells.Rows.Count, 2).End(-4162))      '在已用单元格中循环
-                'If Rng.Value <> "" And Rng.Value = e.Item.SubItems(1).Text Then  '如果有单元格与列表框所选的值相同,则执行下面语句
-                If Rng.Value <> "" And Rng.Offset(0, -1).Value = e.Item.SubItems(0).Text And Rng.Value = e.Item.SubItems(1).Text Then  '如果有单元格与列表框所选的值相同,则执行下面语句
-
-                    'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
-                    '    'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
-                    'If msg1 = vbYes Then  '如果选择了是那么执行下面语句
-                    '    Rng.Select()  '选中单元格
-                    '    Exit Sub     '退出程序
-                    'End If
-
-                    'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
-                    'If msg1 = vbYes Then  '如果选择了是那么执行下面语句
-                    Rng.Select()  '选中单元格
-                    Exit Sub     '退出程序
-                    'End If
-
-
-
-
-
-                End If
-            Next Rng
-        Next Sht
-        'If e.IsSelected Then MsgBox(e.Item.SubItems(1).Text) '文本框显示鼠标选择项第二列内容
+        If e.IsSelected Then
+            ' 获取选中行的第4列（索引3）的代码正文
+            txtCodeDetail.Text = e.Item.SubItems(3).Text
+        End If
     End Sub
+
+
+    'Private Sub ListView1_ItemSelectionChanged(sender As Object, e As ListViewItemSelectionChangedEventArgs) Handles ListView1.ItemSelectionChanged
+    '    Dim Sht As Excel.Worksheet, Rng As Excel.Range, targetrng As Excel.Range, msg1 As MsgBoxResult '声明变量
+    '    'On Error Resume Next
+
+
+
+    '    For Each Sht In xlapp.Worksheets        '在工作表集合中循环
+    '        Sht.Activate()      '激活该活动工作表
+    '        For Each Rng In Sht.Range(xlapp.Cells(1, 2), xlapp.Cells(xlapp.Cells.Rows.Count, 2).End(-4162))      '在已用单元格中循环
+    '            'If Rng.Value <> "" And Rng.Value = e.Item.SubItems(1).Text Then  '如果有单元格与列表框所选的值相同,则执行下面语句
+    '            If Rng.Value <> "" And Rng.Offset(0, -1).Value = e.Item.SubItems(0).Text And Rng.Value = e.Item.SubItems(1).Text Then  '如果有单元格与列表框所选的值相同,则执行下面语句
+
+    '                'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
+    '                '    'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
+    '                'If msg1 = vbYes Then  '如果选择了是那么执行下面语句
+    '                '    Rng.Select()  '选中单元格
+    '                '    Exit Sub     '退出程序
+    '                'End If
+
+    '                'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
+    '                'If msg1 = vbYes Then  '如果选择了是那么执行下面语句
+    '                Rng.Select()  '选中单元格
+    '                Exit Sub     '退出程序
+    '                'End If
+
+
+
+
+
+    '            End If
+    '        Next Rng
+    '    Next Sht
+    '    'If e.IsSelected Then MsgBox(e.Item.SubItems(1).Text) '文本框显示鼠标选择项第二列内容
+    'End Sub
 
 
 
