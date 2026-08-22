@@ -1,17 +1,69 @@
 ﻿Imports System.Windows.Forms
+Imports System.Text
 
 Public Class WIN190810_VBA代码笔记
     Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
+    ' ★★★ 新增：用于在内存中存放所有代码笔记的列表容器 ★★★
+    ' List(Of String()) 表示一个列表，里面的每一项都是一个字符串数组
+    ' 每个字符串数组包含4个元素：标题、编号、备注、代码正文
+    Private allNotes As List(Of String())
+
     REM 功    能: 宝3-17.5.7-P387 在窗体中跨工作表查询 关键词：array,combox1
 
 
-    'Private Sub UserForm_Activate()
-    '    'On Error Resume Next
-    '    myArray = {"详细代码", "备注"}
-    '    ComboBox1.Items.AddRange(myArray)
-    '    'ComboBox1.List = Array("详细代码", "代码ID") '为复合框指定列表内容 vba代码
-    '    ComboBox1.SelectedIndex = 0  '默认选择第一项
-    'End Sub
+    ''' <summary>
+    ''' 从资源文件加载所有代码笔记到内存列表
+    ''' </summary>
+    ''' <returns>包含所有笔记的列表，每条笔记是一个4元素字符串数组</returns>
+    Private Function LoadNotesFromResource() As List(Of String())
+        ' 1. 创建一个空的列表，用来存放所有笔记
+        Dim lstNotes As New List(Of String())()
+
+        ' 2. 定义资源名称的前缀，只加载以 "Snippet_" 开头的资源项
+        Dim strResourcePrefix As String = "Snippet_"
+
+        ' 3. 获取资源文件中所有的资源项
+        '    ResourceManager 负责管理 .resx 文件中的资源
+        '    GetResourceSet 返回所有资源的集合
+        Dim objResSet As System.Resources.ResourceSet = My.Resources.CodeNotes.ResourceManager.GetResourceSet(
+            Threading.Thread.CurrentThread.CurrentCulture,
+            True,
+            True
+        )
+
+        ' 4. 遍历资源集合中的每一项
+        For Each objEntry As System.Collections.DictionaryEntry In objResSet
+            ' 获取当前资源的名称（比如 "Snippet_001"）
+            Dim strKey As String = objEntry.Key.ToString()
+
+            ' 5. 只处理以 "Snippet_" 开头的资源（过滤掉其他无关资源）
+            If strKey.StartsWith(strResourcePrefix) Then
+                ' 获取资源的值（就是那串用 | 分隔的文本）
+                Dim strValue As String = objEntry.Value.ToString()
+
+                ' 6. 按 | 符号拆分，得到4个字段的数组
+                '    arrFields(0) = 标题
+                '    arrFields(1) = 编号
+                '    arrFields(2) = 备注
+                '    arrFields(3) = 代码正文（含 \n 换行符）
+                Dim arrFields As String() = strValue.Split(New Char() {"|"c}, StringSplitOptions.None)
+
+                ' 7. 确保拆分出来的字段数量至少是4个（防止数据不完整）
+                If arrFields.Length >= 4 Then
+                    ' 8. ★★★ 关键步骤：将代码正文中的 \n 还原成真正的换行符 ★★★
+                    '    资源文件中存的是 "Sub xxx()\n    Dim rng\nEnd Sub"
+                    '    这里把 \n 替换成 vbCrLf（VB中的换行符），变成真正的多行文本
+                    arrFields(3) = arrFields(3).Replace("\n", vbCrLf)
+
+                    ' 9. 将处理好的这条笔记（4个字段）添加到列表中
+                    lstNotes.Add(arrFields)
+                End If
+            End If
+        Next
+
+        ' 10. 返回加载完成的所有笔记列表
+        Return lstNotes
+    End Function
 
     '当在文字框中输入新的查找对象时，清空列表框中上一次的结果
     Private Sub TextBox1_Change()
@@ -27,84 +79,124 @@ Public Class WIN190810_VBA代码笔记
     End Sub
 
 
+    ''' <summary>
+    ''' 当窗体被激活时触发（每次切换到该窗体时）
+    ''' 负责初始化下拉框、加载数据、刷新列表
+    ''' </summary>
     Private Sub WIN190810_VBA代码笔记_Activated(sender As Object, e As EventArgs) Handles Me.Activated
-        'On Error Resume Next
+        ' ★★★ 1. 初始化下拉框（查询条件） ★★★
+        ' 定义下拉框显示的两个选项
         myArray = {"详细代码", "备注"}
-        ComboBox1.Items.Clear()
-        ComboBox1.Items.AddRange(myArray)
-        'ComboBox1.List = Array("详细代码", "代码ID") '为复合框指定列表内容 vba代码
-        ComboBox1.SelectedIndex = 0  '默认选择第一项
+        ComboBox1.Items.Clear()               ' 清空原有项
+        ComboBox1.Items.AddRange(myArray)     ' 添加新项
+        ComboBox1.SelectedIndex = 0           ' 默认选中第一项 "详细代码"
+
+        ' ★★★ 2. ★★★ 从资源文件加载所有代码笔记到内存 ★★★
+        ' 调用刚才添加的 LoadNotesFromResource 方法
+        allNotes = LoadNotesFromResource()
+
+        ' ★★★ 3. 刷新列表显示（显示全部笔记） ★★★
+        ' 调用刷新的方法，传入全部笔记（不进行筛选）
+        RefreshListView(allNotes)
     End Sub
 
+    ''' <summary>
+    ''' 查询按钮：根据下拉框选中的字段和文本框输入的关键词，筛选并显示笔记
+    ''' </summary>
     Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
-        On Error Resume Next
-        Dim Sht As Excel.Worksheet, RowCount As Integer, Item As Integer, FindText As String = ""   '声明变量
-        Dim aryTitle As Object
-        xlapp.Workbooks("FV.xla").IsAddin = False
+        ' ★★★ 1. 安全检查：如果 allNotes 为空，先加载数据 ★★★
+        ' 防止在窗体未激活时点击查询导致空引用错误
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            allNotes = LoadNotesFromResource()
+        End If
 
-        aryTitle = {"ID", "详细代码", "书本分类", "备注"}
-        Item = 0  '对变量赋值为初始值1,因为标题栏已经占用了一行
-        'On Error Resume Next    '出错继续在错误处执行
-        Dim i As Integer        '声明变量
-        With ListView1         '引用视图控件
-            '设置ListView1的标题、显示类型、整行选择和网格线属性
-            .Columns.Clear()        '清除标题行
-            .Clear()                '清除项目集
-            .View = View.Details    '报表输出视图
-            .FullRowSelect = True   '允许整行选择
-            .GridLines = True       '允许网格线
-            For i = 0 To UBound(aryTitle)                 '为ListView1设置标题,在0到字段数量-1上循环
-                .Columns.Add(aryTitle(i).ToString, 100)   '添加标题
-            Next i
+        ' ★★★ 2. 获取用户输入的关键词（去除首尾空格） ★★★
+        Dim strSearchText As String = TextBox1.Text.Trim()
 
-            'ListView1.Columns(0).Width = 50 '列宽根据列内容自适应，此时保证列内容都可见
-            'ListView1.Columns(1).Width = 1050 '列宽根据列内容自适应，此时保证列内容都可见
-            'yourListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent)
-            'ListView1.Columns(2).Width = 60 '列宽根据列内容自适应，此时保证列内容都可见
-            'ListView1.Columns(3).Width = 550 '列宽根据列内容自适应，此时保证列内容都可见
-            'ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent) '列宽根据列内容自适应，此时保证列内容都可见
-            ''为ListView1设置各行数据                       
-            'For i = 1 To rs.RecordCount                                                     '在1到记录数量上循环
-            '    Dim itm As ListViewItem = ListView1.Items.Add(rs.Fields(0).Value.ToString)  '首列为项目名
-            '    For j = 1 To rs.Fields.Count - 1                                            '在1到字段总数-1上循环,向项目名后添加.
-            '        'itm.SubItems.AddRange({"钢笔", "500", "2012-9-15"})
-            '        itm.SubItems.AddRange({rs.Fields(j).value.ToString}) '从第2列开始添加索引列的子项目值
-            '    Next j          '循环语句
-            '    rs.MoveNext     '定位到下一条记录
-            'Next i  '循环
+        ' ★★★ 3. 判断下拉框选中的是“详细代码”还是“备注” ★★★
+        '    下拉框索引0对应“详细代码”，索引1对应“备注”
+        '    在数据数组中，索引0是标题，索引3是代码正文
+        '    为了更准确搜索，我们定义：
+        '    当选择“详细代码”时，搜索标题（arr(0)）+ 代码正文（arr(3)）
+        '    当选择“备注”时，只搜索备注（arr(2)）
+        Dim intColIndex As Integer
+        If ComboBox1.SelectedIndex = 0 Then
+            ' 选择“详细代码”：搜索标题 + 代码正文（两个字段合并）
+            intColIndex = -1  ' 用 -1 表示特殊处理：搜索标题+代码正文
+        Else
+            ' 选择“备注”：只搜索备注字段（索引2）
+            intColIndex = 2
+        End If
 
-            For Each Sht In xlapp.Worksheets   '遍历所有工作表
-                Sht.Activate()      '激活该活动工作表
-                For RowCount = 2 To Sht.Cells(xlapp.Rows.Count, 1).End(-4162).Row   '遍历sht工作表的所有行，首行除外
-                    Select Case ComboBox1.Text  '根据复合框的值决然定查找方式
-                        Case "详细代码"  '如果用户选择按代码查找
-                            FindText = Sht.Cells(RowCount, 2).value  '将sht表中第2列第RowCount行的值赋予变量FindText
-                        Case "备注"  '如果用户选择按成绩查找
-                            FindText = Sht.Cells(RowCount, 3).value   '将sht表中第3列第RowCount行的值赋予变量FindText
-                    End Select
-                    If UCase(FindText) Like "*" & UCase(TextBox1.Text) & "*" Then  '如果FindText的值包含了文本框TextBox1的值
-                        'Item = Item + 1  '累加计数器
-                        'ReDim Preserve arr(0 To 2, 0 To Item - 1)  '重置数组变量
-                        'arr(0, Item) = Sht.Cells(RowCount, 1) '将工作表ROWCOUNT行详细代码名称导入数组的Item列第1行
-                        'arr(1, Item) = Sht.Name                '将工作表名称导入数组的Item列第2行
-                        'arr(2, Item) = Sht.Cells(RowCount, 2)  '将工作表代码ID导入数组的Item列第3行
-                        Dim itm As ListViewItem = ListView1.Items.Add(Sht.Cells(RowCount, 1).value.ToString)  '首列为项目名
-                        'For j = 1 To 3                                         '在1到字段总数-1上循环,向项目名后添加.
-                        'itm.SubItems.AddRange({"钢笔", "500", "2012-9-15"})
+        ' ★★★ 4. 创建筛选结果列表 ★★★
+        Dim lstFiltered As New List(Of String())()
 
-                        itm.SubItems.Add(Sht.Cells(RowCount, 2).value.ToString) '从第2列开始添加索引列的子项目值
-                        itm.SubItems.Add(Sht.Name) '从第2列开始添加索引列的子项目值
-                        itm.SubItems.Add(Sht.Cells(RowCount, 3).value.ToString) '从第3列开始添加索引列的子项目值
+        ' ★★★ 5. 判断用户是否输入了关键词 ★★★
+        If String.IsNullOrEmpty(strSearchText) Then
+            ' 如果关键词为空，显示全部笔记
+            lstFiltered = allNotes
+        Else
+            ' 如果有关键词，遍历所有笔记进行筛选
+            For Each arrNote As String() In allNotes
+                Dim blnMatch As Boolean = False
 
-                        'itm.SubItems.Add(Sht.Cells(RowCount, 4).value.ToString) '从第2列开始添加索引列的子项目值
-                        'Next j          '循环语句
+                If intColIndex = -1 Then
+                    ' 搜索“详细代码”模式：在标题（索引0）和代码正文（索引3）中查找
+                    If arrNote(0).IndexOf(strSearchText, StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        blnMatch = True
+                    ElseIf arrNote(3).IndexOf(strSearchText, StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        blnMatch = True
                     End If
-                Next RowCount
-            Next Sht
-        End With    '结束引用对象
-        ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent) '列宽根据列内容自适应，此时保证列内容都可见
-        ListView1.Focus()  '将焦点转移到ComboBox1
+                Else
+                    ' 搜索“备注”模式：只在备注（索引2）中查找
+                    If arrNote(intColIndex).IndexOf(strSearchText, StringComparison.OrdinalIgnoreCase) >= 0 Then
+                        blnMatch = True
+                    End If
+                End If
+
+                ' 如果匹配，将这条笔记加入筛选结果列表
+                If blnMatch Then
+                    lstFiltered.Add(arrNote)
+                End If
+            Next
+        End If
+
+        ' ★★★ 6. 调用刷新方法，显示筛选结果 ★★★
+        RefreshListView(lstFiltered)
     End Sub
+
+
+
+    ''' <summary>
+    ''' 刷新 ListView 显示指定的笔记列表
+    ''' </summary>
+    ''' <param name="lstData">要显示的笔记列表，每条笔记是一个4元素字符串数组</param>
+    Private Sub RefreshListView(lstData As List(Of String()))
+        ListView1.Items.Clear()
+        ListView1.Columns.Clear()
+
+        ' ★★★ 改大列宽，确保文字完整显示 ★★★
+        ListView1.Columns.Add("标题", 300)
+        ListView1.Columns.Add("编号", 100)
+        ListView1.Columns.Add("备注", 300)
+        ListView1.Columns.Add("代码正文", 600)
+
+        If lstData Is Nothing OrElse lstData.Count = 0 Then
+            Return
+        End If
+
+        For Each arrNote As String() In lstData
+            Dim itm As New ListViewItem(arrNote(0))
+            itm.SubItems.Add(arrNote(1))
+            itm.SubItems.Add(arrNote(2))
+            itm.SubItems.Add(arrNote(3))
+            ListView1.Items.Add(itm)
+        Next
+
+        ' ★★★ 注释掉自动调整，防止覆盖手动设置的宽度 ★★★
+        ' ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent)
+    End Sub
+
 
     Private Sub btnExit_Click(sender As Object, e As EventArgs) Handles btnExit.Click
         Me.Close()

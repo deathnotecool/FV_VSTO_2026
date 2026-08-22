@@ -3,7 +3,7 @@ Imports System.Data           '使用DatSet和DataView类所必须的.
 Imports System.Data.OleDb     '使用OleDbConnection、OleDbAdapter、OleDbCommand、OleDbParameter类所必须的.
 Imports System.Drawing        '使用颜色命名空间
 Public Class D01_资质证书信息
-    Private cmb As CmbDatagridbiew
+    'Private cmb As CmbDatagridbiew
     '声明作用域为类级的对象,该对象建立了与数据库的连接,此时数据库为Access.
     Dim objConnection1th As New OleDbConnection _
              ("Provider=Microsoft.Ace.OleDb.12.0;Data Source=D:\2 笔记记录\0 过程信息管理笔记\人力资源管理\人力资源管理.accdb")  '三星笔记本
@@ -181,8 +181,8 @@ Public Class D01_资质证书信息
         性别.Items.Add("男")
         性别.Items.Add("女")   '维修类型.SelectedIndex = 0    '默认选择第一项
         BindFields() '调用绑定控件过程
-        cmb = New CmbDatagridbiew(Me.grdAuthorTitles)
-        cmb.Add(0, 1, 0, 3) '代表（0，1）单元格 与（0，3）单元格合并
+        'cmb = New CmbDatagridbiew(Me.grdAuthorTitles)
+        'cmb.Add(0, 1, 0, 3) '代表（0，1）单元格 与（0，3）单元格合并
 
         'objDataAdapter1th.SelectCommand = New OleDbCommand()            '初始化一个命令对象
         'objDataAdapter1th.SelectCommand.Connection = objConnection2th   '建立与数据库的连接

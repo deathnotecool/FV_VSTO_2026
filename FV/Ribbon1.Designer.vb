@@ -42,28 +42,40 @@
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Ribbon1))
         Dim RibbonDropDownItemImpl1 As Microsoft.Office.Tools.Ribbon.RibbonDropDownItem = Me.Factory.CreateRibbonDropDownItem
         Dim RibbonDropDownItemImpl2 As Microsoft.Office.Tools.Ribbon.RibbonDropDownItem = Me.Factory.CreateRibbonDropDownItem
         Dim RibbonDropDownItemImpl3 As Microsoft.Office.Tools.Ribbon.RibbonDropDownItem = Me.Factory.CreateRibbonDropDownItem
         Dim RibbonDropDownItemImpl4 As Microsoft.Office.Tools.Ribbon.RibbonDropDownItem = Me.Factory.CreateRibbonDropDownItem
         Dim RibbonDropDownItemImpl5 As Microsoft.Office.Tools.Ribbon.RibbonDropDownItem = Me.Factory.CreateRibbonDropDownItem
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Ribbon1))
         Me.Tab1 = Me.Factory.CreateRibbonTab
         Me.Group3 = Me.Factory.CreateRibbonGroup
+        Me.Separator7 = Me.Factory.CreateRibbonSeparator
+        Me.Separator8 = Me.Factory.CreateRibbonSeparator
+        Me.Group2 = Me.Factory.CreateRibbonGroup
+        Me.Group1 = Me.Factory.CreateRibbonGroup
+        Me.Separator1 = Me.Factory.CreateRibbonSeparator
+        Me.Separator2 = Me.Factory.CreateRibbonSeparator
+        Me.Separator3 = Me.Factory.CreateRibbonSeparator
+        Me.Separator4 = Me.Factory.CreateRibbonSeparator
+        Me.Separator5 = Me.Factory.CreateRibbonSeparator
+        Me.Separator6 = Me.Factory.CreateRibbonSeparator
+        Me.DropDown1 = Me.Factory.CreateRibbonDropDown
+        Me.Separator9 = Me.Factory.CreateRibbonSeparator
+        Me.Group4 = Me.Factory.CreateRibbonGroup
+        Me.ntyRibbon = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.Menu7 = Me.Factory.CreateRibbonMenu
         Me.btnFileInfo = Me.Factory.CreateRibbonButton
         Me.Button19 = Me.Factory.CreateRibbonButton
         Me.Button18 = Me.Factory.CreateRibbonButton
         Me.btnCertifcate = Me.Factory.CreateRibbonButton
         Me.btnCertificateOutput = Me.Factory.CreateRibbonButton
-        Me.Separator7 = Me.Factory.CreateRibbonSeparator
         Me.Menu8 = Me.Factory.CreateRibbonMenu
         Me.Button26 = Me.Factory.CreateRibbonButton
         Me.Button27 = Me.Factory.CreateRibbonButton
         Me.Button28 = Me.Factory.CreateRibbonButton
         Me.Button29 = Me.Factory.CreateRibbonButton
         Me.Button30 = Me.Factory.CreateRibbonButton
-        Me.Separator8 = Me.Factory.CreateRibbonSeparator
         Me.Menu9 = Me.Factory.CreateRibbonMenu
         Me.Button31 = Me.Factory.CreateRibbonButton
         Me.Button33 = Me.Factory.CreateRibbonButton
@@ -101,35 +113,29 @@
         Me.btnSearchInspect = Me.Factory.CreateRibbonButton
         Me.btnCost = Me.Factory.CreateRibbonButton
         Me.Button2 = Me.Factory.CreateRibbonButton
-        Me.Group2 = Me.Factory.CreateRibbonGroup
         Me.Menu4 = Me.Factory.CreateRibbonMenu
         Me.btnMergeRange = Me.Factory.CreateRibbonButton
         Me.btnUnMergeRange = Me.Factory.CreateRibbonButton
         Me.btnMergeCellsRetainContonts = Me.Factory.CreateRibbonButton
-        Me.Group1 = Me.Factory.CreateRibbonGroup
         Me.Menu15 = Me.Factory.CreateRibbonMenu
         Me.btnFrequency = Me.Factory.CreateRibbonButton
         Me.btnDataCollect = Me.Factory.CreateRibbonButton
         Me.btnDistance = Me.Factory.CreateRibbonButton
         Me.btnRatio = Me.Factory.CreateRibbonButton
         Me.btnAnalyzeHeatTreatmentData = Me.Factory.CreateRibbonButton
-        Me.Separator1 = Me.Factory.CreateRibbonSeparator
         Me.Menu6 = Me.Factory.CreateRibbonMenu
         Me.btnExtractId = Me.Factory.CreateRibbonButton
         Me.btnCreateBill = Me.Factory.CreateRibbonButton
-        Me.Separator2 = Me.Factory.CreateRibbonSeparator
         Me.Menu1 = Me.Factory.CreateRibbonMenu
         Me.btnColumnAndAreaDeletePicture = Me.Factory.CreateRibbonButton
         Me.btnAreaLocalPicture = Me.Factory.CreateRibbonButton
         Me.btnSort = Me.Factory.CreateRibbonButton
         Me.btnControlSize = Me.Factory.CreateRibbonButton
-        Me.Separator3 = Me.Factory.CreateRibbonSeparator
         Me.Menu2 = Me.Factory.CreateRibbonMenu
         Me.btnConversionPDF = Me.Factory.CreateRibbonButton
         Me.Button16 = Me.Factory.CreateRibbonButton
         Me.btnBatchNaming = Me.Factory.CreateRibbonButton
         Me.Button24 = Me.Factory.CreateRibbonButton
-        Me.Separator4 = Me.Factory.CreateRibbonSeparator
         Me.Menu5 = Me.Factory.CreateRibbonMenu
         Me.Button10 = Me.Factory.CreateRibbonButton
         Me.Button11 = Me.Factory.CreateRibbonButton
@@ -147,7 +153,6 @@
         Me.Menu18 = Me.Factory.CreateRibbonMenu
         Me.btnSplitWorkbook = Me.Factory.CreateRibbonButton
         Me.btnSplitName = Me.Factory.CreateRibbonButton
-        Me.Separator5 = Me.Factory.CreateRibbonSeparator
         Me.Menu3 = Me.Factory.CreateRibbonMenu
         Me.Button6 = Me.Factory.CreateRibbonButton
         Me.btnDisplayDate = Me.Factory.CreateRibbonButton
@@ -157,14 +162,11 @@
         Me.btnHideErr = Me.Factory.CreateRibbonButton
         Me.btnSearchNote = Me.Factory.CreateRibbonButton
         Me.btnAddMoney = Me.Factory.CreateRibbonButton
-        Me.Separator6 = Me.Factory.CreateRibbonSeparator
         Me.Menu13 = Me.Factory.CreateRibbonMenu
         Me.btn奇偶定位 = Me.Factory.CreateRibbonButton
         Me.btnGreaterData = Me.Factory.CreateRibbonButton
         Me.btnLessData = Me.Factory.CreateRibbonButton
-        Me.DropDown1 = Me.Factory.CreateRibbonDropDown
         Me.toggleButton1 = Me.Factory.CreateRibbonToggleButton
-        Me.Separator9 = Me.Factory.CreateRibbonSeparator
         Me.Menu10 = Me.Factory.CreateRibbonMenu
         Me.Button20 = Me.Factory.CreateRibbonButton
         Me.Button38 = Me.Factory.CreateRibbonButton
@@ -173,11 +175,9 @@
         Me.btnForDosan = Me.Factory.CreateRibbonButton
         Me.btnQuickCode = Me.Factory.CreateRibbonButton
         Me.Button5 = Me.Factory.CreateRibbonButton
-        Me.Group4 = Me.Factory.CreateRibbonGroup
         Me.btnUndo = Me.Factory.CreateRibbonButton
         Me.Button1 = Me.Factory.CreateRibbonButton
         Me.TEST = Me.Factory.CreateRibbonButton
-        Me.ntyRibbon = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.Tab1.SuspendLayout()
         Me.Group3.SuspendLayout()
         Me.Group2.SuspendLayout()
@@ -211,6 +211,102 @@
         Me.Group3.Items.Add(Me.Menu16)
         Me.Group3.Label = "F之数据库"
         Me.Group3.Name = "Group3"
+        '
+        'Separator7
+        '
+        Me.Separator7.Name = "Separator7"
+        '
+        'Separator8
+        '
+        Me.Separator8.Name = "Separator8"
+        '
+        'Group2
+        '
+        Me.Group2.Items.Add(Me.Menu4)
+        Me.Group2.Label = "强化内置功能"
+        Me.Group2.Name = "Group2"
+        '
+        'Group1
+        '
+        Me.Group1.Items.Add(Me.Menu15)
+        Me.Group1.Items.Add(Me.Separator1)
+        Me.Group1.Items.Add(Me.Menu6)
+        Me.Group1.Items.Add(Me.Separator2)
+        Me.Group1.Items.Add(Me.Menu1)
+        Me.Group1.Items.Add(Me.Separator3)
+        Me.Group1.Items.Add(Me.Menu2)
+        Me.Group1.Items.Add(Me.Separator4)
+        Me.Group1.Items.Add(Me.Menu5)
+        Me.Group1.Items.Add(Me.Menu20)
+        Me.Group1.Items.Add(Me.Menu18)
+        Me.Group1.Items.Add(Me.Separator5)
+        Me.Group1.Items.Add(Me.Menu3)
+        Me.Group1.Items.Add(Me.Separator6)
+        Me.Group1.Items.Add(Me.Menu13)
+        Me.Group1.Items.Add(Me.DropDown1)
+        Me.Group1.Items.Add(Me.toggleButton1)
+        Me.Group1.Items.Add(Me.Separator9)
+        Me.Group1.Items.Add(Me.Menu10)
+        Me.Group1.Label = "Ctrl+鼠标左键 功能按钮,调出教程"
+        Me.Group1.Name = "Group1"
+        '
+        'Separator1
+        '
+        Me.Separator1.Name = "Separator1"
+        '
+        'Separator2
+        '
+        Me.Separator2.Name = "Separator2"
+        '
+        'Separator3
+        '
+        Me.Separator3.Name = "Separator3"
+        '
+        'Separator4
+        '
+        Me.Separator4.Name = "Separator4"
+        '
+        'Separator5
+        '
+        Me.Separator5.Name = "Separator5"
+        '
+        'Separator6
+        '
+        Me.Separator6.Name = "Separator6"
+        '
+        'DropDown1
+        '
+        RibbonDropDownItemImpl1.Label = "请选择条件"
+        RibbonDropDownItemImpl2.Label = "最大值"
+        RibbonDropDownItemImpl3.Label = "最小值"
+        RibbonDropDownItemImpl4.Label = "平均值"
+        RibbonDropDownItemImpl5.Label = "众数"
+        Me.DropDown1.Items.Add(RibbonDropDownItemImpl1)
+        Me.DropDown1.Items.Add(RibbonDropDownItemImpl2)
+        Me.DropDown1.Items.Add(RibbonDropDownItemImpl3)
+        Me.DropDown1.Items.Add(RibbonDropDownItemImpl4)
+        Me.DropDown1.Items.Add(RibbonDropDownItemImpl5)
+        Me.DropDown1.Label = "定位数值"
+        Me.DropDown1.Name = "DropDown1"
+        Me.DropDown1.ScreenTip = "GN021_定位"
+        Me.DropDown1.SuperTip = "选择区域,下拉选项,最大:深黄;最小:浅黄;众数:亮绿;平均值:绿色."
+        '
+        'Separator9
+        '
+        Me.Separator9.Name = "Separator9"
+        '
+        'Group4
+        '
+        Me.Group4.Items.Add(Me.btnUndo)
+        Me.Group4.Items.Add(Me.Button1)
+        Me.Group4.Items.Add(Me.TEST)
+        Me.Group4.Label = "谨慎使用"
+        Me.Group4.Name = "Group4"
+        '
+        'ntyRibbon
+        '
+        Me.ntyRibbon.Text = "NotifyIcon1"
+        Me.ntyRibbon.Visible = True
         '
         'Menu7
         '
@@ -268,10 +364,6 @@
         Me.btnCertificateOutput.Name = "btnCertificateOutput"
         Me.btnCertificateOutput.ShowImage = True
         '
-        'Separator7
-        '
-        Me.Separator7.Name = "Separator7"
-        '
         'Menu8
         '
         Me.Menu8.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
@@ -326,10 +418,6 @@
         Me.Button30.Label = "信息查询导出"
         Me.Button30.Name = "Button30"
         Me.Button30.ShowImage = True
-        '
-        'Separator8
-        '
-        Me.Separator8.Name = "Separator8"
         '
         'Menu9
         '
@@ -654,12 +742,6 @@
         Me.Button2.Name = "Button2"
         Me.Button2.ShowImage = True
         '
-        'Group2
-        '
-        Me.Group2.Items.Add(Me.Menu4)
-        Me.Group2.Label = "强化内置功能"
-        Me.Group2.Name = "Group2"
-        '
         'Menu4
         '
         Me.Menu4.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
@@ -697,30 +779,6 @@
         Me.btnMergeCellsRetainContonts.ScreenTip = "强化内置合并功能"
         Me.btnMergeCellsRetainContonts.ShowImage = True
         Me.btnMergeCellsRetainContonts.SuperTip = "合并单元格后,保留所有值."
-        '
-        'Group1
-        '
-        Me.Group1.Items.Add(Me.Menu15)
-        Me.Group1.Items.Add(Me.Separator1)
-        Me.Group1.Items.Add(Me.Menu6)
-        Me.Group1.Items.Add(Me.Separator2)
-        Me.Group1.Items.Add(Me.Menu1)
-        Me.Group1.Items.Add(Me.Separator3)
-        Me.Group1.Items.Add(Me.Menu2)
-        Me.Group1.Items.Add(Me.Separator4)
-        Me.Group1.Items.Add(Me.Menu5)
-        Me.Group1.Items.Add(Me.Menu20)
-        Me.Group1.Items.Add(Me.Menu18)
-        Me.Group1.Items.Add(Me.Separator5)
-        Me.Group1.Items.Add(Me.Menu3)
-        Me.Group1.Items.Add(Me.Separator6)
-        Me.Group1.Items.Add(Me.Menu13)
-        Me.Group1.Items.Add(Me.DropDown1)
-        Me.Group1.Items.Add(Me.toggleButton1)
-        Me.Group1.Items.Add(Me.Separator9)
-        Me.Group1.Items.Add(Me.Menu10)
-        Me.Group1.Label = "Ctrl+鼠标左键 功能按钮,调出教程"
-        Me.Group1.Name = "Group1"
         '
         'Menu15
         '
@@ -781,10 +839,6 @@
         Me.btnAnalyzeHeatTreatmentData.ShowImage = True
         Me.btnAnalyzeHeatTreatmentData.SuperTip = "单击后找到保温时间开始/结束点,以及保温时间段"
         '
-        'Separator1
-        '
-        Me.Separator1.Name = "Separator1"
-        '
         'Menu6
         '
         Me.Menu6.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
@@ -812,10 +866,6 @@
         Me.btnCreateBill.ScreenTip = "GN004_生成工资条"
         Me.btnCreateBill.ShowImage = True
         Me.btnCreateBill.SuperTip = "从工资单执行该按钮,工资单必须首行为标题."
-        '
-        'Separator2
-        '
-        Me.Separator2.Name = "Separator2"
         '
         'Menu1
         '
@@ -865,10 +915,6 @@
         Me.btnControlSize.ShowImage = True
         Me.btnControlSize.SuperTip = "文本框内输入参考图形名称，作为统一大小的参考图。"
         '
-        'Separator3
-        '
-        Me.Separator3.Name = "Separator3"
-        '
         'Menu2
         '
         Me.Menu2.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
@@ -916,10 +962,6 @@
         Me.Button24.ScreenTip = "GN0013_文件集合移动"
         Me.Button24.ShowImage = True
         Me.Button24.SuperTip = "（神罗天征技能，慎用）操作前先备份,主要是将文件夹及子文件夹下文件移动到一个指定文件夹内."
-        '
-        'Separator4
-        '
-        Me.Separator4.Name = "Separator4"
         '
         'Menu5
         '
@@ -1073,10 +1115,6 @@
         Me.btnSplitName.Name = "btnSplitName"
         Me.btnSplitName.ShowImage = True
         '
-        'Separator5
-        '
-        Me.Separator5.Name = "Separator5"
-        '
         'Menu3
         '
         Me.Menu3.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
@@ -1145,7 +1183,7 @@
         'btnSearchNote
         '
         Me.btnSearchNote.Image = CType(resources.GetObject("btnSearchNote.Image"), System.Drawing.Image)
-        Me.btnSearchNote.Label = "VBA代码笔记"
+        Me.btnSearchNote.Label = "代码笔记"
         Me.btnSearchNote.Name = "btnSearchNote"
         Me.btnSearchNote.ShowImage = True
         '
@@ -1155,10 +1193,6 @@
         Me.btnAddMoney.Label = "加班费计算"
         Me.btnAddMoney.Name = "btnAddMoney"
         Me.btnAddMoney.ShowImage = True
-        '
-        'Separator6
-        '
-        Me.Separator6.Name = "Separator6"
         '
         'Menu13
         '
@@ -1198,33 +1232,12 @@
         Me.btnLessData.ShowImage = True
         Me.btnLessData.SuperTip = "输入值后，自动选中已用区域小于的值."
         '
-        'DropDown1
-        '
-        RibbonDropDownItemImpl1.Label = "请选择条件"
-        RibbonDropDownItemImpl2.Label = "最大值"
-        RibbonDropDownItemImpl3.Label = "最小值"
-        RibbonDropDownItemImpl4.Label = "平均值"
-        RibbonDropDownItemImpl5.Label = "众数"
-        Me.DropDown1.Items.Add(RibbonDropDownItemImpl1)
-        Me.DropDown1.Items.Add(RibbonDropDownItemImpl2)
-        Me.DropDown1.Items.Add(RibbonDropDownItemImpl3)
-        Me.DropDown1.Items.Add(RibbonDropDownItemImpl4)
-        Me.DropDown1.Items.Add(RibbonDropDownItemImpl5)
-        Me.DropDown1.Label = "定位数值"
-        Me.DropDown1.Name = "DropDown1"
-        Me.DropDown1.ScreenTip = "GN021_定位"
-        Me.DropDown1.SuperTip = "选择区域,下拉选项,最大:深黄;最小:浅黄;众数:亮绿;平均值:绿色."
-        '
         'toggleButton1
         '
         Me.toggleButton1.Image = CType(resources.GetObject("toggleButton1.Image"), System.Drawing.Image)
         Me.toggleButton1.Label = "行列聚光灯"
         Me.toggleButton1.Name = "toggleButton1"
         Me.toggleButton1.ShowImage = True
-        '
-        'Separator9
-        '
-        Me.Separator9.Name = "Separator9"
         '
         'Menu10
         '
@@ -1290,14 +1303,6 @@
         Me.Button5.Name = "Button5"
         Me.Button5.ShowImage = True
         '
-        'Group4
-        '
-        Me.Group4.Items.Add(Me.btnUndo)
-        Me.Group4.Items.Add(Me.Button1)
-        Me.Group4.Items.Add(Me.TEST)
-        Me.Group4.Label = "谨慎使用"
-        Me.Group4.Name = "Group4"
-        '
         'btnUndo
         '
         Me.btnUndo.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
@@ -1313,7 +1318,7 @@
         Me.Button1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.Button1.Image = CType(resources.GetObject("Button1.Image"), System.Drawing.Image)
         Me.Button1.KeyTip = "F"
-        Me.Button1.Label = "加班时间计算1"
+        Me.Button1.Label = "加班时间计算3"
         Me.Button1.Name = "Button1"
         Me.Button1.ShowImage = True
         '
@@ -1324,11 +1329,6 @@
         Me.TEST.Name = "TEST"
         Me.TEST.ShowImage = True
         Me.TEST.Visible = False
-        '
-        'ntyRibbon
-        '
-        Me.ntyRibbon.Text = "NotifyIcon1"
-        Me.ntyRibbon.Visible = True
         '
         'Ribbon1
         '
