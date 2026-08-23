@@ -56,12 +56,12 @@ Partial Class WIN190810_VBA代码笔记
         Me.TextBox1.Location = New System.Drawing.Point(185, 15)
         Me.TextBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.TextBox1.Name = "TextBox1"
-        Me.TextBox1.Size = New System.Drawing.Size(240, 25)
+        Me.TextBox1.Size = New System.Drawing.Size(217, 25)
         Me.TextBox1.TabIndex = 1
         '
         'btnExit
         '
-        Me.btnExit.Location = New System.Drawing.Point(951, 15)
+        Me.btnExit.Location = New System.Drawing.Point(836, 15)
         Me.btnExit.Margin = New System.Windows.Forms.Padding(4)
         Me.btnExit.Name = "btnExit"
         Me.btnExit.Size = New System.Drawing.Size(100, 29)
@@ -84,7 +84,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnSearch
         '
-        Me.btnSearch.Location = New System.Drawing.Point(435, 15)
+        Me.btnSearch.Location = New System.Drawing.Point(410, 15)
         Me.btnSearch.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSearch.Name = "btnSearch"
         Me.btnSearch.Size = New System.Drawing.Size(100, 29)
@@ -108,8 +108,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnCopyCode
         '
-        Me.btnCopyCode.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnCopyCode.Location = New System.Drawing.Point(822, 15)
+        Me.btnCopyCode.Location = New System.Drawing.Point(729, 15)
         Me.btnCopyCode.Name = "btnCopyCode"
         Me.btnCopyCode.Size = New System.Drawing.Size(100, 29)
         Me.btnCopyCode.TabIndex = 8
@@ -118,8 +117,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnDeleteNote
         '
-        Me.btnDeleteNote.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnDeleteNote.Location = New System.Drawing.Point(693, 15)
+        Me.btnDeleteNote.Location = New System.Drawing.Point(623, 15)
         Me.btnDeleteNote.Name = "btnDeleteNote"
         Me.btnDeleteNote.Size = New System.Drawing.Size(100, 29)
         Me.btnDeleteNote.TabIndex = 16
@@ -128,7 +126,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnEditNote
         '
-        Me.btnEditNote.Location = New System.Drawing.Point(564, 15)
+        Me.btnEditNote.Location = New System.Drawing.Point(517, 15)
         Me.btnEditNote.Name = "btnEditNote"
         Me.btnEditNote.Size = New System.Drawing.Size(100, 29)
         Me.btnEditNote.TabIndex = 17
@@ -146,17 +144,16 @@ Partial Class WIN190810_VBA代码笔记
         Me.GroupBox1.Controls.Add(Me.Label2)
         Me.GroupBox1.Controls.Add(Me.txtNewTitle)
         Me.GroupBox1.Controls.Add(Me.Label1)
-        Me.GroupBox1.Location = New System.Drawing.Point(943, 434)
+        Me.GroupBox1.Location = New System.Drawing.Point(1001, 434)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(770, 334)
+        Me.GroupBox1.Size = New System.Drawing.Size(712, 334)
         Me.GroupBox1.TabIndex = 18
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "编辑笔记"
         '
         'btnAddNote
         '
-        Me.btnAddNote.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnAddNote.Location = New System.Drawing.Point(70, 24)
+        Me.btnAddNote.Location = New System.Drawing.Point(64, 24)
         Me.btnAddNote.Name = "btnAddNote"
         Me.btnAddNote.Size = New System.Drawing.Size(100, 34)
         Me.btnAddNote.TabIndex = 22
@@ -165,20 +162,20 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtNewCode
         '
-        Me.txtNewCode.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+        Me.txtNewCode.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtNewCode.Location = New System.Drawing.Point(70, 136)
+        Me.txtNewCode.Location = New System.Drawing.Point(64, 136)
         Me.txtNewCode.Multiline = True
         Me.txtNewCode.Name = "txtNewCode"
-        Me.txtNewCode.Size = New System.Drawing.Size(688, 192)
+        Me.txtNewCode.Size = New System.Drawing.Size(636, 192)
         Me.txtNewCode.TabIndex = 21
         Me.txtNewCode.WordWrap = False
         '
         'Label3
         '
-        Me.Label3.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(12, 220)
+        Me.Label3.Location = New System.Drawing.Point(6, 221)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(52, 15)
         Me.Label3.TabIndex = 20
@@ -186,19 +183,17 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtNewRemark
         '
-        Me.txtNewRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtNewRemark.Location = New System.Drawing.Point(70, 100)
+        Me.txtNewRemark.Location = New System.Drawing.Point(64, 100)
         Me.txtNewRemark.MaxLength = 200
         Me.txtNewRemark.Name = "txtNewRemark"
         Me.txtNewRemark.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtNewRemark.Size = New System.Drawing.Size(688, 25)
+        Me.txtNewRemark.Size = New System.Drawing.Size(636, 25)
         Me.txtNewRemark.TabIndex = 19
         '
         'Label2
         '
-        Me.Label2.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(12, 103)
+        Me.Label2.Location = New System.Drawing.Point(6, 104)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(52, 15)
         Me.Label2.TabIndex = 18
@@ -206,18 +201,16 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtNewTitle
         '
-        Me.txtNewTitle.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtNewTitle.Location = New System.Drawing.Point(70, 64)
+        Me.txtNewTitle.Location = New System.Drawing.Point(64, 64)
         Me.txtNewTitle.MaxLength = 100
         Me.txtNewTitle.Name = "txtNewTitle"
-        Me.txtNewTitle.Size = New System.Drawing.Size(688, 25)
+        Me.txtNewTitle.Size = New System.Drawing.Size(636, 25)
         Me.txtNewTitle.TabIndex = 17
         '
         'Label1
         '
-        Me.Label1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(19, 67)
+        Me.Label1.Location = New System.Drawing.Point(13, 68)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(45, 15)
         Me.Label1.TabIndex = 16

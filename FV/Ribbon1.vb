@@ -2087,21 +2087,9 @@ Public Class Ribbon1
     End Sub
 
     Private Sub btnSearchNote_Click(sender As Object, e As RibbonControlEventArgs) Handles btnSearchNote.Click
-        Dim wb As Excel.Workbook
-        'Dim strNotePath As String = "C:\Program Files\FV\FV.xla"
+        ' 直接显示窗体，不再打开 FV.xlam
         Dim f As New WIN190810_VBA代码笔记
-        'MsgBox("笔记路径:" & strNotePath)
-        'wb = xlapp.Workbooks.Open(strNotePath)
-
-        'PauseWait(1500)
-
-        xlapp.Workbooks.Open("C:\Program Files\FV\FV.xlam")
-        xlapp.ActiveWorkbook.Sheets(1).select '选择第一个表
-        xlapp.Workbooks("FV.xlam").IsAddin = True
-        xlapp.Workbooks("FV.xlam").IsAddin = False
-
         f.Show()
-
     End Sub
 
 

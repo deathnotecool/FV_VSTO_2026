@@ -377,7 +377,7 @@ Public Class WIN190810_VBA代码笔记
     ''' <summary>
     ''' 保存笔记：将用户输入的新笔记添加到列表并保存到文件
     ''' </summary>
-    Private Sub btnAddNote_Click(sender As Object, e As EventArgs)
+    Private Sub btnAddNote_Click(sender As Object, e As EventArgs) Handles btnAddNote.Click
         ' 1. 获取用户输入
         Dim strTitle As String = txtNewTitle.Text.Trim()
         Dim strRemark As String = txtNewRemark.Text.Trim()
