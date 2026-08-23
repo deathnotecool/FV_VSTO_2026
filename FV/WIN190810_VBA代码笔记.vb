@@ -312,40 +312,7 @@ Public Class WIN190810_VBA代码笔记
     End Sub
 
 
-    'Private Sub ListView1_ItemSelectionChanged(sender As Object, e As ListViewItemSelectionChangedEventArgs) Handles ListView1.ItemSelectionChanged
-    '    Dim Sht As Excel.Worksheet, Rng As Excel.Range, targetrng As Excel.Range, msg1 As MsgBoxResult '声明变量
-    '    'On Error Resume Next
 
-
-
-    '    For Each Sht In xlapp.Worksheets        '在工作表集合中循环
-    '        Sht.Activate()      '激活该活动工作表
-    '        For Each Rng In Sht.Range(xlapp.Cells(1, 2), xlapp.Cells(xlapp.Cells.Rows.Count, 2).End(-4162))      '在已用单元格中循环
-    '            'If Rng.Value <> "" And Rng.Value = e.Item.SubItems(1).Text Then  '如果有单元格与列表框所选的值相同,则执行下面语句
-    '            If Rng.Value <> "" And Rng.Offset(0, -1).Value = e.Item.SubItems(0).Text And Rng.Value = e.Item.SubItems(1).Text Then  '如果有单元格与列表框所选的值相同,则执行下面语句
-
-    '                'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
-    '                '    'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
-    '                'If msg1 = vbYes Then  '如果选择了是那么执行下面语句
-    '                '    Rng.Select()  '选中单元格
-    '                '    Exit Sub     '退出程序
-    '                'End If
-
-    '                'msg1 = MsgBox(Rng.Value & Chr(10) & "选择是：选中对应单元格；" + Chr(10) + "选择否：仅退出该提示窗口。", vbYesNo, "操作方式")  '提示信息结果赋值给变量
-    '                'If msg1 = vbYes Then  '如果选择了是那么执行下面语句
-    '                Rng.Select()  '选中单元格
-    '                Exit Sub     '退出程序
-    '                'End If
-
-
-
-
-
-    '            End If
-    '        Next Rng
-    '    Next Sht
-    '    'If e.IsSelected Then MsgBox(e.Item.SubItems(1).Text) '文本框显示鼠标选择项第二列内容
-    'End Sub
 
 
 
