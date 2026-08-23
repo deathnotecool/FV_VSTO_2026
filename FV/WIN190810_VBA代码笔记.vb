@@ -8,6 +8,7 @@ Public Class WIN190810_VBA代码笔记
     ' List(Of String()) 表示一个列表，里面的每一项都是一个字符串数组
     ' 每个字符串数组包含4个元素：标题、编号、备注、代码正文
     Private allNotes As List(Of String())
+    Private intEditingIndex As Integer = -1   ' -1 表示没有正在编辑的笔记
 
     REM 功    能: 宝3-17.5.7-P387 在窗体中跨工作表查询 关键词：array,combox1
 
@@ -352,22 +353,7 @@ Public Class WIN190810_VBA代码笔记
         If e.KeyCode = Keys.Enter Then btnSearch_Click(Nothing, Nothing) '如果按下了Enter键,那么调用查询过程.
     End Sub
 
-    Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
-        On Error Resume Next
-        Kill("C:\Program Files\FV\FV.xlsm")
-        xlapp.Workbooks("FV.xlam").SaveAs(Filename:="C:\Program Files\FV\FV.xlsm", FileFormat:=52, CreateBackup:=False)
 
-        Kill("C:\Program Files\FV\FV.xlam")
-        xlapp.Workbooks("FV.xlsm").SaveAs("C:\Program Files\FV\FV.xlam", FileFormat:=18, CreateBackup:=False)
-
-        'Dim wb As Excel.Workbook
-        'Dim strNotePath As String = "D:\2 笔记记录\1_EXCEL模板综合笔记\2_书籍笔记\0 VBA代码笔记.xlsm"
-        'Dim f As New WIN190810_VBA代码笔记
-        'MsgBox("笔记路径:" & strNotePath)
-        'wb = xlapp.Workbooks.Open(strNotePath)
-        'xlapp.Workbooks("FV.xla").IsAddin = False
-        'f.Show()
-    End Sub
 
     ''' <summary>
     ''' 复制代码按钮：将当前显示的代码正文复制到剪贴板
@@ -391,7 +377,7 @@ Public Class WIN190810_VBA代码笔记
     ''' <summary>
     ''' 保存笔记：将用户输入的新笔记添加到列表并保存到文件
     ''' </summary>
-    Private Sub btnAddNote_Click(sender As Object, e As EventArgs) Handles btnAddNote.Click
+    Private Sub btnAddNote_Click(sender As Object, e As EventArgs)
         ' 1. 获取用户输入
         Dim strTitle As String = txtNewTitle.Text.Trim()
         Dim strRemark As String = txtNewRemark.Text.Trim()
@@ -411,38 +397,13 @@ Public Class WIN190810_VBA代码笔记
             Return
         End If
 
-        ' 4. 生成新ID
-        Dim intMaxID As Integer = 0
-        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
-            For Each arrNote As String() In allNotes
-                Dim strID As String = arrNote(1).Replace("GN", "").Trim()
-                Dim intID As Integer = 0
-                If Integer.TryParse(strID, intID) Then
-                    If intID > intMaxID Then intMaxID = intID
-                End If
-            Next
-        End If
+        ' ★★★ 判断是新增还是编辑（根据模块级变量 intEditingIndex） ★★★
+        Dim blnIsEditing As Boolean = (intEditingIndex >= 0)
+        Dim intEditIndex As Integer = intEditingIndex
 
-        ' ★★★ 判断是新增还是编辑 ★★★
-        Dim strEditingTitle As String = txtNewTitle.Text.Trim()
-        Dim blnIsEditing As Boolean = False
-        Dim intEditIndex As Integer = -1
-
-        ' 检查当前标题是否已存在于列表中（排除自身）
-        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
-            For i As Integer = 0 To allNotes.Count - 1
-                If allNotes(i)(0) = strEditingTitle AndAlso ListView1.SelectedItems.Count > 0 AndAlso i = ListView1.SelectedItems(0).Index Then
-                    ' 如果标题与选中行相同，说明是编辑模式
-                    blnIsEditing = True
-                    intEditIndex = i
-                    Exit For
-                End If
-            Next
-        End If
-
-        ' 如果是编辑模式，使用原标题对应的编号
+        ' 4. 生成新ID（如果是编辑模式，使用原有ID）
         Dim strNewID As String
-        If blnIsEditing AndAlso intEditIndex >= 0 Then
+        If blnIsEditing AndAlso intEditIndex >= 0 AndAlso intEditIndex < allNotes.Count Then
             strNewID = allNotes(intEditIndex)(1)
         Else
             ' 新增模式：生成新ID
@@ -459,9 +420,6 @@ Public Class WIN190810_VBA代码笔记
             strNewID = "GN" & (intMaxID + 1).ToString("D3")
         End If
 
-
-        Dim strNewID As String = "GN" & (intMaxID + 1).ToString("D3")
-
         ' 5. 将代码中的换行符替换成 \n 用于存储
         Dim strCodeForStorage As String = strCode.Replace(vbCrLf, "\n")
 
@@ -469,9 +427,7 @@ Public Class WIN190810_VBA代码笔记
         Dim arrNewNote As String() = {strTitle, strNewID, strRemark, strCodeForStorage}
 
         ' 7. ★★★ 添加到内存列表或更新 ★★★
-        Dim arrNewNote As String() = {strTitle, strNewID, strRemark, strCodeForStorage}
-
-        If blnIsEditing AndAlso intEditIndex >= 0 Then
+        If blnIsEditing AndAlso intEditIndex >= 0 AndAlso intEditIndex < allNotes.Count Then
             ' 编辑模式：替换原有笔记
             allNotes(intEditIndex) = arrNewNote
         Else
@@ -493,7 +449,10 @@ Public Class WIN190810_VBA代码笔记
         txtNewRemark.Clear()
         txtNewCode.Clear()
 
-        MessageBox.Show("笔记保存成功！新ID：" & strNewID, "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        ' ★★★ 重置编辑状态 ★★★
+        intEditingIndex = -1
+
+        MessageBox.Show("笔记保存成功！" & If(blnIsEditing, "已更新", "新ID：" & strNewID), "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
     Private Sub btnDeleteNote_Click(sender As Object, e As EventArgs) Handles btnDeleteNote.Click
@@ -547,6 +506,9 @@ Public Class WIN190810_VBA代码笔记
         txtNewTitle.Text = strOldTitle
         txtNewRemark.Text = strOldRemark
         txtNewCode.Text = strOldCode
+
+        ' ★★★ 记录当前正在编辑的笔记索引 ★★★
+        intEditingIndex = intSelectedIndex
 
         ' 5. 提示用户修改后点击"保存笔记"
         MessageBox.Show("请修改右侧输入框中的内容，然后点击'保存笔记'完成更新。", "编辑提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
