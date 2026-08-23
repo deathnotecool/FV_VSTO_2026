@@ -1,5 +1,6 @@
 ﻿Imports System.Windows.Forms
 Imports System.Text
+Imports System.IO
 
 Public Class WIN190810_VBA代码笔记
     Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
@@ -65,6 +66,81 @@ Public Class WIN190810_VBA代码笔记
         Return lstNotes
     End Function
 
+    ''' <summary>
+    ''' 从外部文件加载所有代码笔记到内存列表
+    ''' </summary>
+    Private Function LoadNotesFromFile() As List(Of String())
+        ' 1. 定义用户数据目录下的文件路径
+        Dim strUserFilePath As String = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FV_VSTO", "CodeNotes.txt")
+
+        ' 2. 确保用户目录存在
+        Dim strUserDirectory As String = System.IO.Path.GetDirectoryName(strUserFilePath)
+        If Not System.IO.Directory.Exists(strUserDirectory) Then
+            System.IO.Directory.CreateDirectory(strUserDirectory)
+        End If
+
+        ' 3. ★★★ 如果用户目录下没有 CodeNotes.txt，从安装目录复制 ★★★
+        If Not System.IO.File.Exists(strUserFilePath) Then
+            ' 获取安装目录下的文件路径（插件所在的目录）
+            Dim strInstallFilePath As String = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CodeNotes.txt")
+
+            ' 如果安装目录下的文件存在，则复制到用户目录
+            If System.IO.File.Exists(strInstallFilePath) Then
+                System.IO.File.Copy(strInstallFilePath, strUserFilePath, True)
+            Else
+                ' 如果安装目录下也没有文件，返回空列表
+                Return New List(Of String())()
+            End If
+        End If
+
+        ' 4. 从用户目录读取文件
+        Dim lines As String() = System.IO.File.ReadAllLines(strUserFilePath, System.Text.Encoding.UTF8)
+        Dim lstNotes As New List(Of String())()
+
+        For Each line As String In lines
+            If Not String.IsNullOrWhiteSpace(line) Then
+                Dim arrFields As String() = line.Split(New Char() {"|"c}, StringSplitOptions.None)
+                If arrFields.Length >= 4 Then
+                    arrFields(3) = arrFields(3).Replace("\n", vbCrLf)
+                    lstNotes.Add(arrFields)
+                End If
+            End If
+        Next
+
+        Return lstNotes
+    End Function
+
+
+    ''' <summary>
+    ''' 将内存中的笔记列表保存到外部文件
+    ''' </summary>
+    Private Sub SaveNotesToFile(ByVal lstNotes As List(Of String()))
+
+
+        ' 1. 构建文件路径
+        ' ★★★ 修改后 ★★★
+        Dim strFilePath As String = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FV_VSTO", "CodeNotes.txt")
+
+        ' 确保目录存在
+        Dim strDirectory As String = System.IO.Path.GetDirectoryName(strFilePath)
+        If Not System.IO.Directory.Exists(strDirectory) Then
+            System.IO.Directory.CreateDirectory(strDirectory)
+        End If
+        ' 2. 准备要写入的行列表
+        Dim lines As New List(Of String)()
+
+        For Each arrNote As String() In lstNotes
+            ' 将代码正文中的换行符替换为 \n 用于存储
+            Dim strCodeForStorage As String = arrNote(3).Replace(vbCrLf, "\n")
+            ' 组合成一行：标题|编号|备注|代码
+            Dim strLine As String = arrNote(0) & "|" & arrNote(1) & "|" & arrNote(2) & "|" & strCodeForStorage
+            lines.Add(strLine)
+        Next
+
+        ' 3. 写入文件
+        System.IO.File.WriteAllLines(strFilePath, lines, System.Text.Encoding.UTF8)
+    End Sub
+
     '当在文字框中输入新的查找对象时，清空列表框中上一次的结果
     Private Sub TextBox1_Change()
         On Error Resume Next
@@ -93,8 +169,7 @@ Public Class WIN190810_VBA代码笔记
 
         ' ★★★ 2. ★★★ 从资源文件加载所有代码笔记到内存 ★★★
         ' 调用刚才添加的 LoadNotesFromResource 方法
-        allNotes = LoadNotesFromResource()
-
+        allNotes = LoadNotesFromFile()
         ' 调试代码已移除，无弹窗
 
         ' ★★★ 3. 刷新列表显示（显示全部笔记） ★★★
@@ -311,5 +386,173 @@ Public Class WIN190810_VBA代码笔记
         Catch ex As Exception
             MessageBox.Show("复制失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' 保存笔记：将用户输入的新笔记添加到列表并保存到文件
+    ''' </summary>
+    Private Sub btnAddNote_Click(sender As Object, e As EventArgs) Handles btnAddNote.Click
+        ' 1. 获取用户输入
+        Dim strTitle As String = txtNewTitle.Text.Trim()
+        Dim strRemark As String = txtNewRemark.Text.Trim()
+        Dim strCode As String = txtNewCode.Text.Trim()
+
+        ' 2. 验证标题
+        If String.IsNullOrEmpty(strTitle) Then
+            MessageBox.Show("请输入笔记标题！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            txtNewTitle.Focus()
+            Return
+        End If
+
+        ' 3. 验证代码正文
+        If String.IsNullOrEmpty(strCode) Then
+            MessageBox.Show("请输入代码正文！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            txtNewCode.Focus()
+            Return
+        End If
+
+        ' 4. 生成新ID
+        Dim intMaxID As Integer = 0
+        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+            For Each arrNote As String() In allNotes
+                Dim strID As String = arrNote(1).Replace("GN", "").Trim()
+                Dim intID As Integer = 0
+                If Integer.TryParse(strID, intID) Then
+                    If intID > intMaxID Then intMaxID = intID
+                End If
+            Next
+        End If
+
+        ' ★★★ 判断是新增还是编辑 ★★★
+        Dim strEditingTitle As String = txtNewTitle.Text.Trim()
+        Dim blnIsEditing As Boolean = False
+        Dim intEditIndex As Integer = -1
+
+        ' 检查当前标题是否已存在于列表中（排除自身）
+        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+            For i As Integer = 0 To allNotes.Count - 1
+                If allNotes(i)(0) = strEditingTitle AndAlso ListView1.SelectedItems.Count > 0 AndAlso i = ListView1.SelectedItems(0).Index Then
+                    ' 如果标题与选中行相同，说明是编辑模式
+                    blnIsEditing = True
+                    intEditIndex = i
+                    Exit For
+                End If
+            Next
+        End If
+
+        ' 如果是编辑模式，使用原标题对应的编号
+        Dim strNewID As String
+        If blnIsEditing AndAlso intEditIndex >= 0 Then
+            strNewID = allNotes(intEditIndex)(1)
+        Else
+            ' 新增模式：生成新ID
+            Dim intMaxID As Integer = 0
+            If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+                For Each arrNote As String() In allNotes
+                    Dim strID As String = arrNote(1).Replace("GN", "").Trim()
+                    Dim intID As Integer = 0
+                    If Integer.TryParse(strID, intID) Then
+                        If intID > intMaxID Then intMaxID = intID
+                    End If
+                Next
+            End If
+            strNewID = "GN" & (intMaxID + 1).ToString("D3")
+        End If
+
+
+        Dim strNewID As String = "GN" & (intMaxID + 1).ToString("D3")
+
+        ' 5. 将代码中的换行符替换成 \n 用于存储
+        Dim strCodeForStorage As String = strCode.Replace(vbCrLf, "\n")
+
+        ' 6. 创建新笔记数组
+        Dim arrNewNote As String() = {strTitle, strNewID, strRemark, strCodeForStorage}
+
+        ' 7. ★★★ 添加到内存列表或更新 ★★★
+        Dim arrNewNote As String() = {strTitle, strNewID, strRemark, strCodeForStorage}
+
+        If blnIsEditing AndAlso intEditIndex >= 0 Then
+            ' 编辑模式：替换原有笔记
+            allNotes(intEditIndex) = arrNewNote
+        Else
+            ' 新增模式：添加到列表
+            If allNotes Is Nothing Then
+                allNotes = New List(Of String())()
+            End If
+            allNotes.Add(arrNewNote)
+        End If
+
+        ' 8. ★★★ 保存到文件 ★★★
+        SaveNotesToFile(allNotes)
+
+        ' 9. 刷新列表显示
+        RefreshListView(allNotes)
+
+        ' 10. 清空输入框
+        txtNewTitle.Clear()
+        txtNewRemark.Clear()
+        txtNewCode.Clear()
+
+        MessageBox.Show("笔记保存成功！新ID：" & strNewID, "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
+    Private Sub btnDeleteNote_Click(sender As Object, e As EventArgs) Handles btnDeleteNote.Click
+        ' 1. 检查是否有选中的行
+        If ListView1.SelectedItems.Count = 0 Then
+            MessageBox.Show("请先选中要删除的笔记！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 2. 获取选中行的索引
+        Dim intSelectedIndex As Integer = ListView1.SelectedItems(0).Index
+
+        ' 3. 确认删除操作
+        Dim strTitle As String = allNotes(intSelectedIndex)(0)
+        If MessageBox.Show("确定要删除笔记 """ & strTitle & """ 吗？", "确认删除", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.No Then
+            Return
+        End If
+
+        ' 4. 从内存列表中移除
+        allNotes.RemoveAt(intSelectedIndex)
+
+        ' 5. 保存到文件
+        SaveNotesToFile(allNotes)
+
+        ' 6. 刷新列表显示
+        RefreshListView(allNotes)
+
+        ' 7. 清空代码显示
+        txtCodeDetail.Clear()
+
+        MessageBox.Show("笔记已删除！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
+    Private Sub btnEditNote_Click(sender As Object, e As EventArgs) Handles btnEditNote.Click
+        ' 1. 检查是否有选中的行
+        If ListView1.SelectedItems.Count = 0 Then
+            MessageBox.Show("请先选中要编辑的笔记！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 2. 获取选中行的索引
+        Dim intSelectedIndex As Integer = ListView1.SelectedItems(0).Index
+
+        ' 3. 获取该笔记的当前数据
+        Dim arrNote As String() = allNotes(intSelectedIndex)
+        Dim strOldTitle As String = arrNote(0)
+        Dim strOldRemark As String = arrNote(2)
+        Dim strOldCode As String = arrNote(3)
+
+        ' 4. 将当前数据显示到输入框中（供用户修改）
+        txtNewTitle.Text = strOldTitle
+        txtNewRemark.Text = strOldRemark
+        txtNewCode.Text = strOldCode
+
+        ' 5. 提示用户修改后点击"保存笔记"
+        MessageBox.Show("请修改右侧输入框中的内容，然后点击'保存笔记'完成更新。", "编辑提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        ' 6. 将焦点定位到标题输入框
+        txtNewTitle.Focus()
+        txtNewTitle.SelectAll()
     End Sub
 End Class
