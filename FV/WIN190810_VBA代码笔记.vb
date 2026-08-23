@@ -101,7 +101,7 @@ Public Class WIN190810_VBA代码笔记
         For Each line As String In lines
             If Not String.IsNullOrWhiteSpace(line) Then
                 Dim arrFields As String() = line.Split(New Char() {"|"c}, StringSplitOptions.None)
-                If arrFields.Length >= 4 Then
+                If arrFields.Length >= 5 Then
                     arrFields(3) = arrFields(3).Replace("\n", vbCrLf)
                     lstNotes.Add(arrFields)
                 End If
