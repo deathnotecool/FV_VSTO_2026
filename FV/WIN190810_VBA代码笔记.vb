@@ -264,11 +264,11 @@ Public Class WIN190810_VBA代码笔记
         ' 2. 设置 ListView 的显示模式为详细信息（表格样式）
         ListView1.View = View.Details
 
-        ' 3. 添加列标题，并设置宽度
-        ListView1.Columns.Add("标题", 300)
-        ListView1.Columns.Add("编号", 100)
-        ListView1.Columns.Add("备注", 300)
-        ListView1.Columns.Add("代码正文", 600)
+        ListView1.Columns.Add("标题", 250)
+        ListView1.Columns.Add("编号", 80)
+        ListView1.Columns.Add("分类", 120)   ' ← 新增这一列
+        ListView1.Columns.Add("备注", 200)
+        ListView1.Columns.Add("代码正文", 500)
 
         ' 4. 检查传入的数据是否为空
         If lstData Is Nothing Then
@@ -279,19 +279,18 @@ Public Class WIN190810_VBA代码笔记
         ' 5. 遍历列表中的每一条笔记，添加到 ListView 中
         For Each arrNote As String() In lstData
             ' 检查数组是否包含4个元素，并且第一个元素不为空
-            If arrNote IsNot Nothing AndAlso arrNote.Length >= 4 AndAlso Not String.IsNullOrEmpty(arrNote(0)) Then
-                ' 创建一行，第一列显示标题
-                Dim itm As New ListViewItem(arrNote(0))
-                ' 添加后续列
-                itm.SubItems.Add(arrNote(1))   ' 编号
-                itm.SubItems.Add(arrNote(2))   ' 备注
-                itm.SubItems.Add(arrNote(3))   ' 代码正文
+            If arrNote IsNot Nothing AndAlso arrNote.Length >= 5 AndAlso Not String.IsNullOrEmpty(arrNote(0)) Then                ' 创建一行，第一列显示标题
+                Dim itm As New ListViewItem(arrNote(0))   ' 标题
+                itm.SubItems.Add(arrNote(1))              ' 编号
+                itm.SubItems.Add(arrNote(2))              ' 备注
+                itm.SubItems.Add(arrNote(4))              ' 分类（第5个字段，索引4）
+                itm.SubItems.Add(arrNote(3))              ' 代码正文
                 ' 将整行添加到 ListView
                 ListView1.Items.Add(itm)
             End If
         Next
 
-        ' 6. 强制禁止自动调整列宽（防止列宽被重置）
+        ' 6. 强制禁止自动调整列宽（防止列宽被重置）..
         ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None)
     End Sub
 
