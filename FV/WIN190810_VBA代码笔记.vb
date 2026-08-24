@@ -82,8 +82,9 @@ Public Class WIN190810_VBA代码笔记
 
         ' 3. ★★★ 如果用户目录下没有 CodeNotes.txt，从安装目录复制 ★★★
         If Not System.IO.File.Exists(strUserFilePath) Then
-            ' 获取安装目录下的文件路径（插件所在的目录）
-            Dim strInstallFilePath As String = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CodeNotes.txt")
+            ' 获取正确的安装目录下的文件路径
+            Dim strInstallFilePath As String = "C:\Program Files\FV\CodeNotes.txt"
+
 
             ' 如果安装目录下的文件存在，则复制到用户目录
             If System.IO.File.Exists(strInstallFilePath) Then
@@ -102,8 +103,18 @@ Public Class WIN190810_VBA代码笔记
             If Not String.IsNullOrWhiteSpace(line) Then
                 Dim arrFields As String() = line.Split(New Char() {"|"c}, StringSplitOptions.None)
                 If arrFields.Length >= 5 Then
-                    arrFields(3) = arrFields(3).Replace("\n", vbCrLf)
-                    lstNotes.Add(arrFields)
+                    ' 按照标准顺序：标题(0)|编号(1)|备注(2)|分类(3)|代码(4)
+                    Dim arrNew(4) As String
+                    arrNew(0) = arrFields(0)   ' 标题
+                    arrNew(1) = arrFields(1)   ' 编号
+                    arrNew(2) = arrFields(2)   ' 备注
+                    arrNew(3) = arrFields(4)   ' 代码正文（索引4，需要还原换行符）
+                    arrNew(4) = arrFields(3)   ' 分类（索引3）
+
+                    ' 还原代码正文中的换行符
+                    arrNew(3) = arrNew(3).Replace("\n", vbCrLf)
+
+                    lstNotes.Add(arrNew)
                 End If
             End If
         Next
@@ -133,9 +144,9 @@ Public Class WIN190810_VBA代码笔记
         For Each arrNote As String() In lstNotes
             ' 将代码正文中的换行符替换为 \n 用于存储
             Dim strCodeForStorage As String = arrNote(3).Replace(vbCrLf, "\n")
-            ' 组合成一行：标题|编号|备注|代码
-            Dim strLine As String = arrNote(0) & "|" & arrNote(1) & "|" & arrNote(2) & "|" & strCodeForStorage
-            lines.Add(strLine)
+            ' 组合成一行：标题|编号|备注|分类|代码
+            Dim strLine As String = arrNote(0) & "|" & arrNote(1) & "|" & arrNote(2) & "|" & arrNote(4) & "|" & strCodeForStorage
+
         Next
 
         ' 3. 写入文件
@@ -266,8 +277,8 @@ Public Class WIN190810_VBA代码笔记
 
         ListView1.Columns.Add("标题", 250)
         ListView1.Columns.Add("编号", 80)
-        ListView1.Columns.Add("分类", 120)   ' ← 新增这一列
-        ListView1.Columns.Add("备注", 200)
+        ListView1.Columns.Add("分类", 120)   ' 第3列
+        ListView1.Columns.Add("备注", 200)   ' 第4列
         ListView1.Columns.Add("代码正文", 500)
 
         ' 4. 检查传入的数据是否为空
@@ -278,14 +289,20 @@ Public Class WIN190810_VBA代码笔记
 
         ' 5. 遍历列表中的每一条笔记，添加到 ListView 中
         For Each arrNote As String() In lstData
+            ' 在 For Each arrNote As String() In lstData 循环内部，添加以下代码（放在最前面）
+            'MessageBox.Show("第1字段(标题): " & arrNote(0) & vbCrLf &
+            '    "第2字段(编号): " & arrNote(1) & vbCrLf &
+            '    "第3字段(备注): " & arrNote(2) & vbCrLf &
+            '    "第4字段(分类): " & arrNote(4) & vbCrLf &
+            '    "第5字段(代码): " & arrNote(3))
+
             ' 检查数组是否包含4个元素，并且第一个元素不为空
             If arrNote IsNot Nothing AndAlso arrNote.Length >= 5 AndAlso Not String.IsNullOrEmpty(arrNote(0)) Then                ' 创建一行，第一列显示标题
                 Dim itm As New ListViewItem(arrNote(0))   ' 标题
                 itm.SubItems.Add(arrNote(1))              ' 编号
-                itm.SubItems.Add(arrNote(2))              ' 备注
-                itm.SubItems.Add(arrNote(4))              ' 分类（第5个字段，索引4）
-                itm.SubItems.Add(arrNote(3))              ' 代码正文
-                ' 将整行添加到 ListView
+                itm.SubItems.Add(arrNote(4))              ' 分类（第5个字段，索引4）  ← 移到第3列
+                itm.SubItems.Add(arrNote(2))              ' 备注                         ← 移到第4列
+                itm.SubItems.Add(arrNote(3))              ' 代码正文                ' 将整行添加到 ListView
                 ListView1.Items.Add(itm)
             End If
         Next
@@ -303,7 +320,7 @@ Public Class WIN190810_VBA代码笔记
     Private Sub ListView1_ItemSelectionChanged(sender As Object, e As ListViewItemSelectionChangedEventArgs) Handles ListView1.ItemSelectionChanged
         If e.IsSelected Then
             ' 选中时，显示代码正文
-            txtCodeDetail.Text = e.Item.SubItems(3).Text
+            txtCodeDetail.Text = e.Item.SubItems(4).Text
         Else
             ' 取消选中时，清空代码文本框
             txtCodeDetail.Text = ""
@@ -390,7 +407,7 @@ Public Class WIN190810_VBA代码笔记
         Dim strCodeForStorage As String = strCode.Replace(vbCrLf, "\n")
 
         ' 6. 创建新笔记数组
-        Dim arrNewNote As String() = {strTitle, strNewID, strRemark, strCodeForStorage}
+        Dim arrNewNote As String() = {strTitle, strNewID, strRemark, "", strCodeForStorage}
 
         ' 7. ★★★ 添加到内存列表或更新 ★★★
         If blnIsEditing AndAlso intEditIndex >= 0 AndAlso intEditIndex < allNotes.Count Then
