@@ -39,6 +39,8 @@ Partial Class WIN190810_VBA代码笔记
         Me.Label2 = New System.Windows.Forms.Label()
         Me.txtNewTitle = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
+        Me.cmbCategory = New System.Windows.Forms.ComboBox()
+        Me.Label4 = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -137,6 +139,8 @@ Partial Class WIN190810_VBA代码笔记
         '
         Me.GroupBox1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox1.Controls.Add(Me.Label4)
+        Me.GroupBox1.Controls.Add(Me.cmbCategory)
         Me.GroupBox1.Controls.Add(Me.btnAddNote)
         Me.GroupBox1.Controls.Add(Me.txtNewCode)
         Me.GroupBox1.Controls.Add(Me.Label3)
@@ -153,7 +157,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnAddNote
         '
-        Me.btnAddNote.Location = New System.Drawing.Point(64, 24)
+        Me.btnAddNote.Location = New System.Drawing.Point(600, 18)
         Me.btnAddNote.Name = "btnAddNote"
         Me.btnAddNote.Size = New System.Drawing.Size(100, 34)
         Me.btnAddNote.TabIndex = 22
@@ -165,10 +169,10 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewCode.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtNewCode.Location = New System.Drawing.Point(64, 136)
+        Me.txtNewCode.Location = New System.Drawing.Point(64, 129)
         Me.txtNewCode.Multiline = True
         Me.txtNewCode.Name = "txtNewCode"
-        Me.txtNewCode.Size = New System.Drawing.Size(636, 192)
+        Me.txtNewCode.Size = New System.Drawing.Size(636, 199)
         Me.txtNewCode.TabIndex = 21
         Me.txtNewCode.WordWrap = False
         '
@@ -183,7 +187,9 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtNewRemark
         '
-        Me.txtNewRemark.Location = New System.Drawing.Point(64, 100)
+        Me.txtNewRemark.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtNewRemark.Location = New System.Drawing.Point(64, 95)
         Me.txtNewRemark.MaxLength = 200
         Me.txtNewRemark.Name = "txtNewRemark"
         Me.txtNewRemark.ScrollBars = System.Windows.Forms.ScrollBars.Both
@@ -193,7 +199,7 @@ Partial Class WIN190810_VBA代码笔记
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(6, 104)
+        Me.Label2.Location = New System.Drawing.Point(6, 101)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(52, 15)
         Me.Label2.TabIndex = 18
@@ -201,7 +207,9 @@ Partial Class WIN190810_VBA代码笔记
         '
         'txtNewTitle
         '
-        Me.txtNewTitle.Location = New System.Drawing.Point(64, 64)
+        Me.txtNewTitle.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtNewTitle.Location = New System.Drawing.Point(64, 61)
         Me.txtNewTitle.MaxLength = 100
         Me.txtNewTitle.Name = "txtNewTitle"
         Me.txtNewTitle.Size = New System.Drawing.Size(636, 25)
@@ -210,11 +218,30 @@ Partial Class WIN190810_VBA代码笔记
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(13, 68)
+        Me.Label1.Location = New System.Drawing.Point(13, 65)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(45, 15)
         Me.Label1.TabIndex = 16
         Me.Label1.Text = "标题:"
+        '
+        'cmbCategory
+        '
+        Me.cmbCategory.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.cmbCategory.FormattingEnabled = True
+        Me.cmbCategory.Location = New System.Drawing.Point(64, 29)
+        Me.cmbCategory.Name = "cmbCategory"
+        Me.cmbCategory.Size = New System.Drawing.Size(476, 23)
+        Me.cmbCategory.TabIndex = 23
+        '
+        'Label4
+        '
+        Me.Label4.AutoSize = True
+        Me.Label4.Location = New System.Drawing.Point(13, 32)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(45, 15)
+        Me.Label4.TabIndex = 24
+        Me.Label4.Text = "分类:"
         '
         'WIN190810_VBA代码笔记
         '
@@ -258,4 +285,6 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents Label2 As Windows.Forms.Label
     Friend WithEvents txtNewTitle As Windows.Forms.TextBox
     Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents Label4 As Windows.Forms.Label
+    Friend WithEvents cmbCategory As Windows.Forms.ComboBox
 End Class
