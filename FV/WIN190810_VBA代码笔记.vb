@@ -201,8 +201,9 @@ Public Class WIN190810_VBA代码笔记
         ' ★★★ 初始化分类下拉框（cmbCategory）预设选项 ★★★
         cmbCategory.Items.Clear()
         cmbCategory.Items.Add("VBA基础")
-        cmbCategory.Items.Add("代码块")
-        cmbCategory.Items.Add("VB.NET")
+        cmbCategory.Items.Add(".NET基础 ")
+        cmbCategory.Items.Add("通用代码块")
+
         ' 可选：设置默认选中第一项，或留空让用户自己选
         cmbCategory.SelectedIndex = -1   ' 不选中任何项，让用户自行选择或输入
         ' 或者 cmbCategory.SelectedIndex = 0  ' 默认选中 "VBA基础"
@@ -217,6 +218,8 @@ Public Class WIN190810_VBA代码笔记
         RefreshListView(allNotes)
         ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None)
 
+        ' 刷新分类筛选下拉框
+        RefreshCategoryFilter()
         If ListView1.Items.Count > 0 Then
             ListView1.Items(0).Selected = True
             ListView1.Focus()
@@ -289,6 +292,47 @@ Public Class WIN190810_VBA代码笔记
         RefreshListView(lstFiltered)
     End Sub
 
+
+    ''' <summary>
+    ''' 刷新分类筛选下拉框：从 allNotes 中提取所有不重复的分类
+    ''' </summary>
+    Private Sub RefreshCategoryFilter()
+        ' 1. 清空下拉框现有项
+        cmbFilterCategory.Items.Clear()
+
+        ' 2. 如果没有任何笔记，添加一个默认提示项并退出
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            cmbFilterCategory.Items.Add("所有分类")
+            cmbFilterCategory.SelectedIndex = 0
+            Return
+        End If
+
+        ' 3. 使用一个临时列表收集所有不重复的分类
+        Dim lstCategories As New List(Of String)()
+
+        ' 4. 遍历所有笔记，提取分类（索引4）
+        For Each arrNote As String() In allNotes
+            If arrNote.Length >= 5 Then
+                Dim strCategory As String = arrNote(4).Trim()
+                ' 如果分类不为空，且不在列表中，则添加
+                If Not String.IsNullOrEmpty(strCategory) AndAlso Not lstCategories.Contains(strCategory) Then
+                    lstCategories.Add(strCategory)
+                End If
+            End If
+        Next
+
+        ' 5. 将分类列表排序（可选，让显示更有序）
+        lstCategories.Sort()
+
+        ' 6. 将分类添加到下拉框，并保留一个“所有分类”选项在最前面
+        cmbFilterCategory.Items.Add("所有分类")
+        For Each strCat As String In lstCategories
+            cmbFilterCategory.Items.Add(strCat)
+        Next
+
+        ' 7. 默认选中“所有分类”
+        cmbFilterCategory.SelectedIndex = 0
+    End Sub
 
 
     ''' <summary>
@@ -533,5 +577,37 @@ Public Class WIN190810_VBA代码笔记
 
         MessageBox.Show("笔记保存成功！" & If(blnIsEditing, "已更新", "新ID：" & strNewID), "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
         cmbCategory.Text = ""
+
+        ' 刷新分类筛选下拉框
+        RefreshCategoryFilter()
+    End Sub
+
+    Private Sub cmbFilterCategory_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFilterCategory.SelectedIndexChanged
+        ' 1. 如果当前没有任何笔记，直接退出
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            Return
+        End If
+
+        ' 2. 获取用户选择的分类文本
+        Dim strSelectedCategory As String = cmbFilterCategory.SelectedItem.ToString()
+
+        ' 3. 如果选择的是“所有分类”，则显示全部笔记
+        If strSelectedCategory = "所有分类" Then
+            RefreshListView(allNotes)
+            Return
+        End If
+
+        ' 4. 否则，创建一个筛选后的列表
+        Dim lstFiltered As New List(Of String())()
+
+        For Each arrNote As String() In allNotes
+            ' 判断笔记的分类是否与选中项匹配
+            If arrNote.Length >= 5 AndAlso arrNote(4).Trim() = strSelectedCategory Then
+                lstFiltered.Add(arrNote)
+            End If
+        Next
+
+        ' 5. 显示筛选结果
+        RefreshListView(lstFiltered)
     End Sub
 End Class

@@ -32,6 +32,8 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnDeleteNote = New System.Windows.Forms.Button()
         Me.btnEditNote = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Label4 = New System.Windows.Forms.Label()
+        Me.cmbCategory = New System.Windows.Forms.ComboBox()
         Me.btnAddNote = New System.Windows.Forms.Button()
         Me.txtNewCode = New System.Windows.Forms.TextBox()
         Me.Label3 = New System.Windows.Forms.Label()
@@ -39,23 +41,22 @@ Partial Class WIN190810_VBA代码笔记
         Me.Label2 = New System.Windows.Forms.Label()
         Me.txtNewTitle = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.cmbCategory = New System.Windows.Forms.ComboBox()
-        Me.Label4 = New System.Windows.Forms.Label()
+        Me.cmbFilterCategory = New System.Windows.Forms.ComboBox()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
         'ComboBox1
         '
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Location = New System.Drawing.Point(16, 15)
+        Me.ComboBox1.Location = New System.Drawing.Point(173, 15)
         Me.ComboBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(160, 23)
+        Me.ComboBox1.Size = New System.Drawing.Size(155, 23)
         Me.ComboBox1.TabIndex = 0
         '
         'TextBox1
         '
-        Me.TextBox1.Location = New System.Drawing.Point(185, 15)
+        Me.TextBox1.Location = New System.Drawing.Point(336, 14)
         Me.TextBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(217, 25)
@@ -63,10 +64,10 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnExit
         '
-        Me.btnExit.Location = New System.Drawing.Point(836, 15)
+        Me.btnExit.Location = New System.Drawing.Point(911, 733)
         Me.btnExit.Margin = New System.Windows.Forms.Padding(4)
         Me.btnExit.Name = "btnExit"
-        Me.btnExit.Size = New System.Drawing.Size(100, 29)
+        Me.btnExit.Size = New System.Drawing.Size(83, 29)
         Me.btnExit.TabIndex = 2
         Me.btnExit.Text = "退出"
         Me.btnExit.UseVisualStyleBackColor = True
@@ -80,16 +81,16 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
         Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
         Me.ListView1.Name = "ListView1"
-        Me.ListView1.Size = New System.Drawing.Size(923, 717)
+        Me.ListView1.Size = New System.Drawing.Size(892, 717)
         Me.ListView1.TabIndex = 4
         Me.ListView1.UseCompatibleStateImageBehavior = False
         '
         'btnSearch
         '
-        Me.btnSearch.Location = New System.Drawing.Point(410, 15)
+        Me.btnSearch.Location = New System.Drawing.Point(558, 12)
         Me.btnSearch.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSearch.Name = "btnSearch"
-        Me.btnSearch.Size = New System.Drawing.Size(100, 29)
+        Me.btnSearch.Size = New System.Drawing.Size(83, 29)
         Me.btnSearch.TabIndex = 5
         Me.btnSearch.Text = "查询"
         Me.btnSearch.UseVisualStyleBackColor = True
@@ -110,27 +111,27 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnCopyCode
         '
-        Me.btnCopyCode.Location = New System.Drawing.Point(729, 15)
+        Me.btnCopyCode.Location = New System.Drawing.Point(822, 12)
         Me.btnCopyCode.Name = "btnCopyCode"
-        Me.btnCopyCode.Size = New System.Drawing.Size(100, 29)
+        Me.btnCopyCode.Size = New System.Drawing.Size(83, 29)
         Me.btnCopyCode.TabIndex = 8
         Me.btnCopyCode.Text = "复制代码"
         Me.btnCopyCode.UseVisualStyleBackColor = True
         '
         'btnDeleteNote
         '
-        Me.btnDeleteNote.Location = New System.Drawing.Point(623, 15)
+        Me.btnDeleteNote.Location = New System.Drawing.Point(734, 12)
         Me.btnDeleteNote.Name = "btnDeleteNote"
-        Me.btnDeleteNote.Size = New System.Drawing.Size(100, 29)
+        Me.btnDeleteNote.Size = New System.Drawing.Size(83, 29)
         Me.btnDeleteNote.TabIndex = 16
         Me.btnDeleteNote.Text = "删除笔记"
         Me.btnDeleteNote.UseVisualStyleBackColor = True
         '
         'btnEditNote
         '
-        Me.btnEditNote.Location = New System.Drawing.Point(517, 15)
+        Me.btnEditNote.Location = New System.Drawing.Point(646, 12)
         Me.btnEditNote.Name = "btnEditNote"
-        Me.btnEditNote.Size = New System.Drawing.Size(100, 29)
+        Me.btnEditNote.Size = New System.Drawing.Size(83, 29)
         Me.btnEditNote.TabIndex = 17
         Me.btnEditNote.Text = "编辑笔记"
         Me.btnEditNote.UseVisualStyleBackColor = True
@@ -155,12 +156,31 @@ Partial Class WIN190810_VBA代码笔记
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "编辑笔记"
         '
+        'Label4
+        '
+        Me.Label4.AutoSize = True
+        Me.Label4.Location = New System.Drawing.Point(13, 32)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(45, 15)
+        Me.Label4.TabIndex = 24
+        Me.Label4.Text = "分类:"
+        '
+        'cmbCategory
+        '
+        Me.cmbCategory.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.cmbCategory.FormattingEnabled = True
+        Me.cmbCategory.Location = New System.Drawing.Point(64, 29)
+        Me.cmbCategory.Name = "cmbCategory"
+        Me.cmbCategory.Size = New System.Drawing.Size(476, 23)
+        Me.cmbCategory.TabIndex = 30
+        '
         'btnAddNote
         '
         Me.btnAddNote.Location = New System.Drawing.Point(600, 18)
         Me.btnAddNote.Name = "btnAddNote"
         Me.btnAddNote.Size = New System.Drawing.Size(100, 34)
-        Me.btnAddNote.TabIndex = 22
+        Me.btnAddNote.TabIndex = 34
         Me.btnAddNote.Text = "保存笔记"
         Me.btnAddNote.UseVisualStyleBackColor = True
         '
@@ -173,7 +193,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewCode.Multiline = True
         Me.txtNewCode.Name = "txtNewCode"
         Me.txtNewCode.Size = New System.Drawing.Size(636, 199)
-        Me.txtNewCode.TabIndex = 21
+        Me.txtNewCode.TabIndex = 33
         Me.txtNewCode.WordWrap = False
         '
         'Label3
@@ -194,7 +214,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewRemark.Name = "txtNewRemark"
         Me.txtNewRemark.ScrollBars = System.Windows.Forms.ScrollBars.Both
         Me.txtNewRemark.Size = New System.Drawing.Size(636, 25)
-        Me.txtNewRemark.TabIndex = 19
+        Me.txtNewRemark.TabIndex = 32
         '
         'Label2
         '
@@ -213,7 +233,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewTitle.MaxLength = 100
         Me.txtNewTitle.Name = "txtNewTitle"
         Me.txtNewTitle.Size = New System.Drawing.Size(636, 25)
-        Me.txtNewTitle.TabIndex = 17
+        Me.txtNewTitle.TabIndex = 31
         '
         'Label1
         '
@@ -224,30 +244,21 @@ Partial Class WIN190810_VBA代码笔记
         Me.Label1.TabIndex = 16
         Me.Label1.Text = "标题:"
         '
-        'cmbCategory
+        'cmbFilterCategory
         '
-        Me.cmbCategory.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.cmbCategory.FormattingEnabled = True
-        Me.cmbCategory.Location = New System.Drawing.Point(64, 29)
-        Me.cmbCategory.Name = "cmbCategory"
-        Me.cmbCategory.Size = New System.Drawing.Size(476, 23)
-        Me.cmbCategory.TabIndex = 23
-        '
-        'Label4
-        '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(13, 32)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(45, 15)
-        Me.Label4.TabIndex = 24
-        Me.Label4.Text = "分类:"
+        Me.cmbFilterCategory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbFilterCategory.FormattingEnabled = True
+        Me.cmbFilterCategory.Location = New System.Drawing.Point(11, 15)
+        Me.cmbFilterCategory.Name = "cmbFilterCategory"
+        Me.cmbFilterCategory.Size = New System.Drawing.Size(155, 23)
+        Me.cmbFilterCategory.TabIndex = 19
         '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1725, 781)
+        Me.Controls.Add(Me.cmbFilterCategory)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnEditNote)
         Me.Controls.Add(Me.btnDeleteNote)
@@ -287,4 +298,5 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents Label1 As Windows.Forms.Label
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents cmbCategory As Windows.Forms.ComboBox
+    Friend WithEvents cmbFilterCategory As Windows.Forms.ComboBox
 End Class
