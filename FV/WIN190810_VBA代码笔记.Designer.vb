@@ -42,6 +42,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewTitle = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.cmbFilterCategory = New System.Windows.Forms.ComboBox()
+        Me.btnInsertCode = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -77,6 +78,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.ListView1.BackColor = System.Drawing.SystemColors.Window
         Me.ListView1.FullRowSelect = True
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
         Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
@@ -253,11 +255,22 @@ Partial Class WIN190810_VBA代码笔记
         Me.cmbFilterCategory.Size = New System.Drawing.Size(155, 23)
         Me.cmbFilterCategory.TabIndex = 19
         '
+        'btnInsertCode
+        '
+        Me.btnInsertCode.Location = New System.Drawing.Point(911, 635)
+        Me.btnInsertCode.Name = "btnInsertCode"
+        Me.btnInsertCode.Size = New System.Drawing.Size(75, 35)
+        Me.btnInsertCode.TabIndex = 20
+        Me.btnInsertCode.Text = "插入代码"
+        Me.btnInsertCode.UseVisualStyleBackColor = True
+        '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1725, 781)
+        Me.Controls.Add(Me.btnExit)
+        Me.Controls.Add(Me.btnInsertCode)
         Me.Controls.Add(Me.cmbFilterCategory)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnEditNote)
@@ -266,7 +279,6 @@ Partial Class WIN190810_VBA代码笔记
         Me.Controls.Add(Me.txtCodeDetail)
         Me.Controls.Add(Me.btnSearch)
         Me.Controls.Add(Me.ListView1)
-        Me.Controls.Add(Me.btnExit)
         Me.Controls.Add(Me.TextBox1)
         Me.Controls.Add(Me.ComboBox1)
         Me.Margin = New System.Windows.Forms.Padding(4)
@@ -299,4 +311,5 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents cmbCategory As Windows.Forms.ComboBox
     Friend WithEvents cmbFilterCategory As Windows.Forms.ComboBox
+    Friend WithEvents btnInsertCode As Windows.Forms.Button
 End Class

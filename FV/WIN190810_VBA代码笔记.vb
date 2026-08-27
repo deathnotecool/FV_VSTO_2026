@@ -610,4 +610,44 @@ Public Class WIN190810_VBA代码笔记
         ' 5. 显示筛选结果
         RefreshListView(lstFiltered)
     End Sub
+
+
+    ''' <summary>
+    ''' 插入代码：将选中笔记的代码正文写入 Excel 当前选中的单元格
+    ''' </summary>
+    Private Sub btnInsertCode_Click(sender As Object, e As EventArgs) Handles btnInsertCode.Click
+        ' 1. 检查是否有选中的行
+        If ListView1.SelectedItems.Count = 0 Then
+            MessageBox.Show("请先选中一条笔记！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 2. 获取当前选中的笔记
+        Dim intSelectedIndex As Integer = ListView1.SelectedItems(0).Index
+        Dim arrNote As String() = allNotes(intSelectedIndex)
+
+        ' 3. 获取代码正文（索引3）
+        Dim strCode As String = arrNote(3)
+
+        ' 4. 检查代码是否为空
+        If String.IsNullOrEmpty(strCode) Then
+            MessageBox.Show("该笔记没有代码正文！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 5. 获取当前 Excel 的选中单元格
+        Dim rng As Excel.Range = xlapp.Selection
+
+        ' 6. 如果选中区域是多个单元格，只使用第一个
+        If rng.Count > 1 Then
+            rng = rng.Cells(1, 1)
+        End If
+
+        ' 7. 将代码写入单元格
+        rng.Value = strCode
+
+        ' 8. 提示成功
+        MessageBox.Show("代码已插入到单元格 " & rng.Address & "！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
 End Class
