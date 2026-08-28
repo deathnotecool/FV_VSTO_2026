@@ -198,11 +198,11 @@ Public Class WIN190810_VBA代码笔记
         ComboBox1.Items.AddRange(myArray)     ' 添加新项
         ComboBox1.SelectedIndex = 0           ' 默认选中第一项 "详细代码"
 
-        ' ★★★ 初始化分类下拉框（cmbCategory）预设选项 ★★★
-        cmbCategory.Items.Clear()
-        cmbCategory.Items.Add("VBA基础")
-        cmbCategory.Items.Add(".NET基础 ")
-        cmbCategory.Items.Add("通用代码块")
+        '' ★★★ 初始化分类下拉框（cmbCategory）预设选项 ★★★
+        'cmbCategory.Items.Clear()
+        'cmbCategory.Items.Add("VBA基础")
+        'cmbCategory.Items.Add(".NET基础 ")
+        'cmbCategory.Items.Add("通用代码块")
 
         ' 可选：设置默认选中第一项，或留空让用户自己选
         cmbCategory.SelectedIndex = -1   ' 不选中任何项，让用户自行选择或输入
@@ -294,44 +294,54 @@ Public Class WIN190810_VBA代码笔记
 
 
     ''' <summary>
-    ''' 刷新分类筛选下拉框：从 allNotes 中提取所有不重复的分类
+    ''' 刷新所有分类下拉框：从 allNotes 中提取所有不重复的分类
+    ''' 同时填充：筛选下拉框（cmbFilterCategory）和编辑区下拉框（cmbCategory）
     ''' </summary>
     Private Sub RefreshCategoryFilter()
-        ' 1. 清空下拉框现有项
-        cmbFilterCategory.Items.Clear()
-
-        ' 2. 如果没有任何笔记，添加一个默认提示项并退出
-        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
-            cmbFilterCategory.Items.Add("所有分类")
-            cmbFilterCategory.SelectedIndex = 0
-            Return
-        End If
-
-        ' 3. 使用一个临时列表收集所有不重复的分类
+        ' 1. 收集所有不重复的分类
         Dim lstCategories As New List(Of String)()
 
-        ' 4. 遍历所有笔记，提取分类（索引4）
-        For Each arrNote As String() In allNotes
-            If arrNote.Length >= 5 Then
-                Dim strCategory As String = arrNote(4).Trim()
-                ' 如果分类不为空，且不在列表中，则添加
-                If Not String.IsNullOrEmpty(strCategory) AndAlso Not lstCategories.Contains(strCategory) Then
-                    lstCategories.Add(strCategory)
+        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+            For Each arrNote As String() In allNotes
+                If arrNote.Length >= 5 Then
+                    Dim strCategory As String = arrNote(4).Trim()
+                    If Not String.IsNullOrEmpty(strCategory) AndAlso Not lstCategories.Contains(strCategory) Then
+                        lstCategories.Add(strCategory)
+                    End If
                 End If
-            End If
-        Next
+            Next
+        End If
 
-        ' 5. 将分类列表排序（可选，让显示更有序）
+        ' 2. 排序
         lstCategories.Sort()
 
-        ' 6. 将分类添加到下拉框，并保留一个“所有分类”选项在最前面
+        ' ============================================================
+        ' ★★★ 刷新筛选下拉框（cmbFilterCategory） ★★★
+        ' ============================================================
+        cmbFilterCategory.Items.Clear()
         cmbFilterCategory.Items.Add("所有分类")
         For Each strCat As String In lstCategories
             cmbFilterCategory.Items.Add(strCat)
         Next
-
-        ' 7. 默认选中“所有分类”
         cmbFilterCategory.SelectedIndex = 0
+
+        ' ============================================================
+        ' ★★★ 刷新编辑区下拉框（cmbCategory） ★★★
+        ' ============================================================
+        cmbCategory.Items.Clear()
+        For Each strCat As String In lstCategories
+            cmbCategory.Items.Add(strCat)
+        Next
+
+        ' 如果没有任何分类，添加一个空提示项
+        If cmbCategory.Items.Count = 0 Then
+            cmbCategory.Items.Add("")
+        End If
+
+        ' 默认选中第一项（如果有）
+        If cmbCategory.Items.Count > 0 Then
+            cmbCategory.SelectedIndex = 0
+        End If
     End Sub
 
 
@@ -384,7 +394,7 @@ Public Class WIN190810_VBA代码笔记
     End Sub
 
 
-    Private Sub btnExit_Click(sender As Object, e As EventArgs) Handles btnExit.Click
+    Private Sub btnExit_Click(sender As Object, e As EventArgs)
         Me.Close()
     End Sub
 
@@ -635,19 +645,137 @@ Public Class WIN190810_VBA代码笔记
             Return
         End If
 
-        ' 5. 获取当前 Excel 的选中单元格
+        ' 5. 获取当前 Excel 的选中区域，并定位到第一个单元格
         Dim rng As Excel.Range = xlapp.Selection
-
-        ' 6. 如果选中区域是多个单元格，只使用第一个
         If rng.Count > 1 Then
             rng = rng.Cells(1, 1)
         End If
 
-        ' 7. 将代码写入单元格
+
+        ' ★★★ 确保撤销功能所需的 FV.xlam 已加载 ★★★
+        Globals.Ribbons.Ribbon1.确保XLAM已加载()
+        ' ★★★ 在修改单元格之前，插入这两行 ★★★
+        M2_调用的任务.BackupActiveSheet()
+        Globals.Ribbons.Ribbon1.btnUndo.Enabled = True
+
+        ' 6. 将代码写入单元格
         rng.Value = strCode
 
-        ' 8. 提示成功
+        ' 7. 选中这个单元格，让用户直观看到
+        rng.Select()
+
+        ' 8. 在 Excel 状态栏提示
+        xlapp.StatusBar = "代码已插入到单元格 " & rng.Address
+
+        ' 9. 弹出提示（可选）
         MessageBox.Show("代码已插入到单元格 " & rng.Address & "！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
+    ''' <summary>
+    ''' 添加分类：弹出输入框让用户输入新分类名称，并添加到下拉框
+    ''' </summary>
+    Private Sub btnAddCategory_Click(sender As Object, e As EventArgs) Handles btnAddCategory.Click
+        ' 1. 弹出输入框让用户输入新分类名称
+        Dim strNewCategory As String = InputBox("请输入新分类名称：", "添加分类", "")
+
+        ' 2. 如果用户取消或未输入内容，则退出
+        If String.IsNullOrEmpty(strNewCategory) Then
+            Return
+        End If
+
+        ' 3. 去除首尾空格
+        strNewCategory = strNewCategory.Trim()
+
+        ' 4. 检查分类是否已存在（不区分大小写）
+        Dim blnExists As Boolean = False
+        For Each strItem As String In cmbCategory.Items
+            If strItem.ToLower() = strNewCategory.ToLower() Then
+                blnExists = True
+                Exit For
+            End If
+        Next
+
+        If blnExists Then
+            MessageBox.Show("分类 '" & strNewCategory & "' 已存在！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 5. 将新分类添加到 cmbCategory 下拉框中
+        cmbCategory.Items.Add(strNewCategory)
+
+        ' 6. 同时刷新分类筛选下拉框（cmbFilterCategory），让筛选列表也包含新分类
+        RefreshCategoryFilter()
+
+        ' 7. 自动选中新添加的分类（方便用户后续使用）
+        cmbCategory.SelectedIndex = cmbCategory.Items.Count - 1
+
+        MessageBox.Show("分类 '" & strNewCategory & "' 添加成功！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
+    ''' <summary>
+    ''' 删除分类：从下拉框中移除选中的分类，并清理笔记中该分类的引用
+    ''' </summary>
+    Private Sub btnDeleteCategory_Click(sender As Object, e As EventArgs) Handles btnDeleteCategory.Click
+        ' 1. 检查是否有选中的分类
+        If cmbCategory.SelectedIndex = -1 Then
+            MessageBox.Show("请先在分类下拉框中选中要删除的分类！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 2. 获取选中的分类名称
+        Dim strCategoryToDelete As String = cmbCategory.SelectedItem.ToString()
+
+        ' 3. 如果分类为空字符串，提示不能删除
+        If String.IsNullOrEmpty(strCategoryToDelete) Then
+            MessageBox.Show("不能删除空分类！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 4. 检查是否有笔记正在使用该分类（区分大小写，保留原始输入）
+        Dim blnInUse As Boolean = False
+        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+            For Each arrNote As String() In allNotes
+                If arrNote.Length >= 5 AndAlso arrNote(4) = strCategoryToDelete Then
+                    blnInUse = True
+                    Exit For
+                End If
+            Next
+        End If
+
+        ' 5. 如果分类正在使用，提示用户并询问是否强制删除（将笔记分类改为空）
+        If blnInUse Then
+            Dim dialogResult As DialogResult = MessageBox.Show(
+                "分类 '" & strCategoryToDelete & "' 正在被笔记使用。" & vbCrLf &
+                "如果删除，相关笔记的分类将被清空。" & vbCrLf &
+                "确定要继续吗？",
+                "分类正在使用",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            )
+
+            If dialogResult = DialogResult.No Then
+                Return
+            End If
+
+            ' 强制删除：将所有笔记中该分类字段清空
+            For i As Integer = 0 To allNotes.Count - 1
+                If allNotes(i).Length >= 5 AndAlso allNotes(i)(4) = strCategoryToDelete Then
+                    allNotes(i)(4) = ""
+                End If
+            Next
+
+            ' 保存到文件
+            SaveNotesToFile(allNotes)
+            ' 刷新列表显示
+            RefreshListView(allNotes)
+        End If
+
+        ' 6. 从 cmbCategory 下拉框中移除该分类
+        cmbCategory.Items.Remove(strCategoryToDelete)
+
+        ' 7. 刷新分类筛选下拉框（cmbFilterCategory）
+        RefreshCategoryFilter()
+
+        MessageBox.Show("分类 '" & strCategoryToDelete & "' 已删除！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
 End Class

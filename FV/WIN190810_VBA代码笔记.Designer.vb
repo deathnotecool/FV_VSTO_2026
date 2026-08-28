@@ -24,7 +24,6 @@ Partial Class WIN190810_VBA代码笔记
     Private Sub InitializeComponent()
         Me.ComboBox1 = New System.Windows.Forms.ComboBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
-        Me.btnExit = New System.Windows.Forms.Button()
         Me.ListView1 = New System.Windows.Forms.ListView()
         Me.btnSearch = New System.Windows.Forms.Button()
         Me.txtCodeDetail = New System.Windows.Forms.TextBox()
@@ -42,8 +41,13 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewTitle = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.cmbFilterCategory = New System.Windows.Forms.ComboBox()
+        Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.btnExit = New System.Windows.Forms.Button()
         Me.btnInsertCode = New System.Windows.Forms.Button()
+        Me.btnAddCategory = New System.Windows.Forms.Button()
+        Me.btnDeleteCategory = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
+        Me.Panel1.SuspendLayout()
         Me.SuspendLayout()
         '
         'ComboBox1
@@ -62,16 +66,6 @@ Partial Class WIN190810_VBA代码笔记
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(217, 25)
         Me.TextBox1.TabIndex = 1
-        '
-        'btnExit
-        '
-        Me.btnExit.Location = New System.Drawing.Point(911, 733)
-        Me.btnExit.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnExit.Name = "btnExit"
-        Me.btnExit.Size = New System.Drawing.Size(83, 29)
-        Me.btnExit.TabIndex = 2
-        Me.btnExit.Text = "退出"
-        Me.btnExit.UseVisualStyleBackColor = True
         '
         'ListView1
         '
@@ -142,6 +136,8 @@ Partial Class WIN190810_VBA代码笔记
         '
         Me.GroupBox1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox1.Controls.Add(Me.btnDeleteCategory)
+        Me.GroupBox1.Controls.Add(Me.btnAddCategory)
         Me.GroupBox1.Controls.Add(Me.Label4)
         Me.GroupBox1.Controls.Add(Me.cmbCategory)
         Me.GroupBox1.Controls.Add(Me.btnAddNote)
@@ -169,17 +165,15 @@ Partial Class WIN190810_VBA代码笔记
         '
         'cmbCategory
         '
-        Me.cmbCategory.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.cmbCategory.FormattingEnabled = True
         Me.cmbCategory.Location = New System.Drawing.Point(64, 29)
         Me.cmbCategory.Name = "cmbCategory"
-        Me.cmbCategory.Size = New System.Drawing.Size(476, 23)
+        Me.cmbCategory.Size = New System.Drawing.Size(188, 23)
         Me.cmbCategory.TabIndex = 30
         '
         'btnAddNote
         '
-        Me.btnAddNote.Location = New System.Drawing.Point(600, 18)
+        Me.btnAddNote.Location = New System.Drawing.Point(600, 22)
         Me.btnAddNote.Name = "btnAddNote"
         Me.btnAddNote.Size = New System.Drawing.Size(100, 34)
         Me.btnAddNote.TabIndex = 34
@@ -255,22 +249,59 @@ Partial Class WIN190810_VBA代码笔记
         Me.cmbFilterCategory.Size = New System.Drawing.Size(155, 23)
         Me.cmbFilterCategory.TabIndex = 19
         '
+        'Panel1
+        '
+        Me.Panel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Panel1.Controls.Add(Me.btnExit)
+        Me.Panel1.Controls.Add(Me.btnInsertCode)
+        Me.Panel1.Location = New System.Drawing.Point(913, 247)
+        Me.Panel1.Name = "Panel1"
+        Me.Panel1.Size = New System.Drawing.Size(81, 347)
+        Me.Panel1.TabIndex = 21
+        '
+        'btnExit
+        '
+        Me.btnExit.Location = New System.Drawing.Point(3, 159)
+        Me.btnExit.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnExit.Name = "btnExit"
+        Me.btnExit.Size = New System.Drawing.Size(75, 34)
+        Me.btnExit.TabIndex = 22
+        Me.btnExit.Text = "退出"
+        Me.btnExit.UseVisualStyleBackColor = True
+        '
         'btnInsertCode
         '
-        Me.btnInsertCode.Location = New System.Drawing.Point(911, 635)
+        Me.btnInsertCode.Location = New System.Drawing.Point(3, 32)
         Me.btnInsertCode.Name = "btnInsertCode"
-        Me.btnInsertCode.Size = New System.Drawing.Size(75, 35)
-        Me.btnInsertCode.TabIndex = 20
+        Me.btnInsertCode.Size = New System.Drawing.Size(75, 34)
+        Me.btnInsertCode.TabIndex = 21
         Me.btnInsertCode.Text = "插入代码"
         Me.btnInsertCode.UseVisualStyleBackColor = True
+        '
+        'btnAddCategory
+        '
+        Me.btnAddCategory.Location = New System.Drawing.Point(258, 24)
+        Me.btnAddCategory.Name = "btnAddCategory"
+        Me.btnAddCategory.Size = New System.Drawing.Size(100, 34)
+        Me.btnAddCategory.TabIndex = 35
+        Me.btnAddCategory.Text = "添加分类"
+        Me.btnAddCategory.UseVisualStyleBackColor = True
+        '
+        'btnDeleteCategory
+        '
+        Me.btnDeleteCategory.Location = New System.Drawing.Point(364, 22)
+        Me.btnDeleteCategory.Name = "btnDeleteCategory"
+        Me.btnDeleteCategory.Size = New System.Drawing.Size(100, 34)
+        Me.btnDeleteCategory.TabIndex = 36
+        Me.btnDeleteCategory.Text = "删除分类"
+        Me.btnDeleteCategory.UseVisualStyleBackColor = True
         '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1725, 781)
-        Me.Controls.Add(Me.btnExit)
-        Me.Controls.Add(Me.btnInsertCode)
+        Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.cmbFilterCategory)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnEditNote)
@@ -286,6 +317,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.Text = "WIN190810_VBA代码笔记"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.Panel1.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -293,7 +325,6 @@ Partial Class WIN190810_VBA代码笔记
 
     Friend WithEvents ComboBox1 As Windows.Forms.ComboBox
     Friend WithEvents TextBox1 As Windows.Forms.TextBox
-    Friend WithEvents btnExit As Windows.Forms.Button
     Friend WithEvents ListView1 As Windows.Forms.ListView
     Friend WithEvents btnSearch As Windows.Forms.Button
     Friend WithEvents txtCodeDetail As Windows.Forms.TextBox
@@ -311,5 +342,9 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents cmbCategory As Windows.Forms.ComboBox
     Friend WithEvents cmbFilterCategory As Windows.Forms.ComboBox
+    Friend WithEvents Panel1 As Windows.Forms.Panel
+    Friend WithEvents btnExit As Windows.Forms.Button
     Friend WithEvents btnInsertCode As Windows.Forms.Button
+    Friend WithEvents btnDeleteCategory As Windows.Forms.Button
+    Friend WithEvents btnAddCategory As Windows.Forms.Button
 End Class

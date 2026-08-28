@@ -33,7 +33,7 @@ Imports System.Diagnostics
 
 Public Class Ribbon1
     ' ★★★ Ribbon1.vb 顶部添加一个公共方法 ★★★
-    Private Sub 确保XLAM已加载()
+    Public Sub 确保XLAM已加载()
         ThisAddIn.LoadXlamOnDemand()
     End Sub
 
