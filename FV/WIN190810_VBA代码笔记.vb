@@ -345,7 +345,7 @@ Public Class WIN190810_VBA代码笔记
             Return
         End If
 
-        ' 5. 遍历列表中的每一条笔记，添加到 ListView 中
+        ' 5. 遍历列表中的每一条笔记，添加到 ListView 中..
         For Each arrNote As String() In lstData
             ' 在 For Each arrNote As String() In lstData 循环内部，添加以下代码（放在最前面）
             'MessageBox.Show("第1字段(标题): " & arrNote(0) & vbCrLf &
