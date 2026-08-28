@@ -298,61 +298,11 @@ Public Class WIN190810_VBA代码笔记
     ''' 同时填充：筛选下拉框（cmbFilterCategory）和编辑区下拉框（cmbCategory）
     ''' </summary>
     Private Sub RefreshCategoryFilter()
-        '' 1. 收集所有不重复的分类
-        'Dim lstCategories As New List(Of String)()
-
-        'If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
-        '    For Each arrNote As String() In allNotes
-        '        If arrNote.Length >= 5 Then
-        '            Dim strCategory As String = arrNote(4).Trim()
-        '            If Not String.IsNullOrEmpty(strCategory) AndAlso Not lstCategories.Contains(strCategory) Then
-        '                lstCategories.Add(strCategory)
-        '            End If
-        '        End If
-        '    Next
-        'End If
-
-        '' 2. 排序
-        'lstCategories.Sort()
-
-        '' ============================================================
-        '' ★★★ 刷新筛选下拉框（cmbFilterCategory） ★★★
-        '' ============================================================
-        'cmbFilterCategory.Items.Clear()
-        'cmbFilterCategory.Items.Add("所有分类")
-        'For Each strCat As String In lstCategories
-        '    cmbFilterCategory.Items.Add(strCat)
-        'Next
-        'cmbFilterCategory.SelectedIndex = 0
-
-        '' ============================================================
-        '' ★★★ 刷新编辑区下拉框（cmbCategory） ★★★
-        '' ============================================================
-        'cmbCategory.Items.Clear()
-        'For Each strCat As String In lstCategories
-        '    cmbCategory.Items.Add(strCat)
-        'Next
-
-        '' 如果没有任何分类，添加一个空提示项
-        'If cmbCategory.Items.Count = 0 Then
-        '    cmbCategory.Items.Add("")
-        'End If
-
-        '' 默认选中第一项（如果有）
-        'If cmbCategory.Items.Count > 0 Then
-        '    cmbCategory.SelectedIndex = 0
-        'End If
-
-
-
-
-        ' 1. 从文件加载分类列表
+        ' 从文件加载分类列表
         Dim lstCategories As List(Of String) = LoadCategoriesFromFile()
-
-        ' 2. 排序（可选）
         lstCategories.Sort()
 
-        ' 3. 刷新筛选下拉框（cmbFilterCategory）
+        ' 刷新筛选下拉框
         cmbFilterCategory.Items.Clear()
         cmbFilterCategory.Items.Add("所有分类")
         For Each strCat As String In lstCategories
@@ -360,12 +310,11 @@ Public Class WIN190810_VBA代码笔记
         Next
         cmbFilterCategory.SelectedIndex = 0
 
-        ' 4. 刷新编辑区下拉框（cmbCategory）
+        ' 刷新编辑区下拉框
         cmbCategory.Items.Clear()
         For Each strCat As String In lstCategories
             cmbCategory.Items.Add(strCat)
         Next
-
         If cmbCategory.Items.Count > 0 Then
             cmbCategory.SelectedIndex = 0
         End If
@@ -686,6 +635,7 @@ Public Class WIN190810_VBA代码笔记
         Globals.Ribbons.Ribbon1.btnUndo.Enabled = True
 
         ' 6. 将代码写入单元格
+        rng.NumberFormat = "@"   ' ★★★ 新增：强制设为文本格式
         rng.Value = strCode
 
         ' 7. 选中这个单元格，让用户直观看到
@@ -730,27 +680,20 @@ Public Class WIN190810_VBA代码笔记
         ' 5. 将新分类添加到 cmbCategory 下拉框中
         cmbCategory.Items.Add(strNewCategory)
 
-        ' 6. 同时刷新分类筛选下拉框（cmbFilterCategory），让筛选列表也包含新分类
-        RefreshCategoryFilter()
-
-        ' 7. 自动选中新添加的分类（方便用户后续使用）
-        cmbCategory.SelectedIndex = cmbCategory.Items.Count - 1
-
-
-        ' 保存分类列表到文件（先保存）
+        ' 6. 保存分类列表到文件
         Dim lstCategories As New List(Of String)()
         For Each strItem As String In cmbCategory.Items
             lstCategories.Add(strItem)
         Next
         SaveCategoriesToFile(lstCategories)
 
-        ' 然后刷新下拉框（从刚保存的文件重新加载，保持一致）
+        ' 7. 刷新分类筛选下拉框（从文件重新加载，保持一致）
         RefreshCategoryFilter()
 
+        ' 8. 自动选中新添加的分类
+        cmbCategory.SelectedIndex = cmbCategory.Items.Count - 1
 
         MessageBox.Show("分类 '" & strNewCategory & "' 添加成功！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-
     End Sub
 
     ''' <summary>
@@ -813,17 +756,17 @@ Public Class WIN190810_VBA代码笔记
 
 
 
-        ' 从 cmbCategory 下拉框中移除该分类后
+        ' 6. 从 cmbCategory 下拉框中移除该分类
         cmbCategory.Items.Remove(strCategoryToDelete)
 
-        ' 保存分类列表到文件（先保存）
+        ' 7. 保存分类列表到文件
         Dim lstCategories As New List(Of String)()
         For Each strItem As String In cmbCategory.Items
             lstCategories.Add(strItem)
         Next
         SaveCategoriesToFile(lstCategories)
 
-        ' 然后刷新下拉框
+        ' 8. 刷新分类筛选下拉框
         RefreshCategoryFilter()
 
         MessageBox.Show("分类 '" & strCategoryToDelete & "' 已删除！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -875,6 +818,159 @@ Public Class WIN190810_VBA代码笔记
 
         ' 写入所有分类（每行一个）
         System.IO.File.WriteAllLines(strFilePath, lstCategories, System.Text.Encoding.UTF8)
+    End Sub
+
+
+    ''' <summary>
+    ''' 导出笔记：将当前所有笔记导出为一个独立的文本文件
+    ''' </summary>
+    Private Sub btnExportNotes_Click(sender As Object, e As EventArgs) Handles btnExportNotes.Click
+        ' 1. 检查是否有笔记可导出
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            MessageBox.Show("没有可导出的笔记！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 2. 弹出保存文件对话框，让用户选择保存位置
+        Dim sfd As New SaveFileDialog()
+        sfd.Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*"
+        sfd.FileName = "FV_CodeNotes_Backup_" & DateTime.Now.ToString("yyyyMMdd_HHmmss") & ".txt"
+        sfd.Title = "导出代码笔记"
+
+        If sfd.ShowDialog() = DialogResult.Cancel Then
+            Return
+        End If
+
+        ' 3. 准备要导出的数据
+        Dim lines As New List(Of String)()
+
+        ' 先写入一个文件头，方便识别
+        lines.Add("# FV 代码笔记导出文件")
+        lines.Add("# 导出时间：" & DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+        lines.Add("# 格式：标题|编号|备注|分类|代码正文")
+        lines.Add("# ============================================")
+
+        For Each arrNote As String() In allNotes
+            If arrNote.Length >= 5 Then
+                ' 将代码正文中的换行符替换为 \n 以便存储
+                Dim strCodeForExport As String = arrNote(3).Replace(vbCrLf, "\n")
+                Dim strLine As String = arrNote(0) & "|" & arrNote(1) & "|" & arrNote(2) & "|" & arrNote(4) & "|" & strCodeForExport
+                lines.Add(strLine)
+            End If
+        Next
+
+        ' 4. 写入文件
+        Try
+            System.IO.File.WriteAllLines(sfd.FileName, lines, System.Text.Encoding.UTF8)
+            MessageBox.Show("成功导出 " & (lines.Count - 4) & " 条笔记到：" & vbCrLf & sfd.FileName, "导出完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As Exception
+            MessageBox.Show("导出失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' 导入笔记：从之前导出的文件中恢复笔记
+    ''' </summary>
+    Private Sub btnImportNotes_Click(sender As Object, e As EventArgs) Handles btnImportNotes.Click
+        ' ★★★ 变量声明区（全部放在最前面） ★★★
+        Dim ofd As New OpenFileDialog()
+        Dim dialogResult As DialogResult
+        Dim lines As String()
+        Dim intImportCount As Integer = 0
+        Dim lstNewNotes As New List(Of String())()
+        Dim intMaxID As Integer = 0
+
+        ' 1. 弹出文件选择对话框
+        ofd.Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*"
+        ofd.Title = "导入代码笔记"
+
+        If ofd.ShowDialog() = DialogResult.Cancel Then
+            Return
+        End If
+
+        ' 2. 读取文件
+        lines = System.IO.File.ReadAllLines(ofd.FileName, System.Text.Encoding.UTF8)
+
+        ' 3. 解析数据（跳过以 # 开头的注释行）
+        For Each line As String In lines
+            ' 跳过空行和注释行
+            If String.IsNullOrWhiteSpace(line) OrElse line.Trim().StartsWith("#") Then
+                Continue For
+            End If
+
+            ' 按 | 拆分
+            Dim arrFields As String() = line.Split(New Char() {"|"c}, StringSplitOptions.None)
+
+            ' 检查字段数量（导入文件应该是5字段：标题|编号|备注|分类|代码）
+            If arrFields.Length >= 5 Then
+                ' 将代码正文中的 \n 还原为换行符
+                arrFields(4) = arrFields(4).Replace("\n", vbCrLf)
+
+                ' 添加到列表
+                lstNewNotes.Add(arrFields)
+                intImportCount += 1
+            Else
+                ' 如果字段数量不对，跳过该行
+                Continue For
+            End If
+        Next
+
+        ' 4. 检查是否有有效数据
+        If intImportCount = 0 Then
+            MessageBox.Show("未找到有效数据，请确认文件格式正确！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        ' 5. 确认是否追加
+        dialogResult = MessageBox.Show(
+            "找到 " & intImportCount & " 条笔记。" & vbCrLf &
+            "是否追加到当前笔记列表？",
+            "确认导入",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question
+        )
+
+        If dialogResult = DialogResult.No Then
+            Return
+        End If
+
+        ' 6. 追加到 allNotes（处理ID冲突，重新编号）
+        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+            For Each arrNote As String() In allNotes
+                If arrNote.Length >= 5 Then
+                    Dim strID As String = arrNote(1).Replace("GN", "").Trim()
+                    Dim intID As Integer = 0
+                    If Integer.TryParse(strID, intID) Then
+                        If intID > intMaxID Then intMaxID = intID
+                    End If
+                End If
+            Next
+        End If
+
+        For Each arrNote As String() In lstNewNotes
+            ' 生成新ID
+            intMaxID += 1
+            Dim strNewID As String = "GN" & intMaxID.ToString("D3")
+            ' 更新笔记数组中的ID
+            arrNote(1) = strNewID
+            allNotes.Add(arrNote)
+        Next
+
+        ' 7. 保存到文件
+        SaveNotesToFile(allNotes)
+
+        ' 8. 刷新列表显示
+        MessageBox.Show("准备刷新列表，共 " & allNotes.Count & " 条笔记")
+        RefreshListView(allNotes)
+        ' 在 RefreshListView(allNotes) 之后添加
+        ListView1.Refresh()
+        Application.DoEvents()
+
+
+        ' 9. 刷新分类筛选下拉框
+        RefreshCategoryFilter()
+
+        MessageBox.Show("成功导入 " & intImportCount & " 条笔记！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
 End Class

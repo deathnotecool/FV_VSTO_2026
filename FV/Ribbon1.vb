@@ -43,7 +43,7 @@ Public Class Ribbon1
     Private Sub Ribbon1_Load(sender As Object, e As RibbonUIEventArgs) Handles Me.Load
         'MsgBox("Hi,the addnis is sucessfully running") '测试是否成功运行语句
         '"检查是否注册过插件与是否有最新版本"
-        On Error Resume Next '出错继续执行下面语句.
+        On Error Resume Next '出错继续执行下面语句...
         Dim j As Byte, k As Integer
 
 

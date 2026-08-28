@@ -31,6 +31,8 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnDeleteNote = New System.Windows.Forms.Button()
         Me.btnEditNote = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.btnDeleteCategory = New System.Windows.Forms.Button()
+        Me.btnAddCategory = New System.Windows.Forms.Button()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.cmbCategory = New System.Windows.Forms.ComboBox()
         Me.btnAddNote = New System.Windows.Forms.Button()
@@ -42,10 +44,10 @@ Partial Class WIN190810_VBA代码笔记
         Me.Label1 = New System.Windows.Forms.Label()
         Me.cmbFilterCategory = New System.Windows.Forms.ComboBox()
         Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.btnImportNotes = New System.Windows.Forms.Button()
+        Me.btnExportNotes = New System.Windows.Forms.Button()
         Me.btnExit = New System.Windows.Forms.Button()
         Me.btnInsertCode = New System.Windows.Forms.Button()
-        Me.btnAddCategory = New System.Windows.Forms.Button()
-        Me.btnDeleteCategory = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.SuspendLayout()
@@ -154,6 +156,24 @@ Partial Class WIN190810_VBA代码笔记
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "编辑笔记"
         '
+        'btnDeleteCategory
+        '
+        Me.btnDeleteCategory.Location = New System.Drawing.Point(364, 22)
+        Me.btnDeleteCategory.Name = "btnDeleteCategory"
+        Me.btnDeleteCategory.Size = New System.Drawing.Size(100, 34)
+        Me.btnDeleteCategory.TabIndex = 36
+        Me.btnDeleteCategory.Text = "删除分类"
+        Me.btnDeleteCategory.UseVisualStyleBackColor = True
+        '
+        'btnAddCategory
+        '
+        Me.btnAddCategory.Location = New System.Drawing.Point(258, 24)
+        Me.btnAddCategory.Name = "btnAddCategory"
+        Me.btnAddCategory.Size = New System.Drawing.Size(100, 34)
+        Me.btnAddCategory.TabIndex = 35
+        Me.btnAddCategory.Text = "添加分类"
+        Me.btnAddCategory.UseVisualStyleBackColor = True
+        '
         'Label4
         '
         Me.Label4.AutoSize = True
@@ -252,12 +272,32 @@ Partial Class WIN190810_VBA代码笔记
         'Panel1
         '
         Me.Panel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Panel1.Controls.Add(Me.btnImportNotes)
+        Me.Panel1.Controls.Add(Me.btnExportNotes)
         Me.Panel1.Controls.Add(Me.btnExit)
         Me.Panel1.Controls.Add(Me.btnInsertCode)
         Me.Panel1.Location = New System.Drawing.Point(913, 247)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(81, 347)
         Me.Panel1.TabIndex = 21
+        '
+        'btnImportNotes
+        '
+        Me.btnImportNotes.Location = New System.Drawing.Point(3, 97)
+        Me.btnImportNotes.Name = "btnImportNotes"
+        Me.btnImportNotes.Size = New System.Drawing.Size(75, 34)
+        Me.btnImportNotes.TabIndex = 26
+        Me.btnImportNotes.Text = "导入笔记"
+        Me.btnImportNotes.UseVisualStyleBackColor = True
+        '
+        'btnExportNotes
+        '
+        Me.btnExportNotes.Location = New System.Drawing.Point(3, 56)
+        Me.btnExportNotes.Name = "btnExportNotes"
+        Me.btnExportNotes.Size = New System.Drawing.Size(75, 34)
+        Me.btnExportNotes.TabIndex = 25
+        Me.btnExportNotes.Text = "导出笔记"
+        Me.btnExportNotes.UseVisualStyleBackColor = True
         '
         'btnExit
         '
@@ -271,30 +311,12 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnInsertCode
         '
-        Me.btnInsertCode.Location = New System.Drawing.Point(3, 32)
+        Me.btnInsertCode.Location = New System.Drawing.Point(3, 3)
         Me.btnInsertCode.Name = "btnInsertCode"
         Me.btnInsertCode.Size = New System.Drawing.Size(75, 34)
         Me.btnInsertCode.TabIndex = 21
         Me.btnInsertCode.Text = "插入代码"
         Me.btnInsertCode.UseVisualStyleBackColor = True
-        '
-        'btnAddCategory
-        '
-        Me.btnAddCategory.Location = New System.Drawing.Point(258, 24)
-        Me.btnAddCategory.Name = "btnAddCategory"
-        Me.btnAddCategory.Size = New System.Drawing.Size(100, 34)
-        Me.btnAddCategory.TabIndex = 35
-        Me.btnAddCategory.Text = "添加分类"
-        Me.btnAddCategory.UseVisualStyleBackColor = True
-        '
-        'btnDeleteCategory
-        '
-        Me.btnDeleteCategory.Location = New System.Drawing.Point(364, 22)
-        Me.btnDeleteCategory.Name = "btnDeleteCategory"
-        Me.btnDeleteCategory.Size = New System.Drawing.Size(100, 34)
-        Me.btnDeleteCategory.TabIndex = 36
-        Me.btnDeleteCategory.Text = "删除分类"
-        Me.btnDeleteCategory.UseVisualStyleBackColor = True
         '
         'WIN190810_VBA代码笔记
         '
@@ -347,4 +369,6 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents btnInsertCode As Windows.Forms.Button
     Friend WithEvents btnDeleteCategory As Windows.Forms.Button
     Friend WithEvents btnAddCategory As Windows.Forms.Button
+    Friend WithEvents btnImportNotes As Windows.Forms.Button
+    Friend WithEvents btnExportNotes As Windows.Forms.Button
 End Class
