@@ -298,26 +298,61 @@ Public Class WIN190810_VBA代码笔记
     ''' 同时填充：筛选下拉框（cmbFilterCategory）和编辑区下拉框（cmbCategory）
     ''' </summary>
     Private Sub RefreshCategoryFilter()
-        ' 1. 收集所有不重复的分类
-        Dim lstCategories As New List(Of String)()
+        '' 1. 收集所有不重复的分类
+        'Dim lstCategories As New List(Of String)()
 
-        If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
-            For Each arrNote As String() In allNotes
-                If arrNote.Length >= 5 Then
-                    Dim strCategory As String = arrNote(4).Trim()
-                    If Not String.IsNullOrEmpty(strCategory) AndAlso Not lstCategories.Contains(strCategory) Then
-                        lstCategories.Add(strCategory)
-                    End If
-                End If
-            Next
-        End If
+        'If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
+        '    For Each arrNote As String() In allNotes
+        '        If arrNote.Length >= 5 Then
+        '            Dim strCategory As String = arrNote(4).Trim()
+        '            If Not String.IsNullOrEmpty(strCategory) AndAlso Not lstCategories.Contains(strCategory) Then
+        '                lstCategories.Add(strCategory)
+        '            End If
+        '        End If
+        '    Next
+        'End If
 
-        ' 2. 排序
+        '' 2. 排序
+        'lstCategories.Sort()
+
+        '' ============================================================
+        '' ★★★ 刷新筛选下拉框（cmbFilterCategory） ★★★
+        '' ============================================================
+        'cmbFilterCategory.Items.Clear()
+        'cmbFilterCategory.Items.Add("所有分类")
+        'For Each strCat As String In lstCategories
+        '    cmbFilterCategory.Items.Add(strCat)
+        'Next
+        'cmbFilterCategory.SelectedIndex = 0
+
+        '' ============================================================
+        '' ★★★ 刷新编辑区下拉框（cmbCategory） ★★★
+        '' ============================================================
+        'cmbCategory.Items.Clear()
+        'For Each strCat As String In lstCategories
+        '    cmbCategory.Items.Add(strCat)
+        'Next
+
+        '' 如果没有任何分类，添加一个空提示项
+        'If cmbCategory.Items.Count = 0 Then
+        '    cmbCategory.Items.Add("")
+        'End If
+
+        '' 默认选中第一项（如果有）
+        'If cmbCategory.Items.Count > 0 Then
+        '    cmbCategory.SelectedIndex = 0
+        'End If
+
+
+
+
+        ' 1. 从文件加载分类列表
+        Dim lstCategories As List(Of String) = LoadCategoriesFromFile()
+
+        ' 2. 排序（可选）
         lstCategories.Sort()
 
-        ' ============================================================
-        ' ★★★ 刷新筛选下拉框（cmbFilterCategory） ★★★
-        ' ============================================================
+        ' 3. 刷新筛选下拉框（cmbFilterCategory）
         cmbFilterCategory.Items.Clear()
         cmbFilterCategory.Items.Add("所有分类")
         For Each strCat As String In lstCategories
@@ -325,20 +360,12 @@ Public Class WIN190810_VBA代码笔记
         Next
         cmbFilterCategory.SelectedIndex = 0
 
-        ' ============================================================
-        ' ★★★ 刷新编辑区下拉框（cmbCategory） ★★★
-        ' ============================================================
+        ' 4. 刷新编辑区下拉框（cmbCategory）
         cmbCategory.Items.Clear()
         For Each strCat As String In lstCategories
             cmbCategory.Items.Add(strCat)
         Next
 
-        ' 如果没有任何分类，添加一个空提示项
-        If cmbCategory.Items.Count = 0 Then
-            cmbCategory.Items.Add("")
-        End If
-
-        ' 默认选中第一项（如果有）
         If cmbCategory.Items.Count > 0 Then
             cmbCategory.SelectedIndex = 0
         End If
@@ -708,8 +735,17 @@ Public Class WIN190810_VBA代码笔记
 
         ' 7. 自动选中新添加的分类（方便用户后续使用）
         cmbCategory.SelectedIndex = cmbCategory.Items.Count - 1
+        ' 保存分类列表到文件
+        Dim lstCategories As New List(Of String)()
+        For Each strItem As String In cmbCategory.Items
+            lstCategories.Add(strItem)
+        Next
+        SaveCategoriesToFile(lstCategories)
+
 
         MessageBox.Show("分类 '" & strNewCategory & "' 添加成功！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+
     End Sub
 
     ''' <summary>
@@ -776,6 +812,63 @@ Public Class WIN190810_VBA代码笔记
         ' 7. 刷新分类筛选下拉框（cmbFilterCategory）
         RefreshCategoryFilter()
 
+
+        ' 保存分类列表到文件--
+        Dim lstCategories As New List(Of String)()
+        For Each strItem As String In cmbCategory.Items
+            lstCategories.Add(strItem)
+        Next
+        SaveCategoriesToFile(lstCategories)
+
         MessageBox.Show("分类 '" & strCategoryToDelete & "' 已删除！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
+
+    ''' <summary>
+    ''' 获取分类文件的路径（与 CodeNotes.txt 在同一目录）
+    ''' </summary>
+    Private Function GetCategoryFilePath() As String
+        Dim strUserFolder As String = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FV_VSTO")
+        Return System.IO.Path.Combine(strUserFolder, "Categories.txt")
+    End Function
+
+    ''' <summary>
+    ''' 从 Categories.txt 文件加载所有分类
+    ''' </summary>
+    Private Function LoadCategoriesFromFile() As List(Of String)
+        Dim lstCategories As New List(Of String)()
+        Dim strFilePath As String = GetCategoryFilePath()
+
+        If System.IO.File.Exists(strFilePath) Then
+            Dim lines As String() = System.IO.File.ReadAllLines(strFilePath, System.Text.Encoding.UTF8)
+            For Each line As String In lines
+                Dim strTrimmed As String = line.Trim()
+                If Not String.IsNullOrEmpty(strTrimmed) Then
+                    lstCategories.Add(strTrimmed)
+                End If
+            Next
+        End If
+
+        ' 如果文件不存在或为空，返回一个包含默认分类的列表
+        If lstCategories.Count = 0 Then
+            lstCategories.AddRange({"VBA基础", ".NET基础", "通用代码块"})
+        End If
+
+        Return lstCategories
+    End Function
+
+    ''' <summary>
+    ''' 将分类列表保存到 Categories.txt 文件
+    ''' </summary>
+    Private Sub SaveCategoriesToFile(ByVal lstCategories As List(Of String))
+        Dim strFilePath As String = GetCategoryFilePath()
+        ' 确保目录存在
+        Dim strDirectory As String = System.IO.Path.GetDirectoryName(strFilePath)
+        If Not System.IO.Directory.Exists(strDirectory) Then
+            System.IO.Directory.CreateDirectory(strDirectory)
+        End If
+
+        ' 写入所有分类（每行一个）
+        System.IO.File.WriteAllLines(strFilePath, lstCategories, System.Text.Encoding.UTF8)
+    End Sub
+
 End Class
