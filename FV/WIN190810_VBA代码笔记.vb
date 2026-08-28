@@ -735,12 +735,17 @@ Public Class WIN190810_VBA代码笔记
 
         ' 7. 自动选中新添加的分类（方便用户后续使用）
         cmbCategory.SelectedIndex = cmbCategory.Items.Count - 1
-        ' 保存分类列表到文件
+
+
+        ' 保存分类列表到文件（先保存）
         Dim lstCategories As New List(Of String)()
         For Each strItem As String In cmbCategory.Items
             lstCategories.Add(strItem)
         Next
         SaveCategoriesToFile(lstCategories)
+
+        ' 然后刷新下拉框（从刚保存的文件重新加载，保持一致）
+        RefreshCategoryFilter()
 
 
         MessageBox.Show("分类 '" & strNewCategory & "' 添加成功！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -806,19 +811,20 @@ Public Class WIN190810_VBA代码笔记
             RefreshListView(allNotes)
         End If
 
-        ' 6. 从 cmbCategory 下拉框中移除该分类
+
+
+        ' 从 cmbCategory 下拉框中移除该分类后
         cmbCategory.Items.Remove(strCategoryToDelete)
 
-        ' 7. 刷新分类筛选下拉框（cmbFilterCategory）
-        RefreshCategoryFilter()
-
-
-        ' 保存分类列表到文件--
+        ' 保存分类列表到文件（先保存）
         Dim lstCategories As New List(Of String)()
         For Each strItem As String In cmbCategory.Items
             lstCategories.Add(strItem)
         Next
         SaveCategoriesToFile(lstCategories)
+
+        ' 然后刷新下拉框
+        RefreshCategoryFilter()
 
         MessageBox.Show("分类 '" & strCategoryToDelete & "' 已删除！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
