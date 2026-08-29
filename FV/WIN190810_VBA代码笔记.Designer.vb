@@ -48,6 +48,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnExportNotes = New System.Windows.Forms.Button()
         Me.btnExit = New System.Windows.Forms.Button()
         Me.btnInsertCode = New System.Windows.Forms.Button()
+        Me.lblStatistics = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.SuspendLayout()
@@ -79,7 +80,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
         Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
         Me.ListView1.Name = "ListView1"
-        Me.ListView1.Size = New System.Drawing.Size(892, 717)
+        Me.ListView1.Size = New System.Drawing.Size(892, 702)
         Me.ListView1.TabIndex = 4
         Me.ListView1.UseCompatibleStateImageBehavior = False
         '
@@ -151,7 +152,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.GroupBox1.Controls.Add(Me.Label1)
         Me.GroupBox1.Location = New System.Drawing.Point(1001, 434)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(712, 334)
+        Me.GroupBox1.Size = New System.Drawing.Size(712, 319)
         Me.GroupBox1.TabIndex = 18
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "编辑笔记"
@@ -208,7 +209,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewCode.Location = New System.Drawing.Point(64, 129)
         Me.txtNewCode.Multiline = True
         Me.txtNewCode.Name = "txtNewCode"
-        Me.txtNewCode.Size = New System.Drawing.Size(636, 199)
+        Me.txtNewCode.Size = New System.Drawing.Size(636, 184)
         Me.txtNewCode.TabIndex = 33
         Me.txtNewCode.WordWrap = False
         '
@@ -318,11 +319,23 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnInsertCode.Text = "插入代码"
         Me.btnInsertCode.UseVisualStyleBackColor = True
         '
+        'lblStatistics
+        '
+        Me.lblStatistics.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblStatistics.Location = New System.Drawing.Point(12, 761)
+        Me.lblStatistics.Name = "lblStatistics"
+        Me.lblStatistics.Size = New System.Drawing.Size(82, 15)
+        Me.lblStatistics.TabIndex = 22
+        Me.lblStatistics.Text = "统计信息："
+        Me.lblStatistics.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
         'WIN190810_VBA代码笔记
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1725, 781)
+        Me.Controls.Add(Me.lblStatistics)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.cmbFilterCategory)
         Me.Controls.Add(Me.GroupBox1)
@@ -371,4 +384,5 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents btnAddCategory As Windows.Forms.Button
     Friend WithEvents btnImportNotes As Windows.Forms.Button
     Friend WithEvents btnExportNotes As Windows.Forms.Button
+    Friend WithEvents lblStatistics As Windows.Forms.Label
 End Class

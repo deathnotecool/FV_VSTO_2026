@@ -367,6 +367,10 @@ Public Class WIN190810_VBA代码笔记
 
         ' 6. 强制禁止自动调整列宽（防止列宽被重置）..
         ListView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None)
+
+        ' 更新统计信息
+        UpdateStatistics()
+
     End Sub
 
 
@@ -566,6 +570,9 @@ Public Class WIN190810_VBA代码笔记
 
         ' 刷新分类筛选下拉框
         RefreshCategoryFilter()
+
+        ' 刷新统计信息
+        UpdateStatistics()
     End Sub
 
     Private Sub cmbFilterCategory_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbFilterCategory.SelectedIndexChanged
@@ -868,17 +875,20 @@ Public Class WIN190810_VBA代码笔记
         End Try
     End Sub
 
+
     ''' <summary>
-    ''' 导入笔记：从之前导出的文件中恢复笔记
+    ''' 导入笔记：从之前导出的文件中恢复笔记（支持灵活解析字段顺序）
     ''' </summary>
     Private Sub btnImportNotes_Click(sender As Object, e As EventArgs) Handles btnImportNotes.Click
-        ' ★★★ 变量声明区（全部放在最前面） ★★★
+        ' ★★★ 变量声明区 ★★★
         Dim ofd As New OpenFileDialog()
         Dim dialogResult As DialogResult
         Dim lines As String()
         Dim intImportCount As Integer = 0
         Dim lstNewNotes As New List(Of String())()
         Dim intMaxID As Integer = 0
+        Dim dictFieldOrder As New Dictionary(Of Integer, Integer)()   ' 导入文件列索引 → 标准索引(0-4) 的映射
+        Dim blnHasHeader As Boolean = False
 
         ' 1. 弹出文件选择对话框
         ofd.Filter = "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*"
@@ -891,37 +901,102 @@ Public Class WIN190810_VBA代码笔记
         ' 2. 读取文件
         lines = System.IO.File.ReadAllLines(ofd.FileName, System.Text.Encoding.UTF8)
 
-        ' 3. 解析数据（跳过以 # 开头的注释行）
+        ' 3. 解析头部，确定字段顺序
         For Each line As String In lines
-            ' 跳过空行和注释行
-            If String.IsNullOrWhiteSpace(line) OrElse line.Trim().StartsWith("#") Then
+            Dim strTrimmed As String = line.Trim()
+            If strTrimmed.StartsWith("# 格式：") Then
+                ' 提取格式声明，例如：标题|编号|备注|分类|代码正文
+                Dim strFormat As String = strTrimmed.Replace("# 格式：", "").Trim()
+                Dim arrFormatFields As String() = strFormat.Split(New Char() {"|"c}, StringSplitOptions.None)
+
+                ' 标准字段顺序（索引0-4）与内部存储一致
+                Dim arrStandardFields As String() = {"标题", "编号", "备注", "分类", "代码正文"}
+
+                ' 建立映射：导入文件的列索引 → 标准索引
+                For i As Integer = 0 To arrFormatFields.Length - 1
+                    For j As Integer = 0 To arrStandardFields.Length - 1
+                        If arrFormatFields(i) = arrStandardFields(j) Then
+                            dictFieldOrder(i) = j
+                            Exit For
+                        End If
+                    Next
+                Next
+
+                blnHasHeader = True
+                Exit For
+            End If
+        Next
+
+        ' 如果找不到格式声明，尝试按默认顺序（标题|编号|备注|分类|代码正文）解析
+        If Not blnHasHeader Then
+            ' 默认映射：i → i（即第1列是标题，第2列是编号...）
+            For i As Integer = 0 To 4
+                dictFieldOrder(i) = i
+            Next
+        End If
+
+        ' 4. 解析数据（跳过以 # 开头的注释行和空行）
+        For Each line As String In lines
+            Dim strTrimmed As String = line.Trim()
+            If String.IsNullOrEmpty(strTrimmed) OrElse strTrimmed.StartsWith("#") Then
                 Continue For
             End If
 
             ' 按 | 拆分
             Dim arrFields As String() = line.Split(New Char() {"|"c}, StringSplitOptions.None)
 
-            ' 检查字段数量（导入文件应该是5字段：标题|编号|备注|分类|代码）
-            If arrFields.Length >= 5 Then
-                ' 将代码正文中的 \n 还原为换行符
-                arrFields(4) = arrFields(4).Replace("\n", vbCrLf)
-
-                ' 添加到列表
-                lstNewNotes.Add(arrFields)
-                intImportCount += 1
-            Else
-                ' 如果字段数量不对，跳过该行
-                Continue For
+            ' 检查字段数量是否足够
+            If arrFields.Length < dictFieldOrder.Count Then
+                Continue For   ' 跳过字段数量不足的行
             End If
+
+            ' ★★★ 根据映射填充标准数组 ★★★
+            Dim arrStandard(4) As String
+            For Each kvp As KeyValuePair(Of Integer, Integer) In dictFieldOrder
+                Dim intImportIndex As Integer = kvp.Key
+                Dim intStandardIndex As Integer = kvp.Value
+                If intImportIndex < arrFields.Length AndAlso intStandardIndex < arrStandard.Length Then
+                    arrStandard(intStandardIndex) = arrFields(intImportIndex).Trim()
+
+                    '' ★★★ 插入位置：输出映射关系（调试用） ★★★
+                    'MessageBox.Show("导入列" & intImportIndex & " → 标准索引" & intStandardIndex & vbCrLf &
+                    '                "值：" & arrFields(intImportIndex).Trim())
+                End If
+            Next
+
+            ' ★★★ 交换索引3（代码正文）和索引4（分类）的内容 ★★★
+            Dim strTemp As String = arrStandard(3)
+            arrStandard(3) = arrStandard(4)
+            arrStandard(4) = strTemp
+
+
+            ' 验证：标题和编号不能为空
+            If String.IsNullOrEmpty(arrStandard(0)) OrElse String.IsNullOrEmpty(arrStandard(1)) Then
+                Continue For   ' 跳过无效行
+            End If
+
+            ' ★★★ 关键：将代码正文中的 \n 还原为换行符（代码正文在标准索引3） ★★★
+            If Not String.IsNullOrEmpty(arrStandard(3)) Then
+                arrStandard(3) = arrStandard(3).Replace("\n", vbCrLf)
+            End If
+
+            ' 添加到导入列表
+            lstNewNotes.Add(arrStandard)
+            intImportCount += 1
+
+            '' ★★★ 调试：显示刚刚添加的 arrStandard 内容 ★★★
+            'MessageBox.Show("arrStandard(3) = " & arrStandard(3) & vbCrLf &
+            '    "arrStandard(4) = " & arrStandard(4))
+
         Next
 
-        ' 4. 检查是否有有效数据
+        ' 5. 检查是否有有效数据
         If intImportCount = 0 Then
             MessageBox.Show("未找到有效数据，请确认文件格式正确！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
-        ' 5. 确认是否追加
+        ' 6. 确认是否追加
         dialogResult = MessageBox.Show(
             "找到 " & intImportCount & " 条笔记。" & vbCrLf &
             "是否追加到当前笔记列表？",
@@ -934,7 +1009,7 @@ Public Class WIN190810_VBA代码笔记
             Return
         End If
 
-        ' 6. 追加到 allNotes（处理ID冲突，重新编号）
+        ' 7. 追加到 allNotes（处理ID冲突，重新编号）
         If allNotes IsNot Nothing AndAlso allNotes.Count > 0 Then
             For Each arrNote As String() In allNotes
                 If arrNote.Length >= 5 Then
@@ -956,21 +1031,62 @@ Public Class WIN190810_VBA代码笔记
             allNotes.Add(arrNote)
         Next
 
-        ' 7. 保存到文件
+        ' 8. 保存到文件
         SaveNotesToFile(allNotes)
 
-        ' 8. 刷新列表显示
-        MessageBox.Show("准备刷新列表，共 " & allNotes.Count & " 条笔记")
+        ' 9. 刷新列表显示
         RefreshListView(allNotes)
-        ' 在 RefreshListView(allNotes) 之后添加
-        ListView1.Refresh()
-        Application.DoEvents()
 
-
-        ' 9. 刷新分类筛选下拉框
+        ' 10. 刷新分类筛选下拉框
         RefreshCategoryFilter()
 
         MessageBox.Show("成功导入 " & intImportCount & " 条笔记！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
+    ''' <summary>
+    ''' 更新统计信息：显示总笔记数和各分类数量
+    ''' </summary>
+    Private Sub UpdateStatistics()
+        ' 1. 如果没有任何笔记，显示提示
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            lblStatistics.Text = "暂无笔记"
+            Return
+        End If
+
+        ' 2. 统计总数
+        Dim intTotal As Integer = allNotes.Count
+
+        ' 3. 统计各分类数量
+        Dim dictCategoryCount As New Dictionary(Of String, Integer)()
+        For Each arrNote As String() In allNotes
+            If arrNote.Length >= 5 Then
+                Dim strCategory As String = arrNote(4).Trim()
+                If String.IsNullOrEmpty(strCategory) Then
+                    strCategory = "未分类"
+                End If
+                If dictCategoryCount.ContainsKey(strCategory) Then
+                    dictCategoryCount(strCategory) += 1
+                Else
+                    dictCategoryCount(strCategory) = 1
+                End If
+            End If
+        Next
+
+        ' 4. 拼接显示文本
+        Dim strDisplay As String = "共 " & intTotal & " 条笔记"
+        For Each kvp As KeyValuePair(Of String, Integer) In dictCategoryCount
+            strDisplay &= " | " & kvp.Key & ": " & kvp.Value & "条"
+        Next
+
+        lblStatistics.Text = strDisplay
+    End Sub
+
+
+
+
+
+
+    Private Sub btnExit_Click_1(sender As Object, e As EventArgs) Handles btnExit.Click
+        Me.Close()
+    End Sub
 End Class
