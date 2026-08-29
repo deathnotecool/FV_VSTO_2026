@@ -11,6 +11,10 @@ Public Class WIN190810_VBA代码笔记
     Private allNotes As List(Of String())
     Private intEditingIndex As Integer = -1   ' -1 表示没有正在编辑的笔记
 
+    ' ★★★ 排序相关变量 ★★★
+    Private intSortColumn As Integer = -1
+    Private blnSortAscending As Boolean = True
+
     REM 功    能: 宝3-17.5.7-P387 在窗体中跨工作表查询 关键词：array,combox1
 
 
@@ -467,9 +471,108 @@ Public Class WIN190810_VBA代码笔记
     End Sub
 
 
+    ''' <summary>
+    ''' ListView 列头点击事件：实现按列排序
+    ''' </summary>
+    Private Sub ListView1_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles ListView1.ColumnClick
+        ' 1. 检查是否有数据可排序
+        If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+            Return
+        End If
 
+        ' 2. 判断点击的是同一列还是新列
+        If e.Column = intSortColumn Then
+            ' 同一列：切换排序方向
+            blnSortAscending = Not blnSortAscending
+        Else
+            ' 新列：设置为升序
+            intSortColumn = e.Column
+            blnSortAscending = True
+        End If
 
+        ' 3. 获取当前显示的数据源（优先使用筛选后的列表，否则使用全部）
+        Dim lstDataSource As List(Of String())
+        If ListView1.Items.Count > 0 Then
+            ' 从 ListView 中提取当前显示的所有笔记
+            lstDataSource = New List(Of String())()
+            For Each item As ListViewItem In ListView1.Items
+                ' 根据列顺序提取对应的原始数据
+                ' 列顺序：标题(0)|编号(1)|分类(2)|备注(3)|代码(4)
+                Dim arrNote(4) As String
+                arrNote(0) = item.Text   ' 标题
+                arrNote(1) = item.SubItems(1).Text   ' 编号
+                arrNote(2) = item.SubItems(3).Text   ' 备注
+                arrNote(3) = item.SubItems(4).Text   ' 代码正文
+                arrNote(4) = item.SubItems(2).Text   ' 分类
+                lstDataSource.Add(arrNote)
+            Next
+        Else
+            ' 如果 ListView 为空，使用 allNotes
+            lstDataSource = allNotes
+        End If
 
+        ' 4. 执行排序
+        Dim lstSorted As List(Of String()) = SortNotes(lstDataSource, intSortColumn, blnSortAscending)
+
+        ' 5. 刷新显示
+        RefreshListView(lstSorted)
+    End Sub
+
+    ''' <summary>
+    ''' 对笔记列表进行排序
+    ''' </summary>
+    Private Function SortNotes(ByVal lstNotes As List(Of String()), ByVal intColumn As Integer, ByVal blnAscending As Boolean) As List(Of String())
+        ' 如果列表为空，直接返回
+        If lstNotes Is Nothing OrElse lstNotes.Count = 0 Then
+            Return lstNotes
+        End If
+
+        ' 创建一个副本用于排序
+        Dim lstSorted As New List(Of String())(lstNotes)
+
+        ' 根据列索引确定排序的字段
+        Select Case intColumn
+            Case 0 ' 标题
+                If blnAscending Then
+                    lstSorted.Sort(Function(x, y) x(0).CompareTo(y(0)))
+                Else
+                    lstSorted.Sort(Function(x, y) y(0).CompareTo(x(0)))
+                End If
+            Case 1 ' 编号
+                If blnAscending Then
+                    lstSorted.Sort(Function(x, y) x(1).CompareTo(y(1)))
+                Else
+                    lstSorted.Sort(Function(x, y) y(1).CompareTo(x(1)))
+                End If
+            Case 2 ' 分类
+                If blnAscending Then
+                    lstSorted.Sort(Function(x, y) x(4).CompareTo(y(4)))
+                Else
+                    lstSorted.Sort(Function(x, y) y(4).CompareTo(x(4)))
+                End If
+            Case 3 ' 备注
+                If blnAscending Then
+                    lstSorted.Sort(Function(x, y) x(2).CompareTo(y(2)))
+                Else
+                    lstSorted.Sort(Function(x, y) y(2).CompareTo(x(2)))
+                End If
+            Case 4 ' 代码正文
+                If blnAscending Then
+                    lstSorted.Sort(Function(x, y) x(3).CompareTo(y(3)))
+                Else
+                    lstSorted.Sort(Function(x, y) y(3).CompareTo(x(3)))
+                End If
+            Case Else
+                ' 默认按标题排序
+                If blnAscending Then
+                    lstSorted.Sort(Function(x, y) x(0).CompareTo(y(0)))
+                Else
+                    lstSorted.Sort(Function(x, y) y(0).CompareTo(x(0)))
+                End If
+        End Select
+
+        Return lstSorted
+    End Function
 
     Private Sub TextBox1_KeyDown(sender As Object, e As KeyEventArgs) Handles TextBox1.KeyDown
         If e.KeyCode = Keys.Enter Then btnSearch_Click(Nothing, Nothing) '如果按下了Enter键,那么调用查询过程.
@@ -1174,8 +1277,48 @@ Public Class WIN190810_VBA代码笔记
         MessageBox.Show("成功导入 " & intImportCount & " 条笔记！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
+    '''' <summary>
+    '''' 更新统计信息：显示总笔记数和各分类数量
+    '''' </summary>
+    'Private Sub UpdateStatistics()
+    '    ' 1. 如果没有任何笔记，显示提示
+    '    If allNotes Is Nothing OrElse allNotes.Count = 0 Then
+    '        lblStatistics.Text = "暂无笔记"
+    '        Return
+    '    End If
+
+    '    ' 2. 统计总数
+    '    Dim intTotal As Integer = allNotes.Count
+
+    '    ' 3. 统计各分类数量
+    '    Dim dictCategoryCount As New Dictionary(Of String, Integer)()
+    '    For Each arrNote As String() In allNotes
+    '        If arrNote.Length >= 5 Then
+    '            Dim strCategory As String = arrNote(4).Trim()
+    '            If String.IsNullOrEmpty(strCategory) Then
+    '                strCategory = "未分类"
+    '            End If
+    '            If dictCategoryCount.ContainsKey(strCategory) Then
+    '                dictCategoryCount(strCategory) += 1
+    '            Else
+    '                dictCategoryCount(strCategory) = 1
+    '            End If
+    '        End If
+    '    Next
+
+    '    ' 4. 拼接显示文本
+    '    Dim strDisplay As String = "共 " & intTotal & " 条笔记"
+
+
+    '    For Each kvp As KeyValuePair(Of String, Integer) In dictCategoryCount
+    '        strDisplay &= " | " & kvp.Key & ": " & kvp.Value & "条"
+    '    Next
+
+    '    lblStatistics.Text = strDisplay
+    'End Sub
+
     ''' <summary>
-    ''' 更新统计信息：显示总笔记数和各分类数量
+    ''' 更新统计信息：显示总笔记数、已分类/未分类数量和各分类数量
     ''' </summary>
     Private Sub UpdateStatistics()
         ' 1. 如果没有任何笔记，显示提示
@@ -1203,16 +1346,31 @@ Public Class WIN190810_VBA代码笔记
             End If
         Next
 
-        ' 4. 拼接显示文本
-        Dim strDisplay As String = "共 " & intTotal & " 条笔记"
+        ' 4. 统计已分类和未分类的数量
+        Dim intCategorized As Integer = 0
+        Dim intUncategorized As Integer = 0
+        For Each kvp As KeyValuePair(Of String, Integer) In dictCategoryCount
+            If kvp.Key = "未分类" Then
+                intUncategorized = kvp.Value
+            Else
+                intCategorized += kvp.Value
+            End If
+        Next
+
+        ' 5. 拼接显示文本
+        Dim strDisplay As String = "共 " & intTotal & " 条笔记" &
+                                   " | 已分类: " & intCategorized & "条" &
+                                   " | 未分类: " & intUncategorized & "条"
+
+        ' 6. 追加各分类明细
         For Each kvp As KeyValuePair(Of String, Integer) In dictCategoryCount
             strDisplay &= " | " & kvp.Key & ": " & kvp.Value & "条"
         Next
 
         lblStatistics.Text = strDisplay
+        ' 强制刷新标签，确保文本完整显示
+        lblStatistics.Refresh()
     End Sub
-
-
 
 
 

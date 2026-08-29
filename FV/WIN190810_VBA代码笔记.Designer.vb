@@ -22,6 +22,7 @@ Partial Class WIN190810_VBA代码笔记
     '不要使用代码编辑器修改它。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.ComboBox1 = New System.Windows.Forms.ComboBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.ListView1 = New System.Windows.Forms.ListView()
@@ -49,6 +50,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnExit = New System.Windows.Forms.Button()
         Me.btnInsertCode = New System.Windows.Forms.Button()
         Me.lblStatistics = New System.Windows.Forms.Label()
+        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.GroupBox1.SuspendLayout()
         Me.Panel1.SuspendLayout()
         Me.SuspendLayout()
@@ -80,7 +82,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.ListView1.Location = New System.Drawing.Point(13, 51)
         Me.ListView1.Margin = New System.Windows.Forms.Padding(4)
         Me.ListView1.Name = "ListView1"
-        Me.ListView1.Size = New System.Drawing.Size(892, 702)
+        Me.ListView1.Size = New System.Drawing.Size(892, 696)
         Me.ListView1.TabIndex = 4
         Me.ListView1.UseCompatibleStateImageBehavior = False
         '
@@ -152,7 +154,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.GroupBox1.Controls.Add(Me.Label1)
         Me.GroupBox1.Location = New System.Drawing.Point(1001, 434)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(712, 319)
+        Me.GroupBox1.Size = New System.Drawing.Size(712, 313)
         Me.GroupBox1.TabIndex = 18
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "编辑笔记"
@@ -209,7 +211,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.txtNewCode.Location = New System.Drawing.Point(64, 129)
         Me.txtNewCode.Multiline = True
         Me.txtNewCode.Name = "txtNewCode"
-        Me.txtNewCode.Size = New System.Drawing.Size(636, 184)
+        Me.txtNewCode.Size = New System.Drawing.Size(636, 178)
         Me.txtNewCode.TabIndex = 33
         Me.txtNewCode.WordWrap = False
         '
@@ -277,14 +279,14 @@ Partial Class WIN190810_VBA代码笔记
         Me.Panel1.Controls.Add(Me.btnExportNotes)
         Me.Panel1.Controls.Add(Me.btnExit)
         Me.Panel1.Controls.Add(Me.btnInsertCode)
-        Me.Panel1.Location = New System.Drawing.Point(913, 247)
+        Me.Panel1.Location = New System.Drawing.Point(912, 51)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(81, 347)
+        Me.Panel1.Size = New System.Drawing.Size(81, 201)
         Me.Panel1.TabIndex = 21
         '
         'btnImportNotes
         '
-        Me.btnImportNotes.Location = New System.Drawing.Point(3, 97)
+        Me.btnImportNotes.Location = New System.Drawing.Point(3, 107)
         Me.btnImportNotes.Name = "btnImportNotes"
         Me.btnImportNotes.Size = New System.Drawing.Size(75, 34)
         Me.btnImportNotes.TabIndex = 26
@@ -293,7 +295,7 @@ Partial Class WIN190810_VBA代码笔记
         '
         'btnExportNotes
         '
-        Me.btnExportNotes.Location = New System.Drawing.Point(3, 56)
+        Me.btnExportNotes.Location = New System.Drawing.Point(3, 55)
         Me.btnExportNotes.Name = "btnExportNotes"
         Me.btnExportNotes.Size = New System.Drawing.Size(75, 34)
         Me.btnExportNotes.TabIndex = 25
@@ -317,18 +319,18 @@ Partial Class WIN190810_VBA代码笔记
         Me.btnInsertCode.Size = New System.Drawing.Size(75, 34)
         Me.btnInsertCode.TabIndex = 21
         Me.btnInsertCode.Text = "插入代码"
+        Me.ToolTip1.SetToolTip(Me.btnInsertCode, "将选中笔记的代码写入当前选中单元格")
         Me.btnInsertCode.UseVisualStyleBackColor = True
         '
         'lblStatistics
         '
         Me.lblStatistics.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.lblStatistics.Location = New System.Drawing.Point(12, 761)
+        Me.lblStatistics.Location = New System.Drawing.Point(12, 755)
         Me.lblStatistics.Name = "lblStatistics"
-        Me.lblStatistics.Size = New System.Drawing.Size(82, 15)
+        Me.lblStatistics.Size = New System.Drawing.Size(82, 20)
         Me.lblStatistics.TabIndex = 22
         Me.lblStatistics.Text = "统计信息："
-        Me.lblStatistics.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'WIN190810_VBA代码笔记
         '
@@ -386,4 +388,5 @@ Partial Class WIN190810_VBA代码笔记
     Friend WithEvents btnImportNotes As Windows.Forms.Button
     Friend WithEvents btnExportNotes As Windows.Forms.Button
     Friend WithEvents lblStatistics As Windows.Forms.Label
+    Friend WithEvents ToolTip1 As Windows.Forms.ToolTip
 End Class
