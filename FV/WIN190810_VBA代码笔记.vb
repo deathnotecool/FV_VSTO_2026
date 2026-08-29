@@ -1,6 +1,7 @@
 ﻿Imports System.Windows.Forms
 Imports System.Text
 Imports System.IO
+Imports System.Drawing   ' ★★★ 新增这一行 ★★★
 
 Public Class WIN190810_VBA代码笔记
     Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
@@ -293,16 +294,49 @@ Public Class WIN190810_VBA代码笔记
     End Sub
 
 
+    '''' <summary>
+    '''' 刷新所有分类下拉框：从 allNotes 中提取所有不重复的分类
+    '''' 同时填充：筛选下拉框（cmbFilterCategory）和编辑区下拉框（cmbCategory）
+    '''' </summary>
+    'Private Sub RefreshCategoryFilter()
+    '    ' 从文件加载分类列表
+    '    Dim lstCategories As List(Of String) = LoadCategoriesFromFile()
+    '    lstCategories.Sort()
+
+    '    ' 刷新筛选下拉框
+    '    cmbFilterCategory.Items.Clear()
+    '    cmbFilterCategory.Items.Add("所有分类")
+    '    For Each strCat As String In lstCategories
+    '        cmbFilterCategory.Items.Add(strCat)
+    '    Next
+    '    cmbFilterCategory.SelectedIndex = 0
+
+    '    ' 刷新编辑区下拉框
+    '    cmbCategory.Items.Clear()
+    '    For Each strCat As String In lstCategories
+    '        cmbCategory.Items.Add(strCat)
+    '    Next
+    '    If cmbCategory.Items.Count > 0 Then
+    '        cmbCategory.SelectedIndex = 0
+    '    End If
+    'End Sub
+
+
     ''' <summary>
-    ''' 刷新所有分类下拉框：从 allNotes 中提取所有不重复的分类
+    ''' 刷新所有分类下拉框：从 Categories.txt 加载分类和颜色
     ''' 同时填充：筛选下拉框（cmbFilterCategory）和编辑区下拉框（cmbCategory）
     ''' </summary>
     Private Sub RefreshCategoryFilter()
-        ' 从文件加载分类列表
-        Dim lstCategories As List(Of String) = LoadCategoriesFromFile()
+        ' 1. 从文件加载分类和颜色映射
+        Dim dictCategories As Dictionary(Of String, String) = LoadCategoriesFromFile()
+
+        ' 2. 提取所有分类名称（用于下拉框显示）
+        Dim lstCategories As List(Of String) = dictCategories.Keys.ToList()
+
+        ' 3. 排序
         lstCategories.Sort()
 
-        ' 刷新筛选下拉框
+        ' 4. 刷新筛选下拉框（cmbFilterCategory）
         cmbFilterCategory.Items.Clear()
         cmbFilterCategory.Items.Add("所有分类")
         For Each strCat As String In lstCategories
@@ -310,15 +344,17 @@ Public Class WIN190810_VBA代码笔记
         Next
         cmbFilterCategory.SelectedIndex = 0
 
-        ' 刷新编辑区下拉框
+        ' 5. 刷新编辑区下拉框（cmbCategory）
         cmbCategory.Items.Clear()
         For Each strCat As String In lstCategories
             cmbCategory.Items.Add(strCat)
         Next
+
         If cmbCategory.Items.Count > 0 Then
             cmbCategory.SelectedIndex = 0
         End If
     End Sub
+
 
 
     ''' <summary>
@@ -357,6 +393,25 @@ Public Class WIN190810_VBA代码笔记
             ' 检查数组是否包含4个元素，并且第一个元素不为空
             If arrNote IsNot Nothing AndAlso arrNote.Length >= 5 AndAlso Not String.IsNullOrEmpty(arrNote(0)) Then                ' 创建一行，第一列显示标题
                 Dim itm As New ListViewItem(arrNote(0))   ' 标题
+
+                ' ★★★ 根据分类设置行背景色 ★★★
+                Dim strCategory As String = arrNote(4).Trim()
+                If String.IsNullOrEmpty(strCategory) Then
+                    strCategory = "未分类"
+                End If
+
+
+                ' 从字典中获取颜色名称
+                Dim dictCategories As Dictionary(Of String, String) = LoadCategoriesFromFile()
+                Dim strColorName As String = "LightGray"
+                If dictCategories.ContainsKey(strCategory) Then
+                    strColorName = dictCategories(strCategory)
+                End If
+
+                ' 将颜色名称转换为 Color 对象
+                itm.BackColor = GetColorFromName(strColorName)
+
+
                 itm.SubItems.Add(arrNote(1))              ' 编号
                 itm.SubItems.Add(arrNote(4))              ' 分类（第5个字段，索引4）  ← 移到第3列
                 itm.SubItems.Add(arrNote(2))              ' 备注                         ← 移到第4列
@@ -787,11 +842,37 @@ Public Class WIN190810_VBA代码笔记
         Return System.IO.Path.Combine(strUserFolder, "Categories.txt")
     End Function
 
+    '''' <summary>
+    '''' 从 Categories.txt 文件加载所有分类
+    '''' </summary>
+    'Private Function LoadCategoriesFromFile() As List(Of String)
+    '    Dim lstCategories As New List(Of String)()
+    '    Dim strFilePath As String = GetCategoryFilePath()
+
+    '    If System.IO.File.Exists(strFilePath) Then
+    '        Dim lines As String() = System.IO.File.ReadAllLines(strFilePath, System.Text.Encoding.UTF8)
+    '        For Each line As String In lines
+    '            Dim strTrimmed As String = line.Trim()
+    '            If Not String.IsNullOrEmpty(strTrimmed) Then
+    '                lstCategories.Add(strTrimmed)
+    '            End If
+    '        Next
+    '    End If
+
+    '    ' 如果文件不存在或为空，返回一个包含默认分类的列表
+    '    If lstCategories.Count = 0 Then
+    '        lstCategories.AddRange({"VBA基础", ".NET基础", "通用代码块"})
+    '    End If
+
+    '    Return lstCategories
+    'End Function
+
     ''' <summary>
-    ''' 从 Categories.txt 文件加载所有分类
+    ''' 从 Categories.txt 文件加载所有分类及其颜色
     ''' </summary>
-    Private Function LoadCategoriesFromFile() As List(Of String)
-        Dim lstCategories As New List(Of String)()
+    ''' <returns>分类名称 → 颜色名称 的字典</returns>
+    Private Function LoadCategoriesFromFile() As Dictionary(Of String, String)
+        Dim dictCategories As New Dictionary(Of String, String)()
         Dim strFilePath As String = GetCategoryFilePath()
 
         If System.IO.File.Exists(strFilePath) Then
@@ -799,18 +880,46 @@ Public Class WIN190810_VBA代码笔记
             For Each line As String In lines
                 Dim strTrimmed As String = line.Trim()
                 If Not String.IsNullOrEmpty(strTrimmed) Then
-                    lstCategories.Add(strTrimmed)
+                    ' 按 | 拆分，格式：分类名称|颜色代码
+                    Dim arrParts As String() = strTrimmed.Split(New Char() {"|"c}, StringSplitOptions.None)
+                    Dim strCategory As String = arrParts(0).Trim()
+                    Dim strColor As String = "LightGray"   ' 默认颜色
+
+                    If arrParts.Length >= 2 Then
+                        strColor = arrParts(1).Trim()
+                    End If
+
+                    If Not dictCategories.ContainsKey(strCategory) Then
+                        dictCategories.Add(strCategory, strColor)
+                    End If
                 End If
             Next
         End If
 
-        ' 如果文件不存在或为空，返回一个包含默认分类的列表
-        If lstCategories.Count = 0 Then
-            lstCategories.AddRange({"VBA基础", ".NET基础", "通用代码块"})
+        ' 如果文件不存在或为空，返回默认分类和颜色
+        If dictCategories.Count = 0 Then
+            dictCategories.Add("VBA基础", "LightBlue")
+            dictCategories.Add(".NET基础", "LightGreen")
+            dictCategories.Add("通用代码块", "LightYellow")
+            dictCategories.Add("未分类", "White")
+            dictCategories.Add("其他", "LightGray")
         End If
 
-        Return lstCategories
+        Return dictCategories
     End Function
+
+
+    ''' <summary>
+    ''' 将颜色名称字符串转换为 System.Drawing.Color 对象
+    ''' </summary>
+    Private Function GetColorFromName(ByVal strColorName As String) As Color
+        Try
+            Return Color.FromName(strColorName)
+        Catch ex As Exception
+            Return Color.LightGray
+        End Try
+    End Function
+
 
     ''' <summary>
     ''' 将分类列表保存到 Categories.txt 文件
