@@ -347,6 +347,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.Controls.Add(Me.ListView1)
         Me.Controls.Add(Me.TextBox1)
         Me.Controls.Add(Me.ComboBox1)
+        Me.KeyPreview = True
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "WIN190810_VBA代码笔记"
         Me.Text = "WIN190810_VBA代码笔记"

@@ -434,6 +434,28 @@ Public Class WIN190810_VBA代码笔记
     End Sub
 
 
+    ''' <summary>
+    ''' 在窗体级别捕获键盘事件，实现 Ctrl+C 复制代码
+    ''' </summary>
+    Private Sub WIN190810_VBA代码笔记_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
+        ' 检查是否按下了 Ctrl+C
+        If e.Control AndAlso e.KeyCode = Keys.C Then
+            ' 检查 txtCodeDetail 是否有内容
+            If Not String.IsNullOrEmpty(txtCodeDetail.Text) Then
+                Try
+                    Clipboard.SetText(txtCodeDetail.Text)
+                    MessageBox.Show("代码已复制到剪贴板！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Catch ex As Exception
+                    MessageBox.Show("复制失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End Try
+            Else
+                MessageBox.Show("没有可复制的代码！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
+            ' 阻止 Ctrl+C 的默认行为
+            e.Handled = True
+        End If
+    End Sub
+
     Private Sub ListView1_ItemSelectionChanged(sender As Object, e As ListViewItemSelectionChangedEventArgs) Handles ListView1.ItemSelectionChanged
         If e.IsSelected Then
             ' 选中时，显示代码正文
