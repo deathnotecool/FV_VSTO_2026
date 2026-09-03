@@ -9,6 +9,7 @@
 ' GN003 | 名称管理 | 辅助工具，查看/筛选/删除自定义名称
 ' GN004 | 热处理数据分析 | 识别4个通道的加热/保温时间，自动分组，生成图表
 ' GN005 | 下拉框定位 | 选中区域后，下拉选择最大值/最小值/众数/平均值，自动定位并高亮（使用枚举优化）
+' GN006 | VBA代码笔记管理 | 独立的代码笔记管理模块，支持增删改查、分类管理、导入导出、一键插入代码、统计与排序
 ' ============================================================
 
 
@@ -2086,6 +2087,8 @@ Public Class Ribbon1
 
     End Sub
 
+
+    ' GN006 | VBA代码笔记管理 | 独立的代码笔记管理模块，支持增删改查、分类管理、导入导出、一键插入代码、统计与排序
     Private Sub btnSearchNote_Click(sender As Object, e As RibbonControlEventArgs) Handles btnSearchNote.Click
         ' 直接显示窗体，不再打开 FV.xlam
         Dim f As New WIN190810_VBA代码笔记

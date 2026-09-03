@@ -352,7 +352,7 @@ Partial Class WIN190810_VBA代码笔记
         Me.KeyPreview = True
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "WIN190810_VBA代码笔记"
-        Me.Text = "WIN190810_VBA代码笔记"
+        Me.Text = "代码笔记"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.Panel1.ResumeLayout(False)

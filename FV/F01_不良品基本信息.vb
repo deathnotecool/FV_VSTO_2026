@@ -4,29 +4,79 @@ Imports System.Data.OleDb     '使用OleDbConnection、OleDbAdapter、OleDbComma
 Imports System.Drawing        '使用颜色命名空间
 ' myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
 Public Class F01_不良品基本信息
+    ' ============================================================
+    ' ★★★ OleDb 与 Provider 的关系说明 ★★★
+    ' ============================================================
+    ' 【OleDb】    ：通用数据访问规范（标准/规则），定义了如何连接和操作数据库的统一方法。
+    ' 【Provider】  ：遵循 OleDb 规范的具体驱动程序（翻译官），负责将代码命令翻译成特定数据库能理解的语言。
+    ' 【连接字符串】：Provider=Microsoft.Ace.OleDb.12.0  指定使用 Access 数据库的翻译官。
+    '
+    ' 流程：VB.NET 代码 → OleDb 规范 → Provider(Ace) → Access 数据库
+    ' ============================================================
 
-    '声明作用域为类级的对象,该对象建立了与数据库的连接,此时数据库为Access.
-    'Dim strYiFangPath As String = "\\192.168.3.52\Users\进销存管理.accdb"
+    ' ============================================================
+    ' ★★★ 数据库连接配置（不良品信息管理） ★★★
+    ' ============================================================
+
+    ' 【用途】定义Access数据库文件的路径（支持多环境切换）
+    ' 说明：根据当前使用场景，取消注释对应的路径，并注释掉其他路径。
+    ' 【共享盘路径】（推荐，多人协作使用）
     Dim strSharePath As String = "\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\不良品信息管理.accdb"
-    Dim strMyHomerComputerPath As String = "E:\access\不良品信息管理.accdb"
-    Dim strMyCompanyComputerPath As String = "D:\6 总务\access\不良品信息管理.accdb"
-    Dim objConnection1th As New OleDbConnection _
-               ("Provider=Microsoft.Ace.OleDb.12.0;Data Source=" & strSharePath)
+    ' 【个人电脑路径1】（其他电脑时使用）
+    ' Dim strMyCompanyComputerPath As String = "D:\6 总务\access\不良品信息管理.accdb"
 
-    '  Dim objConnection1th As New OleDbConnection _
-    '("Provider=Microsoft.Ace.OleDb.12.0;Data Source=\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\不良品信息管理.accdb")  '公司共享盘
-    '("Provider=Microsoft.Ace.OleDb.12.0;Data Source=D:\2 笔记记录\0 过程信息管理笔记\不良品信息管理\不良品信息管理.accdb")  '三星笔记本
-    '("Provider=Microsoft.Ace.OleDb.12.0;Data Source=F:\2 笔记记录\8 过程信息管理\不良品信息管理\不良品信息管理.accdb")  '家里台式机
-    '("Provider=Microsoft.Ace.OleDb.12.0;Data Source=\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\不良品信息管理.accdb")  '公司共享盘
-    '声明作用域为类级的对象,该对象用于从数据库中读取数据,并填充到DataSet对象中.
-    '这个构造函数使我们不必写Adapter属性SelectCommand相关代码.已经加入相关参数(SQL语句)
+    ' 【数据库连接对象】
+    ' 功能：通过 OleDb 规范建立与 Access 数据库的连接。
+    '       具体的数据翻译工作由 Provider 完成。
+    ' 参数说明：
+    '   Provider：指定数据提供程序，Access 使用 Microsoft.Ace.OleDb.12.0
+    '   Data Source：数据库文件的完整路径（此处引用上面定义的共享盘路径）
+    Dim objConnection1th As New OleDbConnection _
+           ("Provider=Microsoft.Ace.OleDb.12.0;Data Source=" & strSharePath)
+
+
+    ' ============================================================
+    ' ★★★ 数据适配器与数据集 ★★★
+    ' ============================================================
+
+    ' 【数据适配器1（主查询）】
+    ' 功能：负责从数据库检索数据，并填充到 DataSet 中。
+    ' 参数1：SQL 查询语句（从 不良品信息 表查询所有字段，按 发生日期 排序）
+    ' 参数2：数据库连接对象（objConnection1th）
+    ' 说明：此适配器在窗体加载时执行，用于获取全部记录。
     Dim objDataAdapter As New OleDbDataAdapter("SELECT 不良品信息.* FROM 不良品信息 ORDER BY 发生日期", objConnection1th)
-    Dim objDataAdapter1th As New OleDbDataAdapter()  '该构造函数需要使用SelectCommand属性.用来填充履历卡数据的
-    Dim objDataSet As New DataSet()     '声明作用域为类级的对象,该对象作为数据的容器,将所有数据存储到内存中,并不连接到数据库.
-    Dim objDataSet1th As New DataSet()  '声明作用域为类级的对象,该对象作为数据的容器,将所有数据存储到内存中,并不连接到数据库.
-    Dim objDataView As DataView         '声明作用域为类级的对象,DataView类用来表示定制表-从数据库返回以及存储在DatSet(DataTable)中的记录视图
-    Dim objDataView1th As DataView      '声明作用域为类级的对象,DataView类用来表示定制表-从数据库返回以及存储在DatSet(DataTable)中的记录视图
-    Dim objCurrencyManager As CurrencyManager   '声明作用域为类级的对象,CurrencyManger对象用于控制绑定数据的移动;作为管理Binding对象的列表
+
+
+    ' 【数据适配器2（辅助查询）】
+    ' 功能：用于执行其他临时查询（如填充下拉框数据源）。
+    ' 说明：其 SelectCommand 属性在代码中动态设置，不固定 SQL。
+    Dim objDataAdapter1th As New OleDbDataAdapter()
+
+    ' 【数据集1（主数据容器）】
+    ' 功能：在内存中存储从数据库检索到的数据（离线数据缓存）。
+    ' 说明：数据适配器 Fill 方法将数据填充到此对象中，供 DataView 和控件绑定使用。
+    Dim objDataSet As New DataSet()
+
+    ' 【数据集2（辅助数据容器）】
+    ' 功能：用于存储辅助查询结果（如下拉框的选项数据）。
+    Dim objDataSet1th As New DataSet()
+
+    ' 【数据视图】
+    ' 功能：为 DataSet 中的数据提供“动态视图”，支持排序、筛选和搜索。
+    ' 说明：数据绑定到控件时，绑定的是 DataView，而不是 DataSet 本身。
+    '       DataView 可以独立于 DataSet 进行排序和筛选，而不影响原始数据。
+    Dim objDataView As DataView
+    Dim objDataView1th As DataView
+
+    ' 【货币管理器（CurrencyManager）】
+    ' 功能：管理绑定到同一数据源的所有控件的“当前记录位置”。
+    ' 说明：当你在窗体中点击“下一条”按钮时，CurrencyManager 负责同步更新
+    '       所有绑定控件的显示内容（文本框、复选框等）。
+    '       它通过 BindingContext 获取，确保多个控件显示同一条记录。
+    Dim objCurrencyManager As CurrencyManager
+
+
+
     Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
 
     '创建一个过程,将在Load事件(初始化代码)调用,并用来填充数据和显示数据.
@@ -356,7 +406,7 @@ Public Class F01_不良品基本信息
         '根据选定的项并设置DataView对象(源数据是指定表sbxx)相关字段的sort属性,  
         'Determine the appropriate item selected And set the Sort property of the DataView object..
         Select Case 排序字段.SelectedIndex
-              '"序列号", "姓名", "性别", "出生年月", "技术职称", "专业等级", "发证日期", "有效期至", "证件编号"
+            '"序列号", "姓名", "性别", "出生年月", "技术职称", "专业等级", "发证日期", "有效期至", "证件编号"
             Case 0
                 objDataView.Sort = "管理编号"
                 str条件 = "管理编号"
@@ -379,7 +429,7 @@ Public Class F01_不良品基本信息
             Case 6
                 objDataView.Sort = "发现过程"
                 str条件 = "发现过程"
-                '"不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
+            '"不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
             Case 7
                 objDataView.Sort = "不良类型"
                 str条件 = "不良类型"
