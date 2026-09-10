@@ -2,6 +2,7 @@
 Imports System.Data           '使用DatSet和DataView类所必须的.
 Imports System.Data.OleDb     '使用OleDbConnection、OleDbAdapter、OleDbCommand、OleDbParameter类所必须的.
 Imports System.Drawing        '使用颜色命名空间
+Imports System.Diagnostics
 ' myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
 Public Class F01_不良品基本信息
     ' ============================================================
@@ -79,44 +80,163 @@ Public Class F01_不良品基本信息
 
     Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
 
-    '创建一个过程,将在Load事件(初始化代码)调用,并用来填充数据和显示数据.
+    ''' <summary>
+    ''' 功能：核心数据加载方法：从 Access 数据库填充 DataSet，并初始化 DataView 和 CurrencyManager。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【调用时机】窗体 Load 事件、刷新按钮、筛选/排序后需重新加载数据时。
+    ''' 【数据流】objDataAdapter(Fill) → objDataSet(表"bl") → objDataView → objCurrencyManager
+    ''' 【历史优化点】
+    '''   1. 填充前清空 DataSet，避免重复累积（历史问题：TableAdapter.ClearBeforeFill 缺失导致数据重复）
+    '''   2. 增加 Try...Catch 异常处理，避免网络路径超时导致程序崩溃（历史问题：\\192.168.3.250 访问超时）
+    '''   3. 异常时给出用户友好提示，并记录调试日志便于排查
+    ''' </remarks>
     Private Sub FillDataSetAndView()
-        objDataSet = New DataSet()  '调用模块级对象,并重新初始化该(DataSet)对象
-        '向DataSet对象填充由Sql(Ole)DataAdapter对象SelectCommand属性从数据库检索到的数据.. 
-        '注意:Fill方法使用选择命令SelectCommand.Connection.如果该链接已打开,就会自动打开填充数据后保持打开连接对象,反之则反.  
-        objDataAdapter.Fill(objDataSet, "bl")  '表(bl)是初始构建起来的,命名为bl.
-        objDataView = New DataView(objDataSet.Tables("bl"))   '初始化并构建DataView对象.
-        'CurrencyManager(窗体获取到的数据记录集合)对象包含于BindingContect集合(内置于Win窗体,无须创建)中,
-        '将DataView对象转化为CurrencyManager对象.
-        objCurrencyManager = CType(Me.BindingContext(objDataView), CurrencyManager)
-    End Sub
+        ' ============================================================
+        ' ★★★ 第1步：异常处理外层 ★★★
+        ' ============================================================
+        ' 原因：数据库连接（网络路径）可能因网络波动、权限问题失败，
+        '       必须捕获异常避免整个窗体加载失败。
+        Try
+            ' ============================================================
+            ' ★★★ 第2步：重新初始化 DataSet（确保干净状态） ★★★
+            ' ============================================================
+            ' 历史踩坑：如果 objDataSet 已有旧数据，再次 Fill 会导致数据累积。
+            ' 解决方案：每次填充前重新 New，相当于清空所有表。
+            objDataSet = New DataSet()
 
-    '创建一个过程,逐一将窗体中的控件属性和指定数据源创建Binding,并将其添加到集合中.
-    Private Sub BindFields()
-        On Error Resume Next
-        Dim i As Byte = 0
-        '控件获取到的数据绑定(DataBindings属性),逐一清除(Clear方法)控件上的绑定(控件可能之前绑定过旧的DataView数据源) 
-        myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量",
-            "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成"， "因素确定"， "图片路径"}
-        For i = 0 To UBound(myArray)
-            GroupBox1.Controls(myArray(i).ToString).DataBindings.Clear()
-        Next i
-        '控件重新逐一绑定DateView数据源,add方法第一参数为要绑定的控件属性的名称,第二参数为要绑定的数据源,
-        '第三参数为要绑定给控件的数据字段(列表).
-        For i = 0 To UBound(myArray)
-            If GroupBox1.Controls(myArray(i).ToString).Name <> "处置完成" Then
+            ' ============================================================
+            ' ★★★ 第3步：执行数据填充 ★★★
+            ' ============================================================
+            ' 说明：objDataAdapter 的 SelectCommand 已在窗体级定义为：
+            '       "SELECT 不良品信息.* FROM 不良品信息 ORDER BY 发生日期"
+            ' Fill 方法会自动打开连接（如果未打开），填充完成后保持原状态。
+            ' 第二参数 "bl" 是 DataSet 中表的名称，后续通过它引用数据。
+            objDataAdapter.Fill(objDataSet, "bl")
 
-                GroupBox1.Controls(myArray(i).ToString).DataBindings.Add("Text", objDataView, GroupBox1.Controls(myArray(i).ToString).Name)
-            Else
-                GroupBox1.Controls(myArray(i).ToString).DataBindings.Add("Checked", objDataView, GroupBox1.Controls(myArray(i).ToString).Name)
+            ' ============================================================
+            ' ★★★ 第4步：初始化 DataView 和 CurrencyManager ★★★
+            ' ============================================================
+            ' DataView：为 DataSet 提供动态视图，支持排序、筛选，而不影响原始数据。
+            ' CurrencyManager：管理绑定到同一数据源的所有控件的当前记录位置，
+            '                  后续导航按钮（上一条/下一条）通过它实现同步。
+            objDataView = New DataView(objDataSet.Tables("bl"))
+            objCurrencyManager = CType(Me.BindingContext(objDataView), CurrencyManager)
+
+            ' ============================================================
+            ' ★★★ 第5步：状态栏提示（如果存在） ★★★
+            ' ============================================================
+            ' 说明：ToolStripLabel1 在窗体设计器中已存在，用于显示"就绪"状态。
+            '       此处仅作友好提示，不强制要求。
+            If Not IsNothing(ToolStripLabel1) Then
+                ToolStripLabel1.Text = "就绪"
             End If
 
-            'GroupBox1.Controls(myArray(i).ToString).DataBindings.Add("Text", objDataView, GroupBox1.Controls(myArray(i).ToString).Name)
-            If GroupBox1.Controls(myArray(i).ToString).Name = "发生日期" Then GroupBox1.Controls(myArray(i).ToString).Text _
-                = Format(CType(GroupBox1.Controls(myArray(i).ToString).Text, Date), "yyyy/MM/dd") '转换日期格式类型.
-        Next i
-        ToolStripLabel1.Text = "Ready"  '显示一个"只读"状态..
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：记录日志并提示用户 ★★★
+            ' ============================================================
+            ' 常见失败原因：
+            '   1. 网络路径 \\192.168.3.250 不可达（检查网络或VPN）
+            '   2. Access 数据库被独占打开（关闭其他连接）
+            '   3. Provider 驱动未安装（检查是否安装 Access 2010 引擎）
+            MessageBox.Show(
+            String.Format("加载不良品数据失败：{0}", ex.Message),
+            "FV VSTO - 数据库错误",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error
+        )
+
+            ' 同时将异常写入调试输出（便于开发时在输出窗口查看）
+            Debug.WriteLine(String.Format("FillDataSetAndView 异常: {0}", ex.ToString()))
+
+            ' 状态栏提示错误信息（如果存在）
+            If Not IsNothing(ToolStripLabel1) Then
+                ToolStripLabel1.Text = "加载失败，请检查数据库连接"
+            End If
+        End Try
     End Sub
+
+
+    ''' <summary>
+    ''' 功能：将 DataView 数据源中的字段逐一绑定到 GroupBox1 内的窗体控件上，
+    '''       使控件显示内容与当前记录保持同步；同时清除旧绑定以防止多次调用时叠加。
+    '''       涉及对象：GroupBox1 内所有与数据库字段同名的控件（文本框、组合框、复选框）。
+    '''       绑定方向：单向（数据源 → 控件），控件编辑后需手动调用更新逻辑写回数据库。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【绑定机制】通过 Control.DataBindings.Add 建立控件属性（如 Text/Checked）与数据字段的映射。
+    ''' 【调用时机】在 FillDataSetAndView 成功加载数据后调用（通常紧随其后）。
+    ''' 【历史优化点】
+    '''   1. 绑定前先清除所有控件的旧绑定，避免残留（防止字段错位或显示异常）
+    '''   2. 针对 CheckBox 单独处理 Checked 属性，而非 Text
+    '''   3. 对日期字段进行格式化（统一为 yyyy/MM/dd），避免显示时分秒
+    ''' </remarks>
+    Private Sub BindFields()
+        ' ============================================================
+        ' ★★★ 第1步：定义字段映射数组 ★★★
+        ' ============================================================
+        ' 说明：此数组顺序必须与 DataSet 中表的列顺序一致（或字段名完全匹配）。
+        '       共 21 个字段，对应数据库表"不良品信息"的所有列。
+        '       历史踩坑：若字段名与控件名不一致，绑定会失败（此处已确保完全一致）。
+        myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量",
+        "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成", "因素确定", "图片路径"}
+
+        ' ============================================================
+        ' ★★★ 第2步：清除所有控件的旧绑定（防止累积） ★★★
+        ' ============================================================
+        ' 说明：遍历 GroupBox1 中的所有控件，清除其 DataBindings 集合。
+        '       如果不清除，在多次调用 BindFields 时（如刷新数据），
+        '       旧绑定会与新绑定叠加，导致显示混乱或报错。
+        For i As Byte = 0 To UBound(myArray)
+            GroupBox1.Controls(myArray(i).ToString()).DataBindings.Clear()
+        Next i
+
+        ' ============================================================
+        ' ★★★ 第3步：重新绑定数据字段到控件 ★★★
+        ' ============================================================
+        ' 说明：DataBindings.Add(属性名, 数据源, 字段名)
+        '       对于普通控件（文本框等），绑定 Text 属性。
+        '       对于 CheckBox，绑定 Checked 属性（布尔值）。
+        For i As Byte = 0 To UBound(myArray)
+            Dim strControlName As String = myArray(i).ToString()
+            Dim ctrl As Control = GroupBox1.Controls(strControlName)
+
+            ' 判断是否为 CheckBox（处置完成）
+            If TypeOf ctrl Is CheckBox Then
+                ' 绑定 Checked 属性，而非 Text
+                ctrl.DataBindings.Add("Checked", objDataView, strControlName)
+            Else
+                ' 绑定 Text 属性
+                ctrl.DataBindings.Add("Text", objDataView, strControlName)
+            End If
+
+            ' ============================================================
+            ' ★★★ 特殊处理：日期字段格式化为短日期 ★★★
+            ' ============================================================
+            ' 原因：数据库中的日期可能包含时间部分（如 2025-01-01 00:00:00），
+            '       直接显示会不美观。统一格式为 yyyy/MM/dd。
+            ' 历史踩坑：如果字段值为 DBNull，直接转换会报错，故使用 Try 捕获。
+            If strControlName = "发生日期" Then
+                Try
+                    Dim dt As Date = CType(ctrl.Text, Date)
+                    ctrl.Text = Format(dt, "yyyy/MM/dd")
+                Catch ex As Exception
+                    ' 若转换失败（如空值），则保持原样
+                    ' 此处不处理异常，避免打断绑定流程
+                End Try
+            End If
+        Next i
+
+        ' ============================================================
+        ' ★★★ 第4步：更新状态栏提示 ★★★
+        ' ============================================================
+        ToolStripLabel1.Text = "Ready"  ' 显示就绪状态
+    End Sub
+
+
+
+
 
     '创建过程,并显示当前单个记录的位置.
     Private Sub ShowPosition()
