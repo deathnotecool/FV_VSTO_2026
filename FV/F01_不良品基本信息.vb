@@ -75,10 +75,15 @@ Public Class F01_不良品基本信息
     '       所有绑定控件的显示内容（文本框、复选框等）。
     '       它通过 BindingContext 获取，确保多个控件显示同一条记录。
     Dim objCurrencyManager As CurrencyManager
-
-
-
     Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
+
+
+    ' 【筛选状态标志】记录当前是否处于"只看未完成记录"筛选状态
+    ' 说明：True = 当前只显示未完成记录（按钮标签为"显示全部"）；
+    '       False = 当前显示全部记录（按钮标签为"未处理记录请点该按钮查看"）。
+    Private blnFilteringUnfinished As Boolean = False
+
+
 
     ''' <summary>
     ''' 功能：核心数据加载方法：从 Access 数据库填充 DataSet，并初始化 DataView 和 CurrencyManager。
@@ -373,19 +378,130 @@ Public Class F01_不良品基本信息
     End Sub
 
 
-
+    ''' <summary>
+    ''' 功能：作为"未处理记录查看"的切换按钮，每次点击切换两种状态：
+    '''       ① 未筛选状态 → 用 objDataView.RowFilter 只保留"处置完成 = False"的记录，
+    '''                      按钮标签改为"显示全部"；
+    '''       ② 已筛选状态 → 清空 RowFilter，恢复显示全部记录，
+    '''                      按钮标签改回"未处理记录请点该按钮查看"。
+    '''       同时遍历 DataGridView 数据行，将已完成行着黑色、未完成行着红色，
+    '''       便于在"全部"视图中一眼区分。
+    '''       涉及对象：objDataView、grdAuthorTitles、btnDisplayingRedData、objCurrencyManager。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【关键机制】
+    '''   - RowFilter 直接作用于 objDataView，所有绑定到它的控件（Grid、导航按钮、位置标签）
+    '''     都会自动同步，无需逐个刷新。
+    '''   - 筛选后 objCurrencyManager.Position 会自动重置为 0，需手动调用 ShowPosition() 更新标签。
+    ''' 【历史踩坑】
+    '''   1. 第18列数据类型为 System.Boolean（已验证），RowFilter 语法用 "处置完成 = False"。
+    '''   2. Grid 必须绑定 objDataView 而非 objDataSet，否则 RowFilter 不生效（本次已修复 Load）。
+    '''   3. 循环终止条件用 RowCount - 2（跳过末尾空白新行），避免读到 DBNull 抛异常。
+    '''   4. 单元格值可能为 Nothing，用 If(...) 兜底为 False，避免 ToString() 抛异常被 WinForms 吞掉。
+    ''' </remarks>
     Private Sub btnDisplayingRedData_Click(sender As Object, e As EventArgs) Handles btnDisplayingRedData.Click
-        For i As Integer = 0 To grdAuthorTitles.RowCount - 2                           '有一个空白行也算一行
-            If CType(grdAuthorTitles.Item(18, i).Value.ToString(), Boolean) Then
-                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
-                grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black                          '字体颜色设置为黑色
+        ' ============================================================
+        ' ★★★ 第1步：异常处理外层 ★★★
+        ' ============================================================
+        ' 原因：RowFilter 语法错误、单元格值为 Nothing 都会抛异常，
+        '       必须捕获，否则按钮表现为"无反应"。
+        Try
+            ' ============================================================
+            ' ★★★ 第2步：切换筛选状态 ★★★
+            ' ============================================================
+            ' 使用模块级变量 blnFilteringUnfinished 记录当前是否处于"只看未完成"状态。
+            ' 每次点击取反，实现两种状态的来回切换。
+            blnFilteringUnfinished = Not blnFilteringUnfinished
 
+            If blnFilteringUnfinished Then
+                ' ---- 进入筛选状态：只显示"处置完成 = False"的记录 ----
+                ' 说明：字段类型为 System.Boolean，故直接写 False，无需用 0/-1。
+                objDataView.RowFilter = "处置完成 = False"
+                btnDisplayingRedData.Text = "显示全部"   ' 提示用户"再点一次可恢复"
             Else
-                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
-                grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red                            '字体颜色设置为红色
+                ' ---- 退出筛选状态：清空筛选，恢复全部记录 ----
+                objDataView.RowFilter = ""               ' 空字符串 = 不过滤
+                btnDisplayingRedData.Text = "未处理记录请点该按钮查看"
             End If
-        Next
+
+            ' ============================================================
+            ' ★★★ 第3步：遍历着色（红色=未完成，黑色=已完成） ★★★
+            ' ============================================================
+            ' 说明：筛选切换后，Grid 会按新数据源重新渲染，
+            '       但已着色的行样式不会被自动清除，故每次点击都重新遍历一遍，
+            '       保证两种状态下的颜色都正确。
+            For i As Integer = 0 To grdAuthorTitles.RowCount - 2
+                ' 读取第 18 列（"处置完成"）的值，Nothing 时按 False 处理
+                Dim objCellValue As Object = grdAuthorTitles.Item(18, i).Value
+                Dim bolFinished As Boolean = If(objCellValue Is Nothing, False, CType(objCellValue.ToString(), Boolean))
+
+                If bolFinished Then
+                    ' ---- 已处置完成：黑色常规字体 ----
+                    grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
+                    grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black
+                Else
+                    ' ---- 未处置完成：红色常规字体（突出显示） ----
+                    grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
+                    grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red
+                End If
+            Next
+
+            ' ============================================================
+            ' ★★★ 第4步：筛选后重置记录位置并刷新标签 ★★★
+            ' ============================================================
+            ' 原因：RowFilter 变化会导致 CurrencyManager.Position 自动归零，
+            '       必须手动调用 ShowPosition() 更新"当前记录位置"标签。
+            If objCurrencyManager.Count > 0 Then
+                objCurrencyManager.Position = 0
+            End If
+            ShowPosition()
+
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：给出友好提示 ★★★
+            ' ============================================================
+            MessageBox.Show(
+            String.Format("切换未处理记录视图时出错：{0}", ex.Message),
+            "FV VSTO - 显示错误",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error
+        )
+            Debug.WriteLine(String.Format("btnDisplayingRedData_Click 异常: {0}", ex.ToString()))
+        End Try
     End Sub
+
+
+    'Private Sub btnDisplayingRedData_Click(sender As Object, e As EventArgs) Handles btnDisplayingRedData.Click
+    '    ' ---- 调试版：定位到底哪里出错 ----
+    '    Try
+    '        ' 显示关键状态
+    '        MessageBox.Show("RowCount = " & grdAuthorTitles.RowCount & vbCrLf &
+    '                    "循环上限 = " & (grdAuthorTitles.RowCount - 2) & vbCrLf &
+    '                    "第18列(处置完成)索引 = 18")
+
+    '        For i As Integer = 0 To grdAuthorTitles.RowCount - 2
+    '            Dim objValue As Object = grdAuthorTitles.Item(18, i).Value
+
+    '            If CType(objValue.ToString(), Boolean) Then
+    '                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
+    '                grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black
+    '            Else
+    '                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
+    '                grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red
+    '            End If
+    '        Next
+
+    '        ' ---- 调试：检查前几行颜色是否真的变了 ----
+    '        Dim strDebug As String = ""
+    '        For i As Integer = 0 To Math.Min(5, grdAuthorTitles.RowCount - 2)
+    '            strDebug &= "行 " & i & " 颜色 = " & grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor.Name &
+    '            "，处置完成 = " & grdAuthorTitles.Item(18, i).Value.ToString() & vbCrLf
+    '        Next
+    '        MessageBox.Show(strDebug)
+    '    Catch ex As Exception
+    '        MessageBox.Show("出错：" & ex.Message & vbCrLf & vbCrLf & ex.StackTrace)
+    '    End Try
+    'End Sub
 
 
     '加载窗体触发事件
@@ -396,11 +512,18 @@ Public Class F01_不良品基本信息
         ShowPosition()  '调用ShowPosition方法,并显示当前记录标签位置    
         'BindFields()  '调用绑定控件过程,因为有复合框,所以放在事件最后面.
         grdAuthorTitles.AutoGenerateColumns = True  '让grd控件创建所需要的所有列.
-        grdAuthorTitles.DataSource = objDataSet '设置DataSet对象,作为gird控件的数据来源(实际上就是一个绑定过程,告知控件从哪里获得数据).
-        grdAuthorTitles.DataMember = "bl"  '设置gird控件要显示的数据源(具体的表名称).
+
+        ' 【历史踩坑修复】Grid 数据源由 objDataSet 改为 objDataView。
+        ' 原因：RowFilter 只对 DataView 生效；若 Grid 直接绑 DataSet，
+        '       则 objDataView.RowFilter 改了也不影响界面，筛选功能会失效（本次调试已踩坑）。
+        ' 注意：DataView 自带表结构，无需再设 DataMember。
+        grdAuthorTitles.DataSource = objDataView
+
         '将对齐方式格式改为垂直居中向右对齐.
         Dim objAlignRightCellStyle As New DataGridViewCellStyle  '初始化DataGridViewCellStyle对象(作为grd控件单元格或标题样式实例) 
         objAlignRightCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+
+
         Dim objAlternatingCellStyle As New DataGridViewCellStyle() '初始化DataGridViewCellStyle对象(grd控件单元格样式实例) 作为交叉行样式  
         objAlternatingCellStyle.BackColor = Color.WhiteSmoke  '设置交叉样式背景色为烟灰色
         grdAuthorTitles.AlternatingRowsDefaultCellStyle = objAlternatingCellStyle '奇数行属性设置刚创建的样式(烟白色)
@@ -1169,6 +1292,10 @@ Public Class F01_不良品基本信息
             End With
         End If
 
+
+    End Sub
+
+    Private Sub F01_不良品基本信息_MinimumSizeChanged(sender As Object, e As EventArgs) Handles Me.MinimumSizeChanged
 
     End Sub
 
