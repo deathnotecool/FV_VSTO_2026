@@ -234,80 +234,145 @@ Public Class F01_不良品基本信息
         ToolStripLabel1.Text = "Ready"  ' 显示就绪状态
     End Sub
 
-
-
-
-
-    '创建过程,并显示当前单个记录的位置.
+    ''' <summary>
+    ''' 功能：格式化"发生日期"文本框内容为短日期（yyyy/MM/dd），
+    '''       并在 txtRecordPosition 文本框中显示当前记录位置（如 "3 of 120"）。
+    '''       涉及对象：GroupBox1 内的"发生日期"控件、txtRecordPosition 控件。
+    '''       触发场景：任何记录导航（首条/上一条/下一条/末条）后调用，
+    '''                 确保界面上的日期格式统一、记录位置实时同步。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【机制说明】
+    '''   - 记录总数来自 objCurrencyManager.Count（当前 DataView 的行数）。
+    '''   - 当前索引来自 objCurrencyManager.Position（从 0 开始，显示时 +1）。
+    ''' 【历史踩坑】
+    '''   - 当记录为空或"发生日期"字段为 DBNull 时，直接 CType 转换会抛异常，
+    '''     故使用 Try...Catch 兜底：转换失败则用当前系统日期填充，保证界面不崩溃。
+    ''' </remarks>
     Private Sub ShowPosition()
-        Try  '格式化日期指定短日期格式.
-            发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd") '定义格式
-        Catch e As System.Exception   '声明一个错误变量类型
-            '如果异常(文本框为空),那么转换当前日期类型为文本类型,并写入文本框中.
+        ' ============================================================
+        ' ★★★ 第1步：格式化"发生日期"为短日期 ★★★
+        ' ============================================================
+        ' 原因：DataView 绑定到文本框后，日期可能带时间部分（如 2025/01/01 0:00:00），
+        '       统一格式为 yyyy/MM/dd 以便阅读。
+        ' 历史踩坑：空记录或 DBNull 会导致 CType 失败，故用 Try 包裹。
+        Try
+            ' 尝试将文本框内容转换为 Date 类型，再按短日期格式回写
+            发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")
+        Catch e As System.Exception
+            ' 转换失败（如空值）时：先用当前系统日期兜底，避免文本框为空导致后续逻辑出错
             GroupBox1.Controls("发生日期").Text = CType(Now, String)
-            发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")  '重新转换Date类型.
+            ' 再次格式化（此时必定成功）
+            发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")
         End Try
+
+        ' ============================================================
+        ' ★★★ 第2步：显示当前记录位置 ★★★
+        ' ============================================================
+        ' 说明：Position 从 0 开始，显示时 +1 更符合用户习惯（如 "1 of 120"）。
+        '       Count 为当前 DataView 的记录总数（受筛选影响）。
         txtRecordPosition.Text = objCurrencyManager.Position + 1 &
-    " of " & objCurrencyManager.Count() '显示当前记录位置,并标记记录数. 
+        " of " & objCurrencyManager.Count()
     End Sub
 
-    '按钮单击事件,移动第一条记录
-    Private Sub btnMoveFirst_Click(Sender As Object,
-            E As EventArgs) Handles btnMoveFirst.Click
+
+    ''' <summary>
+    ''' 功能：将当前记录位置移动到数据集的第一条记录（索引 0）。
+    '''       同时同步 DataGridView 的选中行为第一条记录的第一列，
+    '''       并刷新"当前记录位置"标签显示。
+    '''       涉及对象：objCurrencyManager、grdAuthorTitles、txtRecordPosition。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【关键机制】
+    '''   - 所有绑定到同一 DataView 的控件，其显示内容由 CurrencyManager.Position 统一控制，
+    '''     因此改变 Position 会自动刷新所有控件，无需逐个赋值。
+    '''   - DataGridView 的 CurrentCell 需要通过 RemoveHandler/AddHandler 临时解绑
+    '''     SelectionChanged 事件，避免程序化移动指针时触发用户的选中逻辑（历史踩坑：会造成死循环或额外查询）。
+    ''' 【历史优化点】
+    '''   - 若"查询条件"文本框非空，则将 DataGridView 指针重置为筛选结果的第一行，
+    '''     避免 Position 与视图显示的行不一致。
+    ''' </remarks>
+    Private Sub btnMoveFirst_Click(Sender As Object, E As EventArgs) Handles btnMoveFirst.Click
         Dim intPosition As Integer
-        objCurrencyManager.Position = 0  '设置当前记录为第一条记录.
-        intPosition = objCurrencyManager.Position   '记录位置赋值给变量
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件关联
-        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)  '视图控件指针选择指定行第一个单元格
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
-        '控件与数据源(objDataView)绑定,通过CurrencyManager对象指定位置,因为控件绑定同一数据源,所以控件显示的记录是同步的.
+        objCurrencyManager.Position = 0             ' 定位到第一条记录（索引从 0 开始）
+        intPosition = objCurrencyManager.Position   ' 记录位置赋值给变量，供 DataGridView 同步使用
+
+        ' 临时解绑 SelectionChanged 事件：防止程序化改变 CurrentCell 时触发用户逻辑
+        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)  ' 同步 DataGridView 指针
+        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged  ' 恢复绑定
+
+        ShowPosition()  ' 刷新"当前记录位置"标签
+
+        ' 若处于筛选状态，指针需回到筛选结果的第一行（否则 Position 与视图不一致）
+        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0)
+    End Sub
+
+
+    ''' <summary>
+    ''' 功能：将当前记录位置向前移动一条（Position - 1）。
+    '''       同步 DataGridView 指针与记录位置标签，到达首条时 Position 会被 CurrencyManager 自动钳制。
+    '''       涉及对象：objCurrencyManager、grdAuthorTitles、txtRecordPosition。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【注意】Position -= 1 在第一条时会保持 0（CurrencyManager 内部已做边界保护）。
+    ''' 【历史踩坑】同 btnMoveFirst_Click，需 RemoveHandler/AddHandler 避免事件冲突。
+    ''' </remarks>
+    Private Sub btnMovePrevious_Click(Sender As Object, E As EventArgs) Handles btnMovePrevious.Click
+        Dim intPosition As Integer
+        objCurrencyManager.Position -= 1            ' 上一条记录（边界由 CurrencyManager 自动处理）
+        intPosition = objCurrencyManager.Position
+        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)
+        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
         ShowPosition()
-        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0) 'CurrentCell 
-
+        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0)
     End Sub
 
-    '按钮单击事件,移动上一条记录
-    Private Sub btnMovePrevious_Click(Sender As Object,
-            E As EventArgs) Handles btnMovePrevious.Click
+
+    ''' <summary>
+    ''' 功能：将当前记录位置向后移动一条（Position + 1）。
+    '''       同步 DataGridView 指针与记录位置标签，到达末条时 Position 会被 CurrencyManager 自动钳制。
+    '''       涉及对象：objCurrencyManager、grdAuthorTitles、txtRecordPosition。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【注意】Position += 1 在最后一条时会保持 Count-1（CurrencyManager 内部已做边界保护）。
+    ''' 【历史踩坑】同 btnMoveFirst_Click，需 RemoveHandler/AddHandler 避免事件冲突。
+    ''' </remarks>
+    Private Sub btnMoveNext_Click(Sender As Object, E As EventArgs) Handles btnMoveNext.Click
         Dim intPosition As Integer
-        objCurrencyManager.Position -= 1 'Move to the previous record..
-        intPosition = objCurrencyManager.Position  '记录位置赋值给变量
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged  '解除事件.
-        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)  '视图控件指针选择指定行第一个单元格.
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '绑定事件.
-        ShowPosition()  '控件与数据源(objDataView)绑定,通过CurrencyManager指定位置,因为控件绑定同一数据源,所以控件显示的记录是同步的.
-        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0) 'CurrentCell 
-
+        objCurrencyManager.Position += 1            ' 下一条记录（边界由 CurrencyManager 自动处理）
+        intPosition = objCurrencyManager.Position
+        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)
+        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+        ShowPosition()
+        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0)
     End Sub
 
-    '按钮单击事件,移动下一条记录.
-    Private Sub btnMoveNext_Click(Sender As Object,
-            E As EventArgs) Handles btnMoveNext.Click
+
+    ''' <summary>
+    ''' 功能：将当前记录位置直接跳到数据集的最后一条记录（Count - 1）。
+    '''       同步 DataGridView 指针与记录位置标签。
+    '''       涉及对象：objCurrencyManager、grdAuthorTitles、txtRecordPosition。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【注意】若数据集为空（Count = 0），Position = -1 会导致后续 Rows(-1) 报错，
+    '''         因此建议在调用前确保 Count > 0（本方法在 Load 后调用，通常已满足）。
+    ''' 【历史踩坑】同 btnMoveFirst_Click，需 RemoveHandler/AddHandler 避免事件冲突。
+    ''' </remarks>
+    Private Sub btnMoveLast_Click(Sender As Object, E As EventArgs) Handles btnMoveLast.Click
         Dim intPosition As Integer
-        '移动下一条记录. 
-        objCurrencyManager.Position += 1 'Move to the next record..
-        intPosition = objCurrencyManager.Position  '记录位置赋值给变量
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
-        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)  '视图控件指针选择指定行第一个单元格
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
-        ShowPosition()  '控件与数据源(objDataView)绑定,通过CurrencyManager指定位置,因为控件绑定同一数据源,所以控件显示的记录是同步的.
-        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0) 'CurrentCell 
-
+        objCurrencyManager.Position = objCurrencyManager.Count - 1  ' 定位到最后一条记录
+        intPosition = objCurrencyManager.Position
+        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)
+        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+        ShowPosition()
+        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0)
     End Sub
 
-    '按钮单击事件,移动最后一条记录
-    Private Sub btnMoveLast_Click(Sender As Object,
-            E As EventArgs) Handles btnMoveLast.Click
-        Dim intPosition As Integer
-        '移动最后一条记录,不需要调用重新绑定过程,自动同步的,只要不更新,就不存在数据源集的变更 
-        objCurrencyManager.Position = objCurrencyManager.Count - 1 ' Set the record position to the last record..
-        intPosition = objCurrencyManager.Position   '记录位置赋值给变量
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
-        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)  '视图控件指针选择指定行第一个单元格
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '绑定事件
-        ShowPosition()  '控件与数据源(objDataView)绑定,通过CurrencyManager指定位置,因为控件绑定同一数据源,所以控件显示的记录是同步的.
-        If 查询条件.Text <> "" Then grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(0).Cells(0) 'CurrentCell 
-    End Sub
+
 
     Private Sub btnDisplayingRedData_Click(sender As Object, e As EventArgs) Handles btnDisplayingRedData.Click
         For i As Integer = 0 To grdAuthorTitles.RowCount - 2                           '有一个空白行也算一行
