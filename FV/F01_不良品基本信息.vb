@@ -5,6 +5,15 @@ Imports System.Drawing        '使用颜色命名空间
 Imports System.Diagnostics
 ' myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
 Public Class F01_不良品基本信息
+    'OleDbConnection/objConnection1th	电话线（连接通道）
+    'OleDbCommand	你说的话（Sql 语句）
+    'OleDbDataAdapter	接线员（帮你把话传过去、把答复拿回来）,专门问"不良品信息"的接线员
+    'objDataAdapter1th	临时问其他表的接线员
+    'DataSet/ objDataSet1th 	你的笔记本（本地缓存）,两本笔记本，装不同数据
+    'DataView	笔记本上的"筛选/排序视图"
+    'objCurrencyManager	翻页器（管当前显示第几条）
+
+
     ' ============================================================
     ' ★★★ OleDb 与 Provider 的关系说明 ★★★
     ' ============================================================
@@ -470,70 +479,64 @@ Public Class F01_不良品基本信息
         End Try
     End Sub
 
-
-    'Private Sub btnDisplayingRedData_Click(sender As Object, e As EventArgs) Handles btnDisplayingRedData.Click
-    '    ' ---- 调试版：定位到底哪里出错 ----
-    '    Try
-    '        ' 显示关键状态
-    '        MessageBox.Show("RowCount = " & grdAuthorTitles.RowCount & vbCrLf &
-    '                    "循环上限 = " & (grdAuthorTitles.RowCount - 2) & vbCrLf &
-    '                    "第18列(处置完成)索引 = 18")
-
-    '        For i As Integer = 0 To grdAuthorTitles.RowCount - 2
-    '            Dim objValue As Object = grdAuthorTitles.Item(18, i).Value
-
-    '            If CType(objValue.ToString(), Boolean) Then
-    '                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
-    '                grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black
-    '            Else
-    '                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
-    '                grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red
-    '            End If
-    '        Next
-
-    '        ' ---- 调试：检查前几行颜色是否真的变了 ----
-    '        Dim strDebug As String = ""
-    '        For i As Integer = 0 To Math.Min(5, grdAuthorTitles.RowCount - 2)
-    '            strDebug &= "行 " & i & " 颜色 = " & grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor.Name &
-    '            "，处置完成 = " & grdAuthorTitles.Item(18, i).Value.ToString() & vbCrLf
-    '        Next
-    '        MessageBox.Show(strDebug)
-    '    Catch ex As Exception
-    '        MessageBox.Show("出错：" & ex.Message & vbCrLf & vbCrLf & ex.StackTrace)
-    '    End Try
-    'End Sub
-
-
-    '加载窗体触发事件
+    ''' <summary>
+    ''' 功能：窗体加载时初始化整个不良品信息界面。
+    '''       包括：加载数据、绑定数据源、配置 DataGridView 列与样式、
+    '''             填充各类下拉框选项、设置默认选中项。
+    '''       涉及对象：objDataSet、objDataView、grdAuthorTitles、各类 ComboBox。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【历史踩坑修复】
+    '''   1. Grid 数据源由 objDataSet 改为 objDataView（RowFilter 才能生效，本次已修复）。
+    '''   2. 数据加载通过 FillDataSetAndView() 完成，该方法内部已加异常处理。
+    '''   3. 列样式设置必须在 Grid 绑定数据源之后，否则 AutoGenerateColumns 会覆盖样式。
+    ''' </remarks>
     Private Sub F01_不良品基本信息_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        '需要说明的是,Fill方法会执行命令(SelectCommand),其Connection属性保持为调用该方法时的状态.
-        'On Error Resume Next
-        FillDataSetAndView() '调用FillDataSetAndView过程检索数据并调用BindFields过程绑定数据源字段到指定控件.
-        ShowPosition()  '调用ShowPosition方法,并显示当前记录标签位置    
-        'BindFields()  '调用绑定控件过程,因为有复合框,所以放在事件最后面.
-        grdAuthorTitles.AutoGenerateColumns = True  '让grd控件创建所需要的所有列.
+        ' ============================================================
+        ' ★★★ 第1步：加载数据并刷新界面基础状态 ★★★
+        ' ============================================================
+        ' FillDataSetAndView()：填充 objDataSet → 构建 objDataView → 获取 objCurrencyManager
+        ' ShowPosition()：刷新"当前记录位置"标签（如 "1 of 2617"）
+        FillDataSetAndView()
+        ShowPosition()
 
-        ' 【历史踩坑修复】Grid 数据源由 objDataSet 改为 objDataView。
-        ' 原因：RowFilter 只对 DataView 生效；若 Grid 直接绑 DataSet，
-        '       则 objDataView.RowFilter 改了也不影响界面，筛选功能会失效（本次调试已踩坑）。
-        ' 注意：DataView 自带表结构，无需再设 DataMember。
+        ' ============================================================
+        ' ★★★ 第2步：将 Grid 绑定到 objDataView ★★★
+        ' ============================================================
+        ' 【关键】必须绑定 objDataView，而非 objDataSet：
+        '   - RowFilter 只对 DataView 生效，绑定 DataSet 会导致筛选功能失效（本次踩坑）。
+        '   - DataView 自带表结构，无需再设 DataMember。
+        ' AutoGenerateColumns = True：让 Grid 根据数据源自动创建所有列。
+        grdAuthorTitles.AutoGenerateColumns = True
         grdAuthorTitles.DataSource = objDataView
 
-        '将对齐方式格式改为垂直居中向右对齐.
-        Dim objAlignRightCellStyle As New DataGridViewCellStyle  '初始化DataGridViewCellStyle对象(作为grd控件单元格或标题样式实例) 
+
+        ' ============================================================
+        ' ★★★ 第3步：配置 DataGridView 列标题与单元格样式 ★★★
+        ' ============================================================
+        ' 说明：所有列样式设置必须在 Grid 绑定数据源之后执行，
+        '       否则 AutoGenerateColumns 重新生成列时会覆盖此处设置（历史踩坑）。
+
+        ' ---- 3.1 定义通用样式对象 ----
+        ' objAlignRightCellStyle：右对齐样式，用于金额类列标题。
+        Dim objAlignRightCellStyle As New DataGridViewCellStyle
         objAlignRightCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
 
+        ' objAlternatingCellStyle：交替行背景色，提升可读性。
+        Dim objAlternatingCellStyle As New DataGridViewCellStyle()
+        objAlternatingCellStyle.BackColor = Color.WhiteSmoke
+        grdAuthorTitles.AlternatingRowsDefaultCellStyle = objAlternatingCellStyle
 
-        Dim objAlternatingCellStyle As New DataGridViewCellStyle() '初始化DataGridViewCellStyle对象(grd控件单元格样式实例) 作为交叉行样式  
-        objAlternatingCellStyle.BackColor = Color.WhiteSmoke  '设置交叉样式背景色为烟灰色
-        grdAuthorTitles.AlternatingRowsDefaultCellStyle = objAlternatingCellStyle '奇数行属性设置刚创建的样式(烟白色)
-        Dim objCurrencyCellStyle As New DataGridViewCellStyle()  '初始化DataGridViewCellStyle对象,将设置单元格格式为货币型.
-        objCurrencyCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft  '将对齐方式改为居中向左对齐
-        objCurrencyCellStyle.Format = "¥#,##0.00" '样式格式为货币型(美元或者人民币$¥)
-        'objCurrencyCellStyle.Format = "C"  '样式格式为货币型(人民币)
-        grdAuthorTitles.Columns(0).HeaderText = "管理编号"   '设置控件列标题   
-        'grdAuthorTitles.Columns(1).HeaderText = "发生日期"
-        grdAuthorTitles.Columns(1).HeaderText = "录入日期"
+        ' objCurrencyCellStyle：货币格式样式，用于金额类单元格（加工费用/材料费用/损失成本）。
+        Dim objCurrencyCellStyle As New DataGridViewCellStyle()
+        objCurrencyCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft
+        objCurrencyCellStyle.Format = "¥#,##0.00"
+
+        ' ---- 3.2 设置各列标题文字 ----
+        ' 说明：Grid 自动生成的列标题默认是英文字段名或数据库列名，
+        '       需逐一映射为中文标题，便于用户理解。
+        grdAuthorTitles.Columns(0).HeaderText = "管理编号"
+        grdAuthorTitles.Columns(1).HeaderText = "发生日期"
         grdAuthorTitles.Columns(2).HeaderText = "客户"
         grdAuthorTitles.Columns(3).HeaderText = "供应商"
         grdAuthorTitles.Columns(4).HeaderText = "产品规格"
@@ -548,111 +551,250 @@ Public Class F01_不良品基本信息
         grdAuthorTitles.Columns(13).HeaderText = "材料费用"
         grdAuthorTitles.Columns(14).HeaderText = "损失成本"
         grdAuthorTitles.Columns(15).HeaderText = "不良现象及原因"
-        grdAuthorTitles.Columns(15).Width = 130 '设置指定列默认宽度大一点
+        grdAuthorTitles.Columns(15).Width = 130                 ' 现象描述较长，加宽便于阅读
         grdAuthorTitles.Columns(16).HeaderText = "备注"
         grdAuthorTitles.Columns(17).HeaderText = "重量"
         grdAuthorTitles.Columns(18).HeaderText = "处置完成"
-        grdAuthorTitles.Columns(18).Width = 60 '设置指定列默认宽度大一点
+        grdAuthorTitles.Columns(18).Width = 60                  ' 布尔值只需小宽度
         grdAuthorTitles.Columns(19).HeaderText = "因素确定"
         grdAuthorTitles.Columns(20).HeaderText = "图片路径"
-        '自动调整列宽.
-        'grdAuthorTitles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnMode.AllCells
 
-
-        ''改变字段标题名称和样式'Change column names and styles using the column name  
-        grdAuthorTitles.Columns("加工费用").HeaderCell.Value = "加工费用_内" '重新设置列标题的值显示为"描述"
-        '标题重新调用列标题样式(之前设定的-居中右对齐)
+        ' ---- 3.3 金额类列设置特殊样式（标题右对齐 + 单元格货币格式） ----
+        ' 说明：Columns("列名") 通过列名引用，需保证列名与数据库字段一致。
+        grdAuthorTitles.Columns("加工费用").HeaderCell.Value = "加工费用_内"  ' 标题改写便于区分
         grdAuthorTitles.Columns("加工费用").HeaderCell.Style = objAlignRightCellStyle
-        '单元格内容重新调用样式(之前设定的-货币样式)
         grdAuthorTitles.Columns("加工费用").DefaultCellStyle = objCurrencyCellStyle
+
         grdAuthorTitles.Columns("材料费用").HeaderCell.Style = objAlignRightCellStyle
-        '单元格内容重新调用样式(之前设定的-货币样式)
         grdAuthorTitles.Columns("材料费用").DefaultCellStyle = objCurrencyCellStyle
+
         grdAuthorTitles.Columns("损失成本").HeaderCell.Style = objAlignRightCellStyle
-        '单元格内容重新调用样式(之前设定的-货币样式)
         grdAuthorTitles.Columns("损失成本").DefaultCellStyle = objCurrencyCellStyle
 
-        ''遍历记录数量
-        'For i As Integer = 0 To grdAuthorTitles.RowCount - 1  '有一个空白行也算一行
-        '    If Math.Ceiling(CType(grdAuthorTitles.Item(7, i).Value.ToString(), Date).Subtract(Now).TotalDays) <= 20 Then
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red                            '字体颜色设置为红色
-        '    Else
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black                          '字体颜色设置为黑色
-        '    End If
-        'Next
+        ' ---- 3.4 释放临时样式对象 ----
+        ' 说明：样式已赋值给 Grid，临时对象可置 Nothing 释放引用（GC 后续回收）。
+        objCurrencyCellStyle = Nothing
+        objAlternatingCellStyle = Nothing
+        objAlignRightCellStyle = Nothing
 
-        'For i As Integer = 0 To grdAuthorTitles.RowCount - 2                           '有一个空白行也算一行
-        '    If CType(grdAuthorTitles.Item(18, i).Value.ToString(), Boolean) Then
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black                          '字体颜色设置为黑色
-
-        '    Else
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
-        '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red                            '字体颜色设置为红色
-        '    End If
-        'Next
-
-        objCurrencyCellStyle = Nothing     '清除样式对象(单元格记录内容用)
-        objAlternatingCellStyle = Nothing  '清除交叉单元格样式
-        objAlignRightCellStyle = Nothing   '清除列标题样式(标题用)
-        排序字段.Items.Clear()   '给组合框添加项目  'Add items to the combo box..
+        ' ============================================================
+        ' ★★★ 第4步：填充"排序字段"下拉框 ★★★
+        ' ============================================================
+        ' 说明：myArray 是模块级数组，包含所有可排序字段名，
+        '       在 BindFields 或类顶部定义，此处直接复用。
+        ' 【良好习惯】Clear 后 AddRange，避免重复调用 Load 时累积重复项。
+        排序字段.Items.Clear()
         排序字段.Items.AddRange(myArray)
-        排序字段.SelectedIndex = 0         '默认选择第一项
-        客户.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
-        '添加项目
-        客户.Items.Add("日本日立") ： 客户.Items.Add("德國久保田") ： 客户.Items.Add("日本久保田") ： 客户.Items.Add("常州现代") ： 客户.Items.Add("GE") ： 客户.Items.Add("印度日立") ： 客户.Items.Add("发注至总公司")
-        客户.Items.Add("苏州斗山山猫") ： 客户.Items.Add("烟台斗山") ： 客户.Items.Add("VOLVO") ： 客户.Items.Add("远景能源")
-        供应商.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
-        供应商.Items.Add("荣程A") ： 供应商.Items.Add("新顺章B") ： 供应商.Items.Add("海陆C") ： 供应商.Items.Add("利元D") ： 供应商.Items.Add("广源E") ： 供应商.Items.Add("瑞鑫F")
-        供应商.Items.Add("纽威G") ： 供应商.Items.Add("荣冠H") ： 供应商.Items.Add("派克L")
+        排序字段.SelectedIndex = 0  ' 默认选第一项（"管理编号"）
 
+        ' ============================================================
+        ' ★★★ 第5步：填充"客户"下拉框 ★★★
+        ' ============================================================
+        ' 说明：客户列表目前硬编码，后续建议迁移到数据库表统一维护（TODO）。
+        客户.Items.Clear()
+        客户.Items.Add("日本日立") : 客户.Items.Add("德國久保田") : 客户.Items.Add("日本久保田")
+        客户.Items.Add("常州现代") : 客户.Items.Add("GE") : 客户.Items.Add("印度日立")
+        客户.Items.Add("发注至总公司") : 客户.Items.Add("苏州斗山山猫") : 客户.Items.Add("烟台斗山")
+        客户.Items.Add("VOLVO") : 客户.Items.Add("远景能源")
 
-        类型区分.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
-        类型区分.Items.Add("I/N") ： 类型区分.Items.Add("O/T") ： 类型区分.Items.Add("Assembly")
+        ' ============================================================
+        ' ★★★ 第6步：填充"供应商"下拉框 ★★★
+        ' ============================================================
+        ' 说明：同客户列表，建议后续统一迁移到数据表。
+        供应商.Items.Clear()
+        供应商.Items.Add("荣程A") : 供应商.Items.Add("新顺章B") : 供应商.Items.Add("海陆C")
+        供应商.Items.Add("利元D") : 供应商.Items.Add("广源E") : 供应商.Items.Add("瑞鑫F")
+        供应商.Items.Add("纽威G") : 供应商.Items.Add("荣冠H") : 供应商.Items.Add("派克L")
+
+        ' ============================================================
+        ' ★★★ 第7步：填充"类型区分"下拉框 ★★★
+        ' ============================================================
+        ' 说明：I/N、O/T、Assembly 是内部分类编码，含义由业务侧约定。
+        类型区分.Items.Clear()
+        类型区分.Items.Add("I/N") : 类型区分.Items.Add("O/T") : 类型区分.Items.Add("Assembly")
+
+        ' ============================================================
+        ' ★★★ 第8步：触发"产品规格"选中事件，联动刷新其他下拉框 ★★★
+        ' ============================================================
+        ' 说明：产品规格选中后会触发 SelectedIndexChanged，联动加载相关选项。
+        '       此处传入 Nothing 手动触发一次，确保初始状态下下拉框已填充。
         产品规格_SelectedIndexChanged(Nothing, Nothing)
-        '维修类型.SelectedIndex = 0  '默认选择第一项
 
-
-
-
-        'objDataAdapter1th.SelectCommand = New OleDbCommand()            '初始化一个命令对象
-        'objDataAdapter1th.SelectCommand.Connection = objConnection1th   '建立与数据库的连接
-        'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "产品规格" & " from " & "物品信息 ORDER BY 产品规格" '写入SQL语句
-
-        ''objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "产品规格" & " from " & "物品信息 ORDER BY 物品编号" '写入SQL语句
-        'objDataAdapter1th.SelectCommand.CommandType = CommandType.Text  '这里的SelectCommand的CommandType属性就是CommandType.Text,是默认属性可以省略的.
-        'objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
-        'objDataAdapter1th.Fill(objDataSet1th, "wpxx01")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
-        'Dim tb As DataTable = objDataSet1th.Tables("wpxx01") '声明一个表类型,并赋值给该变量.
-        '产品规格.Items.Clear()                               '清楚复合框项目集
-        'For inCounter = 0 To tb.Rows.Count - 1               '在表行数上循环
-        '    产品规格.Items.Add(tb.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
-        'Next
-        'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "发现过程" & " from " & "赔偿比例 ORDER BY 发现过程" '写入SQL语句
-        objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "赔偿比例.*" & " from " & "赔偿比例 ORDER BY 比例" '写入SQL语句
-        objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx04")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
-        Dim tb1 As DataTable = objDataSet1th.Tables("wpxx04") '声明一个表类型,并赋值给该变量.
-        发现过程.Items.Clear()                               '清楚复合框项目集
-        For inCounter = 0 To tb1.Rows.Count - 1               '在表行数上循环
-            发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
+        ' ============================================================
+        ' ★★★ 第9步：填充"发现过程"下拉框（从"赔偿比例"表动态读取） ★★★
+        ' ============================================================
+        ' 【机制说明】
+        '   - 用 objDataAdapter1th 执行临时查询，填充到 objDataSet1th，再从表中循环读取。
+        '   - SQL 用 SELECT DISTINCT 去重，ORDER BY 比例 保证顺序稳定。
+        ' 【连接来源】
+        '   objDataAdapter1th 的连接不是声明时绑定的，而是在
+        '   产品规格_SelectedIndexChanged 事件中通过下面两行绑定：
+        '       objDataAdapter1th.SelectCommand = New OleDbCommand()
+        '       objDataAdapter1th.SelectCommand.Connection = objConnection1th
+        '   因此 Load 里必须先调用 产品规格_SelectedIndexChanged(Nothing, Nothing)
+        '   完成初始化，才能执行本段的 Fill 操作。
+        '   ⚠ TODO：该事件用了 On Error Resume Next，会吞异常，后续应改为 Try...Catch。
+        ' 【历史踩坑】
+        '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
+        objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "赔偿比例.*" & " from " & "赔偿比例 ORDER BY 比例"
+        objDataSet1th = New DataSet()                          ' 重新初始化，避免数据累积
+        objDataAdapter1th.Fill(objDataSet1th, "wpxx04")        ' 第二参数为内存表名，便于后续引用
+        Dim tb1 As DataTable = objDataSet1th.Tables("wpxx04")  ' 取出表对象
+        发现过程.Items.Clear()
+        For inCounter = 0 To tb1.Rows.Count - 1                ' 遍历表行填充下拉框
+            发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString())
         Next
-        'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "发现过程" & " from " & "赔偿比例 ORDER BY 发现过程" '写入SQL语句
-        objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型" & " from " & "不良类型分类" '写入SQL语句
-        objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx14")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
-        Dim tb2 As DataTable = objDataSet1th.Tables("wpxx14") '声明一个表类型,并赋值给该变量.
-        不良类型.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
-        '不良类型.Items.Add("外注不良") ： 不良类型.Items.Add("内部工程不良-人员") ： 不良类型.Items.Add("内部工程不良-条件")
-        '不良类型.Items.Add("内部工程不良-设备") ： 不良类型.Items.Add("内部工程不良-工具") ： 不良类型.Items.Add("内部工程不良-其他")
-        '不良类型.Items.Add("客户发现不良")
-        For inCounter = 0 To tb2.Rows.Count - 1               '在表行数上循环
-            不良类型.Items.Add(tb2.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
-        Next
-        BindFields()  '调用绑定控件过程
     End Sub
+
+    ''加载窗体触发事件
+    'Private Sub F01_不良品基本信息_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    '    '需要说明的是,Fill方法会执行命令(SelectCommand),其Connection属性保持为调用该方法时的状态.
+    '    'On Error Resume Next
+    '    FillDataSetAndView() '调用FillDataSetAndView过程检索数据并调用BindFields过程绑定数据源字段到指定控件.
+    '    ShowPosition()  '调用ShowPosition方法,并显示当前记录标签位置    
+    '    'BindFields()  '调用绑定控件过程,因为有复合框,所以放在事件最后面.
+    '    grdAuthorTitles.AutoGenerateColumns = True  '让grd控件创建所需要的所有列.
+
+    '    ' 【历史踩坑修复】Grid 数据源由 objDataSet 改为 objDataView。
+    '    ' 原因：RowFilter 只对 DataView 生效；若 Grid 直接绑 DataSet，
+    '    '       则 objDataView.RowFilter 改了也不影响界面，筛选功能会失效（本次调试已踩坑）。
+    '    ' 注意：DataView 自带表结构，无需再设 DataMember。
+    '    grdAuthorTitles.DataSource = objDataView
+
+    '    '将对齐方式格式改为垂直居中向右对齐.
+    '    Dim objAlignRightCellStyle As New DataGridViewCellStyle  '初始化DataGridViewCellStyle对象(作为grd控件单元格或标题样式实例) 
+    '    objAlignRightCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+
+
+    '    Dim objAlternatingCellStyle As New DataGridViewCellStyle() '初始化DataGridViewCellStyle对象(grd控件单元格样式实例) 作为交叉行样式  
+    '    objAlternatingCellStyle.BackColor = Color.WhiteSmoke  '设置交叉样式背景色为烟灰色
+    '    grdAuthorTitles.AlternatingRowsDefaultCellStyle = objAlternatingCellStyle '奇数行属性设置刚创建的样式(烟白色)
+    '    Dim objCurrencyCellStyle As New DataGridViewCellStyle()  '初始化DataGridViewCellStyle对象,将设置单元格格式为货币型.
+    '    objCurrencyCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft  '将对齐方式改为居中向左对齐
+    '    objCurrencyCellStyle.Format = "¥#,##0.00" '样式格式为货币型(美元或者人民币$¥)
+    '    'objCurrencyCellStyle.Format = "C"  '样式格式为货币型(人民币)
+    '    grdAuthorTitles.Columns(0).HeaderText = "管理编号"   '设置控件列标题   
+    '    'grdAuthorTitles.Columns(1).HeaderText = "发生日期"
+    '    grdAuthorTitles.Columns(1).HeaderText = "录入日期"
+    '    grdAuthorTitles.Columns(2).HeaderText = "客户"
+    '    grdAuthorTitles.Columns(3).HeaderText = "供应商"
+    '    grdAuthorTitles.Columns(4).HeaderText = "产品规格"
+    '    grdAuthorTitles.Columns(5).HeaderText = "加工设备"
+    '    grdAuthorTitles.Columns(6).HeaderText = "发现过程"
+    '    grdAuthorTitles.Columns(7).HeaderText = "不良类型"
+    '    grdAuthorTitles.Columns(8).HeaderText = "操作者"
+    '    grdAuthorTitles.Columns(9).HeaderText = "类型区分"
+    '    grdAuthorTitles.Columns(10).HeaderText = "不良数量"
+    '    grdAuthorTitles.Columns(11).HeaderText = "完成工序"
+    '    grdAuthorTitles.Columns(12).HeaderText = "加工费用"
+    '    grdAuthorTitles.Columns(13).HeaderText = "材料费用"
+    '    grdAuthorTitles.Columns(14).HeaderText = "损失成本"
+    '    grdAuthorTitles.Columns(15).HeaderText = "不良现象及原因"
+    '    grdAuthorTitles.Columns(15).Width = 130 '设置指定列默认宽度大一点
+    '    grdAuthorTitles.Columns(16).HeaderText = "备注"
+    '    grdAuthorTitles.Columns(17).HeaderText = "重量"
+    '    grdAuthorTitles.Columns(18).HeaderText = "处置完成"
+    '    grdAuthorTitles.Columns(18).Width = 60 '设置指定列默认宽度大一点
+    '    grdAuthorTitles.Columns(19).HeaderText = "因素确定"
+    '    grdAuthorTitles.Columns(20).HeaderText = "图片路径"
+    '    '自动调整列宽.
+    '    'grdAuthorTitles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnMode.AllCells
+
+
+    '    ''改变字段标题名称和样式'Change column names and styles using the column name  
+    '    grdAuthorTitles.Columns("加工费用").HeaderCell.Value = "加工费用_内" '重新设置列标题的值显示为"描述"
+    '    '标题重新调用列标题样式(之前设定的-居中右对齐)
+    '    grdAuthorTitles.Columns("加工费用").HeaderCell.Style = objAlignRightCellStyle
+    '    '单元格内容重新调用样式(之前设定的-货币样式)
+    '    grdAuthorTitles.Columns("加工费用").DefaultCellStyle = objCurrencyCellStyle
+    '    grdAuthorTitles.Columns("材料费用").HeaderCell.Style = objAlignRightCellStyle
+    '    '单元格内容重新调用样式(之前设定的-货币样式)
+    '    grdAuthorTitles.Columns("材料费用").DefaultCellStyle = objCurrencyCellStyle
+    '    grdAuthorTitles.Columns("损失成本").HeaderCell.Style = objAlignRightCellStyle
+    '    '单元格内容重新调用样式(之前设定的-货币样式)
+    '    grdAuthorTitles.Columns("损失成本").DefaultCellStyle = objCurrencyCellStyle
+
+    '    ''遍历记录数量
+    '    'For i As Integer = 0 To grdAuthorTitles.RowCount - 1  '有一个空白行也算一行
+    '    '    If Math.Ceiling(CType(grdAuthorTitles.Item(7, i).Value.ToString(), Date).Subtract(Now).TotalDays) <= 20 Then
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red                            '字体颜色设置为红色
+    '    '    Else
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black                          '字体颜色设置为黑色
+    '    '    End If
+    '    'Next
+
+    '    'For i As Integer = 0 To grdAuthorTitles.RowCount - 2                           '有一个空白行也算一行
+    '    '    If CType(grdAuthorTitles.Item(18, i).Value.ToString(), Boolean) Then
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black                          '字体颜色设置为黑色
+
+    '    '    Else
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)    '构建一个字体类及相关属性
+    '    '        grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red                            '字体颜色设置为红色
+    '    '    End If
+    '    'Next
+
+    '    objCurrencyCellStyle = Nothing     '清除样式对象(单元格记录内容用)
+    '    objAlternatingCellStyle = Nothing  '清除交叉单元格样式
+    '    objAlignRightCellStyle = Nothing   '清除列标题样式(标题用)
+    '    排序字段.Items.Clear()   '给组合框添加项目  'Add items to the combo box..
+    '    排序字段.Items.AddRange(myArray)
+    '    排序字段.SelectedIndex = 0         '默认选择第一项
+    '    客户.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
+    '    '添加项目
+    '    客户.Items.Add("日本日立") ： 客户.Items.Add("德國久保田") ： 客户.Items.Add("日本久保田") ： 客户.Items.Add("常州现代") ： 客户.Items.Add("GE") ： 客户.Items.Add("印度日立") ： 客户.Items.Add("发注至总公司")
+    '    客户.Items.Add("苏州斗山山猫") ： 客户.Items.Add("烟台斗山") ： 客户.Items.Add("VOLVO") ： 客户.Items.Add("远景能源")
+    '    供应商.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
+    '    供应商.Items.Add("荣程A") ： 供应商.Items.Add("新顺章B") ： 供应商.Items.Add("海陆C") ： 供应商.Items.Add("利元D") ： 供应商.Items.Add("广源E") ： 供应商.Items.Add("瑞鑫F")
+    '    供应商.Items.Add("纽威G") ： 供应商.Items.Add("荣冠H") ： 供应商.Items.Add("派克L")
+
+
+    '    类型区分.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
+    '    类型区分.Items.Add("I/N") ： 类型区分.Items.Add("O/T") ： 类型区分.Items.Add("Assembly")
+    '    产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '    '维修类型.SelectedIndex = 0  '默认选择第一项
+
+
+
+
+    '    'objDataAdapter1th.SelectCommand = New OleDbCommand()            '初始化一个命令对象
+    '    'objDataAdapter1th.SelectCommand.Connection = objConnection1th   '建立与数据库的连接
+    '    'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "产品规格" & " from " & "物品信息 ORDER BY 产品规格" '写入SQL语句
+
+    '    ''objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "产品规格" & " from " & "物品信息 ORDER BY 物品编号" '写入SQL语句
+    '    'objDataAdapter1th.SelectCommand.CommandType = CommandType.Text  '这里的SelectCommand的CommandType属性就是CommandType.Text,是默认属性可以省略的.
+    '    'objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
+    '    'objDataAdapter1th.Fill(objDataSet1th, "wpxx01")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
+    '    'Dim tb As DataTable = objDataSet1th.Tables("wpxx01") '声明一个表类型,并赋值给该变量.
+    '    '产品规格.Items.Clear()                               '清楚复合框项目集
+    '    'For inCounter = 0 To tb.Rows.Count - 1               '在表行数上循环
+    '    '    产品规格.Items.Add(tb.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
+    '    'Next
+    '    'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "发现过程" & " from " & "赔偿比例 ORDER BY 发现过程" '写入SQL语句
+    '    objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "赔偿比例.*" & " from " & "赔偿比例 ORDER BY 比例" '写入SQL语句
+    '    objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
+    '    objDataAdapter1th.Fill(objDataSet1th, "wpxx04")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
+    '    Dim tb1 As DataTable = objDataSet1th.Tables("wpxx04") '声明一个表类型,并赋值给该变量.
+    '    发现过程.Items.Clear()                               '清楚复合框项目集
+    '    For inCounter = 0 To tb1.Rows.Count - 1               '在表行数上循环
+    '        发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
+    '    Next
+    '    'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "发现过程" & " from " & "赔偿比例 ORDER BY 发现过程" '写入SQL语句
+    '    objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型" & " from " & "不良类型分类" '写入SQL语句
+    '    objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
+    '    objDataAdapter1th.Fill(objDataSet1th, "wpxx14")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
+    '    Dim tb2 As DataTable = objDataSet1th.Tables("wpxx14") '声明一个表类型,并赋值给该变量.
+    '    不良类型.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
+    '    '不良类型.Items.Add("外注不良") ： 不良类型.Items.Add("内部工程不良-人员") ： 不良类型.Items.Add("内部工程不良-条件")
+    '    '不良类型.Items.Add("内部工程不良-设备") ： 不良类型.Items.Add("内部工程不良-工具") ： 不良类型.Items.Add("内部工程不良-其他")
+    '    '不良类型.Items.Add("客户发现不良")
+    '    For inCounter = 0 To tb2.Rows.Count - 1               '在表行数上循环
+    '        不良类型.Items.Add(tb2.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
+    '    Next
+    '    BindFields()  '调用绑定控件过程
+    'End Sub
 
     '排序按钮,确定对哪个字段进行排序.单击事件 '注:DateGirdView控件视图自带单击列标题排序,这里针对的是绑定的简单控件数据源进行排序.
     Private Sub 执行排序_Click(sender As Object, e As EventArgs) Handles 执行排序.Click
@@ -809,20 +951,68 @@ Public Class F01_不良品基本信息
         If e.KeyCode = Keys.Enter Then 执行查询_Click(Nothing, Nothing) '如果按下了Enter键,那么调用查询过程.
     End Sub
 
-    '新建按钮事件
+    ''' <summary>
+    ''' 功能：清空所有输入控件，为录入新记录做准备（不写数据库）。
+    '''       同时将各下拉框重置为默认选项，避免残留在上一条记录的值。
+    '''       涉及对象：GroupBox1 内所有绑定到 objDataView 的控件。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【关键机制】
+    '''   - 清空前必须先用 BindingContext(objDataView).EndCurrentEdit() 提交当前编辑，
+    '''     否则文本框中的未提交值可能被 DataView 保留。
+    '''   - 新建后"删除/更新"按钮应禁用，防止误操作。
+    ''' 【历史踩坑】
+    '''   - 直接清空控件 Text 属性，但控件仍绑定在 objDataView 上，
+    '''     用户切换记录时可能被数据源覆盖，需先解除绑定再清空。
+    ''' </remarks>
     Private Sub 新建_Click(sender As Object, e As EventArgs) Handles 新建.Click
-        Dim i As Byte = 0             '声明局部变量
-        myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分",
-            "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成", "因素确定", "图片路径"}
-        For i = 0 To UBound(myArray)  '清空简单控件值
-            GroupBox1.Controls(myArray(i).ToString).Text = ""
-        Next i
-        GroupBox1.Controls(myArray(10).ToString).Text = 1
-        产品规格.SelectedIndex = 0  '默认选择第一项
-        类型区分.SelectedIndex = 0  '默认选择第一项
-        发现过程.SelectedIndex = 0
-        '管理编号.Enabled = False      '设置禁止使用控件
+        ' ============================================================
+        ' ★★★ 第1步：提交当前编辑（防止未提交值残留） ★★★
+        ' ============================================================
+        ' EndCurrentEdit：通知 CurrencyManager 结束当前单元格的编辑状态。
+        Me.BindingContext(objDataView).EndCurrentEdit()
+
+        ' ============================================================
+        ' ★★★ 第2步：遍历控件清空内容 ★★★
+        ' ============================================================
+        ' 说明：仅清空文本框/组合框的 Text，不清除绑定关系（避免破坏 DataView 联动）。
+        '       复选框统一置为 False。
+        For i As Byte = 0 To UBound(myArray)
+            Dim ctrl As Control = GroupBox1.Controls(myArray(i).ToString())
+            If TypeOf ctrl Is CheckBox Then
+                CType(ctrl, CheckBox).Checked = False
+            Else
+                ctrl.Text = ""
+            End If
+        Next
+
+        ' ============================================================
+        ' ★★★ 第3步：启用"添加"按钮，禁用"更新/删除" ★★★
+        ' ============================================================
+        ' 原因：新建记录尚未入库，只能"添加"，不能"更新"或"删除"。
+        添加.Enabled = True
+        更新.Enabled = False
+        删除.Enabled = False
+
+        ' 光标定位到"管理编号"，方便用户快速录入
+        管理编号.Focus()
     End Sub
+
+
+    ''新建按钮事件
+    'Private Sub 新建_Click(sender As Object, e As EventArgs) Handles 新建.Click
+    '    Dim i As Byte = 0             '声明局部变量
+    '    myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分",
+    '        "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成", "因素确定", "图片路径"}
+    '    For i = 0 To UBound(myArray)  '清空简单控件值
+    '        GroupBox1.Controls(myArray(i).ToString).Text = ""
+    '    Next i
+    '    GroupBox1.Controls(myArray(10).ToString).Text = 1
+    '    产品规格.SelectedIndex = 0  '默认选择第一项
+    '    类型区分.SelectedIndex = 0  '默认选择第一项
+    '    发现过程.SelectedIndex = 0
+    '    '管理编号.Enabled = False      '设置禁止使用控件
+    'End Sub
 
     '添加按钮事件
     Private Sub 添加_Click(sender As Object, e As EventArgs) Handles 添加.Click
