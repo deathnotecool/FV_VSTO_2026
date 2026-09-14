@@ -109,7 +109,7 @@ Partial Class F01_不良品基本信息
         '
         Me.客户.FormattingEnabled = True
         Me.客户.Location = New System.Drawing.Point(563, 42)
-        Me.客户.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.客户.Margin = New System.Windows.Forms.Padding(4)
         Me.客户.Name = "客户"
         Me.客户.Size = New System.Drawing.Size(145, 23)
         Me.客户.TabIndex = 3
@@ -127,7 +127,7 @@ Partial Class F01_不良品基本信息
         'txtRecordPosition
         '
         Me.txtRecordPosition.Location = New System.Drawing.Point(523, 248)
-        Me.txtRecordPosition.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.txtRecordPosition.Margin = New System.Windows.Forms.Padding(4)
         Me.txtRecordPosition.Name = "txtRecordPosition"
         Me.txtRecordPosition.Size = New System.Drawing.Size(132, 25)
         Me.txtRecordPosition.TabIndex = 32
@@ -183,7 +183,6 @@ Partial Class F01_不良品基本信息
         Me.Label5.Size = New System.Drawing.Size(67, 15)
         Me.Label5.TabIndex = 21
         Me.Label5.Text = "发生日期"
-        Me.ToolTip1.SetToolTip(Me.Label5, "请不要写产品不良发生日期")
         '
         'Label6
         '
@@ -208,7 +207,7 @@ Partial Class F01_不良品基本信息
         '管理编号
         '
         Me.管理编号.Location = New System.Drawing.Point(80, 41)
-        Me.管理编号.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.管理编号.Margin = New System.Windows.Forms.Padding(4)
         Me.管理编号.Name = "管理编号"
         Me.管理编号.Size = New System.Drawing.Size(145, 25)
         Me.管理编号.TabIndex = 1
@@ -278,9 +277,9 @@ Partial Class F01_不良品基本信息
         Me.GroupBox1.Controls.Add(Me.管理编号)
         Me.GroupBox1.Controls.Add(Me.Label8)
         Me.GroupBox1.Location = New System.Drawing.Point(11, 440)
-        Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Size = New System.Drawing.Size(1187, 281)
         Me.GroupBox1.TabIndex = 42
         Me.GroupBox1.TabStop = False
@@ -289,7 +288,7 @@ Partial Class F01_不良品基本信息
         'txtPathEqual
         '
         Me.txtPathEqual.Location = New System.Drawing.Point(896, 228)
-        Me.txtPathEqual.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.txtPathEqual.Margin = New System.Windows.Forms.Padding(4)
         Me.txtPathEqual.Name = "txtPathEqual"
         Me.txtPathEqual.Size = New System.Drawing.Size(153, 25)
         Me.txtPathEqual.TabIndex = 55
@@ -308,7 +307,7 @@ Partial Class F01_不良品基本信息
         '发生日期
         '
         Me.发生日期.Location = New System.Drawing.Point(331, 41)
-        Me.发生日期.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.发生日期.Margin = New System.Windows.Forms.Padding(4)
         Me.发生日期.Name = "发生日期"
         Me.发生日期.Size = New System.Drawing.Size(145, 25)
         Me.发生日期.TabIndex = 2
@@ -318,7 +317,7 @@ Partial Class F01_不良品基本信息
         '图片路径
         '
         Me.图片路径.Location = New System.Drawing.Point(896, 246)
-        Me.图片路径.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.图片路径.Margin = New System.Windows.Forms.Padding(4)
         Me.图片路径.Name = "图片路径"
         Me.图片路径.Size = New System.Drawing.Size(153, 25)
         Me.图片路径.TabIndex = 53
@@ -327,7 +326,7 @@ Partial Class F01_不良品基本信息
         '
         Me.因素确定.FormattingEnabled = True
         Me.因素确定.Location = New System.Drawing.Point(80, 248)
-        Me.因素确定.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.因素确定.Margin = New System.Windows.Forms.Padding(4)
         Me.因素确定.Name = "因素确定"
         Me.因素确定.Size = New System.Drawing.Size(192, 23)
         Me.因素确定.TabIndex = 17
@@ -335,7 +334,7 @@ Partial Class F01_不良品基本信息
         'btnOpenFile
         '
         Me.btnOpenFile.Location = New System.Drawing.Point(1119, 245)
-        Me.btnOpenFile.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnOpenFile.Margin = New System.Windows.Forms.Padding(4)
         Me.btnOpenFile.Name = "btnOpenFile"
         Me.btnOpenFile.Size = New System.Drawing.Size(52, 29)
         Me.btnOpenFile.TabIndex = 52
@@ -346,7 +345,7 @@ Partial Class F01_不良品基本信息
         '
         Me.CheckBox1.AutoSize = True
         Me.CheckBox1.Location = New System.Drawing.Point(80, 385)
-        Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.CheckBox1.Name = "CheckBox1"
         Me.CheckBox1.Size = New System.Drawing.Size(89, 19)
         Me.CheckBox1.TabIndex = 33
@@ -357,7 +356,7 @@ Partial Class F01_不良品基本信息
         '
         Me.处置完成.AutoSize = True
         Me.处置完成.Location = New System.Drawing.Point(281, 250)
-        Me.处置完成.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.处置完成.Margin = New System.Windows.Forms.Padding(4)
         Me.处置完成.Name = "处置完成"
         Me.处置完成.Size = New System.Drawing.Size(89, 19)
         Me.处置完成.TabIndex = 18
@@ -367,7 +366,7 @@ Partial Class F01_不良品基本信息
         'btnImport
         '
         Me.btnImport.Location = New System.Drawing.Point(1057, 245)
-        Me.btnImport.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnImport.Margin = New System.Windows.Forms.Padding(4)
         Me.btnImport.Name = "btnImport"
         Me.btnImport.Size = New System.Drawing.Size(52, 29)
         Me.btnImport.TabIndex = 51
@@ -378,7 +377,7 @@ Partial Class F01_不良品基本信息
         '
         Me.产品规格.FormattingEnabled = True
         Me.产品规格.Location = New System.Drawing.Point(1011, 42)
-        Me.产品规格.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.产品规格.Margin = New System.Windows.Forms.Padding(4)
         Me.产品规格.Name = "产品规格"
         Me.产品规格.Size = New System.Drawing.Size(159, 23)
         Me.产品规格.TabIndex = 5
@@ -387,7 +386,7 @@ Partial Class F01_不良品基本信息
         '
         Me.类型区分.FormattingEnabled = True
         Me.类型区分.Location = New System.Drawing.Point(1011, 94)
-        Me.类型区分.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.类型区分.Margin = New System.Windows.Forms.Padding(4)
         Me.类型区分.Name = "类型区分"
         Me.类型区分.Size = New System.Drawing.Size(159, 23)
         Me.类型区分.TabIndex = 6
@@ -396,7 +395,7 @@ Partial Class F01_不良品基本信息
         '
         Me.发现过程.FormattingEnabled = True
         Me.发现过程.Location = New System.Drawing.Point(331, 94)
-        Me.发现过程.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.发现过程.Margin = New System.Windows.Forms.Padding(4)
         Me.发现过程.Name = "发现过程"
         Me.发现过程.Size = New System.Drawing.Size(145, 23)
         Me.发现过程.TabIndex = 9
@@ -405,7 +404,7 @@ Partial Class F01_不良品基本信息
         '
         Me.不良类型.FormattingEnabled = True
         Me.不良类型.Location = New System.Drawing.Point(80, 198)
-        Me.不良类型.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.不良类型.Margin = New System.Windows.Forms.Padding(4)
         Me.不良类型.Name = "不良类型"
         Me.不良类型.Size = New System.Drawing.Size(192, 23)
         Me.不良类型.TabIndex = 16
@@ -414,7 +413,7 @@ Partial Class F01_不良品基本信息
         '
         Me.供应商.FormattingEnabled = True
         Me.供应商.Location = New System.Drawing.Point(783, 44)
-        Me.供应商.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.供应商.Margin = New System.Windows.Forms.Padding(4)
         Me.供应商.Name = "供应商"
         Me.供应商.Size = New System.Drawing.Size(145, 23)
         Me.供应商.TabIndex = 4
@@ -422,7 +421,7 @@ Partial Class F01_不良品基本信息
         'btnMoveLast
         '
         Me.btnMoveLast.Location = New System.Drawing.Point(737, 248)
-        Me.btnMoveLast.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMoveLast.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMoveLast.Name = "btnMoveLast"
         Me.btnMoveLast.Size = New System.Drawing.Size(65, 26)
         Me.btnMoveLast.TabIndex = 34
@@ -433,7 +432,7 @@ Partial Class F01_不良品基本信息
         'btnMoveNext
         '
         Me.btnMoveNext.Location = New System.Drawing.Point(664, 248)
-        Me.btnMoveNext.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMoveNext.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMoveNext.Name = "btnMoveNext"
         Me.btnMoveNext.Size = New System.Drawing.Size(65, 26)
         Me.btnMoveNext.TabIndex = 33
@@ -444,7 +443,7 @@ Partial Class F01_不良品基本信息
         'btnMoveFirst
         '
         Me.btnMoveFirst.Location = New System.Drawing.Point(376, 246)
-        Me.btnMoveFirst.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMoveFirst.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMoveFirst.Name = "btnMoveFirst"
         Me.btnMoveFirst.Size = New System.Drawing.Size(65, 26)
         Me.btnMoveFirst.TabIndex = 30
@@ -455,7 +454,7 @@ Partial Class F01_不良品基本信息
         'btnMovePrevious
         '
         Me.btnMovePrevious.Location = New System.Drawing.Point(449, 248)
-        Me.btnMovePrevious.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMovePrevious.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMovePrevious.Name = "btnMovePrevious"
         Me.btnMovePrevious.Size = New System.Drawing.Size(65, 26)
         Me.btnMovePrevious.TabIndex = 31
@@ -467,7 +466,7 @@ Partial Class F01_不良品基本信息
         '
         Me.加工费用.Enabled = False
         Me.加工费用.Location = New System.Drawing.Point(563, 144)
-        Me.加工费用.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.加工费用.Margin = New System.Windows.Forms.Padding(4)
         Me.加工费用.Name = "加工费用"
         Me.加工费用.Size = New System.Drawing.Size(145, 25)
         Me.加工费用.TabIndex = 13
@@ -476,7 +475,7 @@ Partial Class F01_不良品基本信息
         '
         Me.材料费用.Enabled = False
         Me.材料费用.Location = New System.Drawing.Point(783, 142)
-        Me.材料费用.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.材料费用.Margin = New System.Windows.Forms.Padding(4)
         Me.材料费用.Name = "材料费用"
         Me.材料费用.Size = New System.Drawing.Size(145, 25)
         Me.材料费用.TabIndex = 14
@@ -484,7 +483,7 @@ Partial Class F01_不良品基本信息
         '操作者
         '
         Me.操作者.Location = New System.Drawing.Point(783, 89)
-        Me.操作者.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.操作者.Margin = New System.Windows.Forms.Padding(4)
         Me.操作者.Name = "操作者"
         Me.操作者.Size = New System.Drawing.Size(145, 25)
         Me.操作者.TabIndex = 7
@@ -522,7 +521,7 @@ Partial Class F01_不良品基本信息
         '完成工序
         '
         Me.完成工序.Location = New System.Drawing.Point(331, 142)
-        Me.完成工序.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.完成工序.Margin = New System.Windows.Forms.Padding(4)
         Me.完成工序.Name = "完成工序"
         Me.完成工序.Size = New System.Drawing.Size(145, 25)
         Me.完成工序.TabIndex = 12
@@ -530,7 +529,7 @@ Partial Class F01_不良品基本信息
         '不良现象及原因
         '
         Me.不良现象及原因.Location = New System.Drawing.Point(367, 188)
-        Me.不良现象及原因.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.不良现象及原因.Margin = New System.Windows.Forms.Padding(4)
         Me.不良现象及原因.Multiline = True
         Me.不良现象及原因.Name = "不良现象及原因"
         Me.不良现象及原因.Size = New System.Drawing.Size(456, 52)
@@ -539,7 +538,7 @@ Partial Class F01_不良品基本信息
         '备注
         '
         Me.备注.Location = New System.Drawing.Point(896, 188)
-        Me.备注.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.备注.Margin = New System.Windows.Forms.Padding(4)
         Me.备注.Multiline = True
         Me.备注.Name = "备注"
         Me.备注.Size = New System.Drawing.Size(273, 52)
@@ -559,7 +558,7 @@ Partial Class F01_不良品基本信息
         '
         Me.损失成本.Enabled = False
         Me.损失成本.Location = New System.Drawing.Point(1011, 144)
-        Me.损失成本.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.损失成本.Margin = New System.Windows.Forms.Padding(4)
         Me.损失成本.Name = "损失成本"
         Me.损失成本.Size = New System.Drawing.Size(159, 25)
         Me.损失成本.TabIndex = 15
@@ -618,7 +617,7 @@ Partial Class F01_不良品基本信息
         '
         Me.重量.Enabled = False
         Me.重量.Location = New System.Drawing.Point(563, 94)
-        Me.重量.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.重量.Margin = New System.Windows.Forms.Padding(4)
         Me.重量.Name = "重量"
         Me.重量.Size = New System.Drawing.Size(145, 25)
         Me.重量.TabIndex = 8
@@ -626,7 +625,7 @@ Partial Class F01_不良品基本信息
         '不良数量
         '
         Me.不良数量.Location = New System.Drawing.Point(80, 144)
-        Me.不良数量.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.不良数量.Margin = New System.Windows.Forms.Padding(4)
         Me.不良数量.Name = "不良数量"
         Me.不良数量.Size = New System.Drawing.Size(145, 25)
         Me.不良数量.TabIndex = 11
@@ -634,7 +633,7 @@ Partial Class F01_不良品基本信息
         '加工设备
         '
         Me.加工设备.Location = New System.Drawing.Point(80, 94)
-        Me.加工设备.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.加工设备.Margin = New System.Windows.Forms.Padding(4)
         Me.加工设备.Name = "加工设备"
         Me.加工设备.Size = New System.Drawing.Size(145, 25)
         Me.加工设备.TabIndex = 10
@@ -656,7 +655,7 @@ Partial Class F01_不良品基本信息
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.grdAuthorTitles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.grdAuthorTitles.Location = New System.Drawing.Point(8, 25)
-        Me.grdAuthorTitles.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.grdAuthorTitles.Margin = New System.Windows.Forms.Padding(4)
         Me.grdAuthorTitles.Name = "grdAuthorTitles"
         Me.grdAuthorTitles.RowTemplate.Height = 23
         Me.grdAuthorTitles.Size = New System.Drawing.Size(1171, 396)
@@ -682,7 +681,7 @@ Partial Class F01_不良品基本信息
         '查询条件
         '
         Me.查询条件.Location = New System.Drawing.Point(97, 124)
-        Me.查询条件.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.查询条件.Margin = New System.Windows.Forms.Padding(4)
         Me.查询条件.Name = "查询条件"
         Me.查询条件.Size = New System.Drawing.Size(140, 25)
         Me.查询条件.TabIndex = 27
@@ -709,9 +708,9 @@ Partial Class F01_不良品基本信息
         Me.GroupBox2.Controls.Add(Me.查询条件)
         Me.GroupBox2.Controls.Add(Me.Label10)
         Me.GroupBox2.Location = New System.Drawing.Point(1205, 440)
-        Me.GroupBox2.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox2.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox2.Padding = New System.Windows.Forms.Padding(4)
         Me.GroupBox2.Size = New System.Drawing.Size(377, 281)
         Me.GroupBox2.TabIndex = 44
         Me.GroupBox2.TabStop = False
@@ -720,7 +719,7 @@ Partial Class F01_不良品基本信息
         'btnDisplayingRedData
         '
         Me.btnDisplayingRedData.Location = New System.Drawing.Point(19, 239)
-        Me.btnDisplayingRedData.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnDisplayingRedData.Margin = New System.Windows.Forms.Padding(4)
         Me.btnDisplayingRedData.Name = "btnDisplayingRedData"
         Me.btnDisplayingRedData.Size = New System.Drawing.Size(340, 31)
         Me.btnDisplayingRedData.TabIndex = 31
@@ -730,7 +729,7 @@ Partial Class F01_不良品基本信息
         'btnReseting
         '
         Me.btnReseting.Location = New System.Drawing.Point(307, 124)
-        Me.btnReseting.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnReseting.Margin = New System.Windows.Forms.Padding(4)
         Me.btnReseting.Name = "btnReseting"
         Me.btnReseting.Size = New System.Drawing.Size(52, 26)
         Me.btnReseting.TabIndex = 30
@@ -740,7 +739,7 @@ Partial Class F01_不良品基本信息
         '退出
         '
         Me.退出.Location = New System.Drawing.Point(305, 185)
-        Me.退出.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.退出.Margin = New System.Windows.Forms.Padding(4)
         Me.退出.Name = "退出"
         Me.退出.Size = New System.Drawing.Size(53, 28)
         Me.退出.TabIndex = 25
@@ -750,7 +749,7 @@ Partial Class F01_不良品基本信息
         '执行查询
         '
         Me.执行查询.Location = New System.Drawing.Point(247, 124)
-        Me.执行查询.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.执行查询.Margin = New System.Windows.Forms.Padding(4)
         Me.执行查询.Name = "执行查询"
         Me.执行查询.Size = New System.Drawing.Size(52, 26)
         Me.执行查询.TabIndex = 29
@@ -760,7 +759,7 @@ Partial Class F01_不良品基本信息
         '执行排序
         '
         Me.执行排序.Location = New System.Drawing.Point(247, 48)
-        Me.执行排序.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.执行排序.Margin = New System.Windows.Forms.Padding(4)
         Me.执行排序.Name = "执行排序"
         Me.执行排序.Size = New System.Drawing.Size(112, 26)
         Me.执行排序.TabIndex = 28
@@ -771,7 +770,7 @@ Partial Class F01_不良品基本信息
         '
         Me.删除.Enabled = False
         Me.删除.Location = New System.Drawing.Point(233, 185)
-        Me.删除.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.删除.Margin = New System.Windows.Forms.Padding(4)
         Me.删除.Name = "删除"
         Me.删除.Size = New System.Drawing.Size(53, 28)
         Me.删除.TabIndex = 24
@@ -781,7 +780,7 @@ Partial Class F01_不良品基本信息
         '更新
         '
         Me.更新.Location = New System.Drawing.Point(161, 185)
-        Me.更新.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.更新.Margin = New System.Windows.Forms.Padding(4)
         Me.更新.Name = "更新"
         Me.更新.Size = New System.Drawing.Size(53, 28)
         Me.更新.TabIndex = 23
@@ -791,7 +790,7 @@ Partial Class F01_不良品基本信息
         '添加
         '
         Me.添加.Location = New System.Drawing.Point(89, 185)
-        Me.添加.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.添加.Margin = New System.Windows.Forms.Padding(4)
         Me.添加.Name = "添加"
         Me.添加.Size = New System.Drawing.Size(53, 28)
         Me.添加.TabIndex = 21
@@ -801,7 +800,7 @@ Partial Class F01_不良品基本信息
         '新建
         '
         Me.新建.Location = New System.Drawing.Point(17, 185)
-        Me.新建.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.新建.Margin = New System.Windows.Forms.Padding(4)
         Me.新建.Name = "新建"
         Me.新建.Size = New System.Drawing.Size(53, 28)
         Me.新建.TabIndex = 22
@@ -813,7 +812,7 @@ Partial Class F01_不良品基本信息
         Me.排序字段.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.排序字段.FormattingEnabled = True
         Me.排序字段.Location = New System.Drawing.Point(100, 48)
-        Me.排序字段.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.排序字段.Margin = New System.Windows.Forms.Padding(4)
         Me.排序字段.Name = "排序字段"
         Me.排序字段.Size = New System.Drawing.Size(137, 23)
         Me.排序字段.TabIndex = 26
@@ -845,9 +844,9 @@ Partial Class F01_不良品基本信息
         Me.GroupBox4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.GroupBox4.Controls.Add(Me.grdAuthorTitles)
         Me.GroupBox4.Location = New System.Drawing.Point(11, 4)
-        Me.GroupBox4.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox4.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox4.Padding = New System.Windows.Forms.Padding(4)
         Me.GroupBox4.Size = New System.Drawing.Size(1187, 429)
         Me.GroupBox4.TabIndex = 45
         Me.GroupBox4.TabStop = False
@@ -860,9 +859,9 @@ Partial Class F01_不良品基本信息
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox5.Controls.Add(Me.PictureBox1)
         Me.GroupBox5.Location = New System.Drawing.Point(1205, 4)
-        Me.GroupBox5.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox5.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox5.Name = "GroupBox5"
-        Me.GroupBox5.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.GroupBox5.Padding = New System.Windows.Forms.Padding(4)
         Me.GroupBox5.Size = New System.Drawing.Size(377, 429)
         Me.GroupBox5.TabIndex = 50
         Me.GroupBox5.TabStop = False
@@ -873,7 +872,7 @@ Partial Class F01_不良品基本信息
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PictureBox1.Location = New System.Drawing.Point(8, 18)
-        Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.PictureBox1.Name = "PictureBox1"
         Me.PictureBox1.Size = New System.Drawing.Size(361, 404)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
@@ -892,7 +891,7 @@ Partial Class F01_不良品基本信息
         Me.Controls.Add(Me.GroupBox4)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "F01_不良品基本信息"
         Me.Text = "F01_不良品基本信息"
         Me.GroupBox1.ResumeLayout(False)

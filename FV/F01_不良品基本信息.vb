@@ -3,7 +3,18 @@ Imports System.Data           '使用DatSet和DataView类所必须的.
 Imports System.Data.OleDb     '使用OleDbConnection、OleDbAdapter、OleDbCommand、OleDbParameter类所必须的.
 Imports System.Drawing        '使用颜色命名空间
 Imports System.Diagnostics
-' myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
+' ============================================================
+' F01_不良品基本信息 - 模块开发备忘
+' ============================================================
+' 【Load 重写检查清单】重写 Load 时务必核对以下下拉框：
+'   排序字段、客户、供应商、类型区分、产品规格、发现过程、不良类型、因素确定
+' 【历史踩坑】
+'   1. 曾漏掉"不良类型"，导致下拉框为空（数据源：不良类型分类 表）。
+'   2. Grid 必须绑定 objDataView 而非 objDataSet，否则 RowFilter 不生效。
+'   3. objDataAdapter1th 的连接在 产品规格_SelectedIndexChanged 中初始化，
+'      依赖 Load 中提前调用 产品规格_SelectedIndexChanged(Nothing, Nothing)。
+' ============================================================
+
 Public Class F01_不良品基本信息
     'OleDbConnection/objConnection1th	电话线（连接通道）
     'OleDbCommand	你说的话（Sql 语句）
@@ -84,7 +95,13 @@ Public Class F01_不良品基本信息
     '       所有绑定控件的显示内容（文本框、复选框等）。
     '       它通过 BindingContext 获取，确保多个控件显示同一条记录。
     Dim objCurrencyManager As CurrencyManager
-    Dim myArray() As String                       '声明数组变量,数组长度为要引用的数据表字段数量.
+
+    ' 【字段映射数组】所有数据库字段名，按顺序排列
+    ' 说明：声明时即赋值，避免依赖 BindFields 被调用（历史踩坑）。
+    Dim myArray() As String = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备",
+        "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序",
+        "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量",
+        "处置完成", "因素确定", "图片路径"}
 
 
     ' 【筛选状态标志】记录当前是否处于"只看未完成记录"筛选状态
@@ -193,8 +210,9 @@ Public Class F01_不良品基本信息
         ' 说明：此数组顺序必须与 DataSet 中表的列顺序一致（或字段名完全匹配）。
         '       共 21 个字段，对应数据库表"不良品信息"的所有列。
         '       历史踩坑：若字段名与控件名不一致，绑定会失败（此处已确保完全一致）。
-        myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量",
-        "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成", "因素确定", "图片路径"}
+
+        'myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量",
+        '"完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成", "因素确定", "图片路径"}
 
         ' ============================================================
         ' ★★★ 第2步：清除所有控件的旧绑定（防止累积） ★★★
@@ -439,22 +457,26 @@ Public Class F01_不良品基本信息
             ' 说明：筛选切换后，Grid 会按新数据源重新渲染，
             '       但已着色的行样式不会被自动清除，故每次点击都重新遍历一遍，
             '       保证两种状态下的颜色都正确。
+            ' ---- 复用 Font 对象，避免循环内 New 3000 次（性能优化） ----
+            ' 【原理】Font 是 GDI 资源，创建/销毁开销大；
+            '         原代码每次循环都 New，导致 3000 行时明显卡顿。
+            ' 【注意】对象不手动 Dispose，交给 Grid 持有引用，窗体销毁时统一释放。
+            Dim objFont As New Font("宋体", 9, FontStyle.Regular)
+
             For i As Integer = 0 To grdAuthorTitles.RowCount - 2
                 ' 读取第 18 列（"处置完成"）的值，Nothing 时按 False 处理
                 Dim objCellValue As Object = grdAuthorTitles.Item(18, i).Value
                 Dim bolFinished As Boolean = If(objCellValue Is Nothing, False, CType(objCellValue.ToString(), Boolean))
 
+                ' 字体统一复用 objFont，仅切换颜色
+                grdAuthorTitles.Rows(i).DefaultCellStyle.Font = objFont
+
                 If bolFinished Then
-                    ' ---- 已处置完成：黑色常规字体 ----
-                    grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
                     grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Black
                 Else
-                    ' ---- 未处置完成：红色常规字体（突出显示） ----
-                    grdAuthorTitles.Rows(i).DefaultCellStyle.Font = New Font("宋体", 9, FontStyle.Regular)
                     grdAuthorTitles.Rows(i).DefaultCellStyle.ForeColor = Color.Red
                 End If
             Next
-
             ' ============================================================
             ' ★★★ 第4步：筛选后重置记录位置并刷新标签 ★★★
             ' ============================================================
@@ -492,6 +514,22 @@ Public Class F01_不良品基本信息
     '''   3. 列样式设置必须在 Grid 绑定数据源之后，否则 AutoGenerateColumns 会覆盖样式。
     ''' </remarks>
     Private Sub F01_不良品基本信息_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        ' ============================================================
+        ' ★★★ 开启 DataGridView 双缓冲，改善 3000 行滚动性能 ★★★
+        ' ============================================================
+        ' 【原理】双缓冲先把内容绘制到内存，再一次性输出到屏幕，
+        '         避免逐行绘制造成的闪烁和卡顿。
+        ' 【说明】DoubleBuffered 是受保护属性，无法直接设置，
+        '         需通过反射访问基类的 Protected 属性（这是 WinForms 通用技巧）。
+        ' 【历史踩坑】不设置该属性时，3000 行滚动明显"一愣一愣"。
+        Dim objProp As System.Reflection.PropertyInfo = GetType(DataGridView).GetProperty(
+            "DoubleBuffered",
+            System.Reflection.BindingFlags.Instance Or System.Reflection.BindingFlags.NonPublic)
+        If objProp IsNot Nothing Then
+            objProp.SetValue(grdAuthorTitles, True, Nothing)
+        End If
+
         ' ============================================================
         ' ★★★ 第1步：加载数据并刷新界面基础状态 ★★★
         ' ============================================================
@@ -509,6 +547,15 @@ Public Class F01_不良品基本信息
         ' AutoGenerateColumns = True：让 Grid 根据数据源自动创建所有列。
         grdAuthorTitles.AutoGenerateColumns = True
         grdAuthorTitles.DataSource = objDataView
+
+        ' ============================================================
+        ' ★★★ 新增：绑定字段到 GroupBox1 内控件 ★★★
+        ' ============================================================
+        ' 【关键】BindFields() 只在此处调用一次，建立持久绑定。
+        '   后续切换记录时，CurrencyManager 会自动同步控件显示，
+        '   无需在 SelectionChanged 里重复调用（历史踩坑：曾因重复调用导致 3000 行卡顿）。
+        ' 调用时机：必须在 FillDataSetAndView() 之后，因为 objDataView 已就绪。
+        BindFields()
 
 
         ' ============================================================
@@ -644,6 +691,41 @@ Public Class F01_不良品基本信息
         For inCounter = 0 To tb1.Rows.Count - 1                ' 遍历表行填充下拉框
             发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString())
         Next
+
+        ' ============================================================
+        ' ★★★ 第10步：填充"不良类型"下拉框（从"不良类型分类"表动态读取） ★★★
+        ' ============================================================
+        ' 【机制说明】
+        '   - 与"发现过程"类似，使用 objDataAdapter1th 执行临时查询。
+        '   - SQL 用 SELECT DISTINCT 去重，来源为"不良类型分类"表。
+        ' 【连接来源】
+        '   同第9步：依赖 产品规格_SelectedIndexChanged 中初始化的连接。
+        ' 【历史踩坑】
+        '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
+        objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型 from 不良类型分类"
+        objDataSet1th = New DataSet()                          ' 重新初始化，避免数据累积
+        objDataAdapter1th.Fill(objDataSet1th, "wpxx14")        ' 第二参数为内存表名，便于后续引用
+        Dim tb2 As DataTable = objDataSet1th.Tables("wpxx14")  ' 取出表对象
+        不良类型.Items.Clear()
+        For inCounter = 0 To tb2.Rows.Count - 1                ' 遍历表行填充下拉框
+            不良类型.Items.Add(tb2.Rows(inCounter).Item(0).ToString())
+        Next
+
+        ' ============================================================
+        ' ★★★ 第11步：默认按"发生日期"降序排列（新记录在顶部） ★★★
+        ' ============================================================
+        ' 【优化说明】原作者在"添加"后才排序，导致打开窗体时视图
+        '             按"管理编号"排列，与用户预期的"最近不良在顶部"不符。
+        '   现改为：Load 完成后立即按"发生日期 DESC"排序，
+        '           保持打开、添加、查询三种场景的排序一致。
+        ' 【历史踩坑】
+        '   - 若直接改 objDataView.Sort，不会自动刷新 CurrencyManager 位置，
+        '     需配合 ShowPosition() 确保标签同步。
+        objDataView.Sort = "发生日期 DESC"
+        If 排序字段.Items.Count > 1 Then
+            排序字段.SelectedIndex = 1   ' 下拉框同步显示"发生日期"
+        End If
+        ShowPosition()                   ' 刷新"当前记录位置"标签
     End Sub
 
     ''加载窗体触发事件
@@ -998,6 +1080,135 @@ Public Class F01_不良品基本信息
         管理编号.Focus()
     End Sub
 
+    ''' <summary>
+    ''' 功能：将 GroupBox1 中的当前输入值作为一条新记录，插入 Access 数据库"不良品信息"表，
+    '''       成功后清空查询条件、显示全部数据，并自动滚动定位到刚添加的新记录。
+    '''       涉及对象：objConnection1th、OleDbCommand、objDataView、objCurrencyManager。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【关键机制】
+    '''   - 使用参数化 SQL（OleDbParameter）避免 SQL 注入和日期/文本类型转换错误。
+    '''   - 字段顺序需与 INSERT INTO 语句严格一致。
+    ''' 【历史踩坑】
+    '''   1. 日期字段（发生日期）在 Access 中为 Date 类型，需用 CDate() 转换，
+    '''      直接用字符串可能被 Access 按错误格式解析。
+    '''   2. 插入后必须重新 Fill 数据源，否则 Grid 看不到新记录。
+    '''   3. 原逻辑用"筛选新记录"方式显示，导致其他记录被 RowFilter 过滤掉，
+    '''      用户误以为数据丢失。现改为"显示全部 + 定位到新记录"。
+    ''' </remarks>
+    Private Sub 添加_Click(sender As Object, e As EventArgs) Handles 添加.Click
+        ' ============================================================
+        ' ★★★ 第1步：构建 INSERT 语句（参数化） ★★★
+        ' ============================================================
+        ' 说明：? 是占位符，稍后用 OleDbParameter 按顺序填充实际值，
+        '       避免 SQL 拼接带来的类型错误和注入风险。
+        ' 注意：OleDb 用 ? 而非 @名称，参数顺序必须与 SQL 占位符严格一致。
+        Dim strSql As String = "INSERT INTO 不良品信息 (管理编号, 发生日期, 客户, 供应商, 产品规格, " &
+                            "加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, " &
+                            "加工费用, 材料费用, 损失成本, 不良现象及原因, 备注, 重量, 处置完成, 因素确定, 图片路径) " &
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+        ' ============================================================
+        ' ★★★ 第2步：执行插入 ★★★
+        ' ============================================================
+        Try
+            Dim cmdInsert As New OleDbCommand(strSql, objConnection1th)
+
+            ' ---- 按顺序添加参数（顺序必须与 SQL 中占位符一致） ----
+            cmdInsert.Parameters.AddWithValue("@管理编号", 管理编号.Text)
+            cmdInsert.Parameters.AddWithValue("@发生日期", CDate(发生日期.Text))   ' 日期需显式转换
+            cmdInsert.Parameters.AddWithValue("@客户", 客户.Text)
+            cmdInsert.Parameters.AddWithValue("@供应商", 供应商.Text)
+            cmdInsert.Parameters.AddWithValue("@产品规格", 产品规格.Text)
+            cmdInsert.Parameters.AddWithValue("@加工设备", 加工设备.Text)
+            cmdInsert.Parameters.AddWithValue("@发现过程", 发现过程.Text)
+            cmdInsert.Parameters.AddWithValue("@不良类型", 不良类型.Text)
+            cmdInsert.Parameters.AddWithValue("@操作者", 操作者.Text)
+            cmdInsert.Parameters.AddWithValue("@类型区分", 类型区分.Text)
+            cmdInsert.Parameters.AddWithValue("@不良数量", 不良数量.Text)
+            cmdInsert.Parameters.AddWithValue("@完成工序", 完成工序.Text)
+            cmdInsert.Parameters.AddWithValue("@加工费用", 加工费用.Text)
+            cmdInsert.Parameters.AddWithValue("@材料费用", 材料费用.Text)
+            cmdInsert.Parameters.AddWithValue("@损失成本", 损失成本.Text)
+            cmdInsert.Parameters.AddWithValue("@不良现象及原因", 不良现象及原因.Text)
+            cmdInsert.Parameters.AddWithValue("@备注", 备注.Text)
+            cmdInsert.Parameters.AddWithValue("@重量", 重量.Text)
+            cmdInsert.Parameters.AddWithValue("@处置完成", 处置完成.Checked)
+            cmdInsert.Parameters.AddWithValue("@因素确定", 因素确定.Text)
+            cmdInsert.Parameters.AddWithValue("@图片路径", 图片路径.Text)
+
+            ' ---- 打开连接并执行 ----
+            objConnection1th.Open()
+            cmdInsert.ExecuteNonQuery()
+            objConnection1th.Close()
+
+            ' ============================================================
+            ' ★★★ 第3步：刷新全部数据并定位到新记录 ★★★
+            ' ============================================================
+            ' 【设计意图】显示全部记录（而非筛选），让用户既能看到新记录，
+            '             也不丢失其他记录的上下文。
+            MessageBox.Show("添加成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+            ' ---- 3.1 重新加载全部数据 ----
+            FillDataSetAndView()
+
+            ' ---- 3.2 清空查询条件，确保显示全部记录 ----
+            ' 原因：如果 查询条件.Text 有残留，后续查询会再次过滤数据。
+            查询条件.Text = ""
+
+            ' ---- 3.3 按"发生日期"降序排序，让新记录在顶部可见 ----
+            ' 【优化说明】
+            '   原作者使用"按管理编号排序 + 筛选新记录"方案，存在两个问题：
+            '     ① 管理编号排序后，新记录可能出现在列表中间，用户不易找到；
+            '     ② 筛选导致其他记录消失，用户误以为数据丢失。
+            '   现改为：按"发生日期 DESC"排序 + 显示全部记录 + 定位到新记录。
+            '   原因：日期越晚通常越需要关注，新记录自然排在顶部，符合业务直觉。
+            '   ⚠ 只影响本次"添加"后的显示，不改变用户手动排序的行为。
+            objDataView.Sort = "发生日期 DESC"
+            If 排序字段.Items.Count > 1 Then
+                排序字段.SelectedIndex = 1   ' 1 = 发生日期，保持下拉框与视图一致
+            End If
+
+            ' ---- 3.4 定位到刚添加的新记录 ----
+            ' 说明：通过"管理编号"字段匹配刚添加的记录，找到其在 DataView 中的索引。
+            Dim intNewRow As Integer = -1
+            For i As Integer = 0 To objDataView.Count - 1
+                If objDataView(i)("管理编号").ToString().Trim() = 管理编号.Text.Trim() Then
+                    intNewRow = i
+                    Exit For
+                End If
+            Next
+
+            ' ---- 3.5 同步 CurrencyManager 位置与 Grid 显示 ----
+            If intNewRow >= 0 Then
+                objCurrencyManager.Position = intNewRow
+                ShowPosition()
+                RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+                grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intNewRow).Cells(0)
+                AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+                grdAuthorTitles.FirstDisplayedScrollingRowIndex = intNewRow   ' 滚动到新记录
+            Else
+                ShowPosition()   ' 定位失败时至少刷新位置标签
+            End If
+
+            ToolStripLabel1.Text = "Record Added"   ' 状态栏提示
+
+            ' ---- 3.6 锁定金额类字段（防误改） ----
+            重量.Enabled = False
+            损失成本.Enabled = False
+            材料费用.Enabled = False
+            加工费用.Enabled = False
+
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：确保连接关闭并提示用户 ★★★
+            ' ============================================================
+            If objConnection1th.State = ConnectionState.Open Then objConnection1th.Close()
+            MessageBox.Show("添加失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Debug.WriteLine(String.Format("添加_Click 异常: {0}", ex.ToString()))
+        End Try
+    End Sub
+
 
     ''新建按钮事件
     'Private Sub 新建_Click(sender As Object, e As EventArgs) Handles 新建.Click
@@ -1014,101 +1225,101 @@ Public Class F01_不良品基本信息
     '    '管理编号.Enabled = False      '设置禁止使用控件
     'End Sub
 
-    '添加按钮事件
-    Private Sub 添加_Click(sender As Object, e As EventArgs) Handles 添加.Click
-        'Dim intMaxID As Integer     '声明一个局部变量intPosition作为记录位置,intMaxID作为最大连续数字'Declare local variables and objects..  
-        'Dim strID As String = ""    '变量用来存储authors表的主键并设置authors表的新键
-        Dim objCommand As OleDbCommand = New OleDbCommand() '创建一个新的查询.
-        '创建一个命令实例并传入SQL字符串  Create a new SqlCommand object..
-        '从表设备编号表中按照指定条件设备编号匹配数据库最后条的记录
-        '存贮当前记录位置给变量 Save the current record position..
-        'Dim maxIdCommand As OleDbCommand = New OleDbCommand _
-        '("SELECT TOP 1 * FROM 不良品信息 ORDER BY 序列号 DESC", objConnection1th)
-        'objConnection1th.Open()   '打开数据库连接 Open the connection, execute the command SELECT TOP 1 * FROM 表名 ORDER BY 排序字段 DESC
-        'Dim maxId As Object = maxIdCommand.ExecuteScalar()  '调用SqlCommand的一个执行方法(只返回一行一列).并把结果赋值给变量
-        'If maxId Is DBNull.Value Then                       '如果返回结果是空值那么执行    If the MaxID column is null..
-        '    intMaxID = 1000                                 '设置一个默认值1000.Set a default value of 1000..
-        'Else
-        '    strID = CType(maxId, String)                    '否则执行将maxId换成String型.strId.otherwise set the strID variable to the value in MaxID..
-        '    intMaxID = CType(strID.Remove(0, 2), Integer)   '利用Remove方法删除sb前缀,转换整型赋值给变量intMaxID.Get the integer part of the string..
-        '    intMaxID += 1                                   '变量加1.Increment the value..
-        'End If
-        '变量转换成字符串,并与DM连接,构建一个新主键.Finally, set the new ID..'strID = "SB" & intMaxID.ToString
-        ''变量转换成字符串,并与DM连接,构建一个新主键.Finally, set the new ID..
-        'Select Case Len(intMaxID.ToString)
-        '    Case 1
-        '        strID = "XL00" & intMaxID.ToString
-        '    Case 2
-        '        strID = "XL0" & intMaxID.ToString
-        '    Case Else
-        '        strID = "XL" & intMaxID.ToString
-        'End Select
+    ''添加按钮事件
+    'Private Sub 添加_Click(sender As Object, e As EventArgs) Handles 添加.Click
+    '    'Dim intMaxID As Integer     '声明一个局部变量intPosition作为记录位置,intMaxID作为最大连续数字'Declare local variables and objects..  
+    '    'Dim strID As String = ""    '变量用来存储authors表的主键并设置authors表的新键
+    '    Dim objCommand As OleDbCommand = New OleDbCommand() '创建一个新的查询.
+    '    '创建一个命令实例并传入SQL字符串  Create a new SqlCommand object..
+    '    '从表设备编号表中按照指定条件设备编号匹配数据库最后条的记录
+    '    '存贮当前记录位置给变量 Save the current record position..
+    '    'Dim maxIdCommand As OleDbCommand = New OleDbCommand _
+    '    '("SELECT TOP 1 * FROM 不良品信息 ORDER BY 序列号 DESC", objConnection1th)
+    '    'objConnection1th.Open()   '打开数据库连接 Open the connection, execute the command SELECT TOP 1 * FROM 表名 ORDER BY 排序字段 DESC
+    '    'Dim maxId As Object = maxIdCommand.ExecuteScalar()  '调用SqlCommand的一个执行方法(只返回一行一列).并把结果赋值给变量
+    '    'If maxId Is DBNull.Value Then                       '如果返回结果是空值那么执行    If the MaxID column is null..
+    '    '    intMaxID = 1000                                 '设置一个默认值1000.Set a default value of 1000..
+    '    'Else
+    '    '    strID = CType(maxId, String)                    '否则执行将maxId换成String型.strId.otherwise set the strID variable to the value in MaxID..
+    '    '    intMaxID = CType(strID.Remove(0, 2), Integer)   '利用Remove方法删除sb前缀,转换整型赋值给变量intMaxID.Get the integer part of the string..
+    '    '    intMaxID += 1                                   '变量加1.Increment the value..
+    '    'End If
+    '    '变量转换成字符串,并与DM连接,构建一个新主键.Finally, set the new ID..'strID = "SB" & intMaxID.ToString
+    '    ''变量转换成字符串,并与DM连接,构建一个新主键.Finally, set the new ID..
+    '    'Select Case Len(intMaxID.ToString)
+    '    '    Case 1
+    '    '        strID = "XL00" & intMaxID.ToString
+    '    '    Case 2
+    '    '        strID = "XL0" & intMaxID.ToString
+    '    '    Case Else
+    '    '        strID = "XL" & intMaxID.ToString
+    '    'End Select
 
-        objCommand.Connection = objConnection1th '设置命令对象的属性 Set the SqlCommand object properties..'将连接字符串的连接对象赋值给Connection属性
-        objConnection1th.Open()
+    '    objCommand.Connection = objConnection1th '设置命令对象的属性 Set the SqlCommand object properties..'将连接字符串的连接对象赋值给Connection属性
+    '    objConnection1th.Open()
 
-        排序字段.SelectedIndex = 0
-        查询条件.Text = 管理编号.Text
+    '    排序字段.SelectedIndex = 0
+    '    查询条件.Text = 管理编号.Text
 
-        'myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
-        'objCommand.CommandText = "INSERT INTO 不良品信息 " &
-        '"(管理编号, 发生日期, 客户, 供应商, 产品规格, 加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, 加工费用, 材料费用, 损失成本, 不良现象及原因) " &
-        '"VALUES(@管理编号, @发生日期, @客户, @供应商, @产品规格, @加工设备, @发现过程, @不良类型, @操作者, @类型区分, @不良数量, @完成工序, @加工费用, @材料费用, @损失成本, @不良现象及原因)"
-        '添加在SQL中的CommandText属性占位符参数,参数为指定Parameters集合列..'AddWithValue方法接受参数名和要添加的对象 
-        'Add parameters For the placeholders In the SQL In the 'CommandText property..Parameter for the title_id column..
-        objCommand.CommandText = "INSERT INTO 不良品信息 " &
-        "(管理编号, 发生日期, 客户, 供应商, 产品规格, 加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, 加工费用, 材料费用, 损失成本, 不良现象及原因, 备注, 重量, 处置完成, 因素确定, 图片路径) " &
-        "VALUES(@管理编号, @发生日期, @客户, @供应商, @产品规格, @加工设备, @发现过程, @不良类型, @操作者, @类型区分, @不良数量, @完成工序, @加工费用, @材料费用, @损失成本, @不良现象及原因, @备注, @重量, @处置完成, @因素确定, @图片路径)"
+    '    'myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
+    '    'objCommand.CommandText = "INSERT INTO 不良品信息 " &
+    '    '"(管理编号, 发生日期, 客户, 供应商, 产品规格, 加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, 加工费用, 材料费用, 损失成本, 不良现象及原因) " &
+    '    '"VALUES(@管理编号, @发生日期, @客户, @供应商, @产品规格, @加工设备, @发现过程, @不良类型, @操作者, @类型区分, @不良数量, @完成工序, @加工费用, @材料费用, @损失成本, @不良现象及原因)"
+    '    '添加在SQL中的CommandText属性占位符参数,参数为指定Parameters集合列..'AddWithValue方法接受参数名和要添加的对象 
+    '    'Add parameters For the placeholders In the SQL In the 'CommandText property..Parameter for the title_id column..
+    '    objCommand.CommandText = "INSERT INTO 不良品信息 " &
+    '    "(管理编号, 发生日期, 客户, 供应商, 产品规格, 加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, 加工费用, 材料费用, 损失成本, 不良现象及原因, 备注, 重量, 处置完成, 因素确定, 图片路径) " &
+    '    "VALUES(@管理编号, @发生日期, @客户, @供应商, @产品规格, @加工设备, @发现过程, @不良类型, @操作者, @类型区分, @不良数量, @完成工序, @加工费用, @材料费用, @损失成本, @不良现象及原因, @备注, @重量, @处置完成, @因素确定, @图片路径)"
 
-        objCommand.Parameters.AddWithValue("@管理编号", 管理编号.Text)          '指定参数写入值,下同.
-        objCommand.Parameters.AddWithValue("@发生日期", 发生日期.Text).DbType = DbType.Date
-        objCommand.Parameters.AddWithValue("@客户", 客户.Text)
-        objCommand.Parameters.AddWithValue("@供应商", 供应商.Text) '转换日期类型
-        objCommand.Parameters.AddWithValue("@产品规格", 产品规格.Text)
-        objCommand.Parameters.AddWithValue("@加工设备", 加工设备.Text)
-        objCommand.Parameters.AddWithValue("@发现过程", 发现过程.Text)
-        objCommand.Parameters.AddWithValue("@不良类型", 不良类型.Text)
-        objCommand.Parameters.AddWithValue("@操作者", 操作者.Text)
-        objCommand.Parameters.AddWithValue("@类型区分", 类型区分.Text)
-        objCommand.Parameters.AddWithValue("@不良数量", 不良数量.Text).DbType = DbType.Single
-        objCommand.Parameters.AddWithValue("@完成工序", 完成工序.Text)
-        objCommand.Parameters.AddWithValue("@加工费用", 加工费用.Text).DbType = DbType.Single
-        objCommand.Parameters.AddWithValue("@材料费用", 材料费用.Text).DbType = DbType.Single
-        objCommand.Parameters.AddWithValue("@损失成本", 损失成本.Text).DbType = DbType.Single
-        objCommand.Parameters.AddWithValue("@不良现象及原因", 不良现象及原因.Text)
-        objCommand.Parameters.AddWithValue("@备注", 备注.Text)
-        objCommand.Parameters.AddWithValue("@重量", 重量.Text).DbType = DbType.Single
-        objCommand.Parameters.AddWithValue("@处置完成", 处置完成.Checked).DbType = DbType.Boolean '试试可不可以删
-        objCommand.Parameters.AddWithValue("@因素确定", 因素确定.Text) '试试可不可以删
-        objCommand.Parameters.AddWithValue("@图片路径", 图片路径.Text) '试试可不可以删
-        'For i = 0 To UBound(myArray)
-        '    If myArray(i).ToString <> "维修单号" Then   '如果名称只要不是维修单号,那么要执行.
-        '        If GroupBox1.Controls(myArray(i).ToString).Text.Length = 0 Then MsgBox("请输入完整数据在添加数据") : _
-        '            新建_Click(Nothing, Nothing) : objConnection1th.Close() : Exit Sub
-        '    End If
-        'Next i
-        Try                               '截取异常'执行命令对象插入新数据  Execute the SqlCommand object to insert the new data..
-            objCommand.ExecuteNonQuery()  '执行命令对象以更新数据(主要对数据库操作)
-        Catch SqlExceptionErr As OleDbException         '声明异常类型
-            MessageBox.Show(SqlExceptionErr.Message)    '如果出错,提示异常类型错误信息
-        End Try                                         '结束截取
-        objConnection1th.Close()                        '关闭数据库连接 Close the connection..
-        F01_不良品基本信息_Load(Nothing, Nothing)         '调用方法填充数据到指定字段及绑定控件  Fill the dataset and bind the fields..
-        objCurrencyManager.Position = objCurrencyManager.Count - 1   '设置你保存的那个记录位置    Set the record position to the one that you saved..
-        ShowPosition()                                               '标签显示位置.
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
-        'grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(objCurrencyManager.Count - 1).Cells(0)    '视图控件指针选择指定行第一个单元格
-        执行查询_Click(Nothing, Nothing)
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
-        ToolStripLabel1.Text = "Record Added"    '状态栏显示你添加的信息   Display a message that the record was added..
+    '    objCommand.Parameters.AddWithValue("@管理编号", 管理编号.Text)          '指定参数写入值,下同.
+    '    objCommand.Parameters.AddWithValue("@发生日期", 发生日期.Text).DbType = DbType.Date
+    '    objCommand.Parameters.AddWithValue("@客户", 客户.Text)
+    '    objCommand.Parameters.AddWithValue("@供应商", 供应商.Text) '转换日期类型
+    '    objCommand.Parameters.AddWithValue("@产品规格", 产品规格.Text)
+    '    objCommand.Parameters.AddWithValue("@加工设备", 加工设备.Text)
+    '    objCommand.Parameters.AddWithValue("@发现过程", 发现过程.Text)
+    '    objCommand.Parameters.AddWithValue("@不良类型", 不良类型.Text)
+    '    objCommand.Parameters.AddWithValue("@操作者", 操作者.Text)
+    '    objCommand.Parameters.AddWithValue("@类型区分", 类型区分.Text)
+    '    objCommand.Parameters.AddWithValue("@不良数量", 不良数量.Text).DbType = DbType.Single
+    '    objCommand.Parameters.AddWithValue("@完成工序", 完成工序.Text)
+    '    objCommand.Parameters.AddWithValue("@加工费用", 加工费用.Text).DbType = DbType.Single
+    '    objCommand.Parameters.AddWithValue("@材料费用", 材料费用.Text).DbType = DbType.Single
+    '    objCommand.Parameters.AddWithValue("@损失成本", 损失成本.Text).DbType = DbType.Single
+    '    objCommand.Parameters.AddWithValue("@不良现象及原因", 不良现象及原因.Text)
+    '    objCommand.Parameters.AddWithValue("@备注", 备注.Text)
+    '    objCommand.Parameters.AddWithValue("@重量", 重量.Text).DbType = DbType.Single
+    '    objCommand.Parameters.AddWithValue("@处置完成", 处置完成.Checked).DbType = DbType.Boolean '试试可不可以删
+    '    objCommand.Parameters.AddWithValue("@因素确定", 因素确定.Text) '试试可不可以删
+    '    objCommand.Parameters.AddWithValue("@图片路径", 图片路径.Text) '试试可不可以删
+    '    'For i = 0 To UBound(myArray)
+    '    '    If myArray(i).ToString <> "维修单号" Then   '如果名称只要不是维修单号,那么要执行.
+    '    '        If GroupBox1.Controls(myArray(i).ToString).Text.Length = 0 Then MsgBox("请输入完整数据在添加数据") : _
+    '    '            新建_Click(Nothing, Nothing) : objConnection1th.Close() : Exit Sub
+    '    '    End If
+    '    'Next i
+    '    Try                               '截取异常'执行命令对象插入新数据  Execute the SqlCommand object to insert the new data..
+    '        objCommand.ExecuteNonQuery()  '执行命令对象以更新数据(主要对数据库操作)
+    '    Catch SqlExceptionErr As OleDbException         '声明异常类型
+    '        MessageBox.Show(SqlExceptionErr.Message)    '如果出错,提示异常类型错误信息
+    '    End Try                                         '结束截取
+    '    objConnection1th.Close()                        '关闭数据库连接 Close the connection..
+    '    F01_不良品基本信息_Load(Nothing, Nothing)         '调用方法填充数据到指定字段及绑定控件  Fill the dataset and bind the fields..
+    '    objCurrencyManager.Position = objCurrencyManager.Count - 1   '设置你保存的那个记录位置    Set the record position to the one that you saved..
+    '    ShowPosition()                                               '标签显示位置.
+    '    RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
+    '    'grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(objCurrencyManager.Count - 1).Cells(0)    '视图控件指针选择指定行第一个单元格
+    '    执行查询_Click(Nothing, Nothing)
+    '    AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
+    '    ToolStripLabel1.Text = "Record Added"    '状态栏显示你添加的信息   Display a message that the record was added..
 
-        重量.Enabled = False
-        损失成本.Enabled = False
-        材料费用.Enabled = False
-        加工费用.Enabled = False
+    '    重量.Enabled = False
+    '    损失成本.Enabled = False
+    '    材料费用.Enabled = False
+    '    加工费用.Enabled = False
 
 
-    End Sub
+    'End Sub
 
     '更新数据库
     Private Sub 更新_Click(sender As Object, e As EventArgs) Handles 更新.Click
@@ -1203,12 +1414,21 @@ Public Class F01_不良品基本信息
         ToolStripLabel1.Text = "Record Deleted"
     End Sub
 
-    '获取项目值模板
+    ''' <summary>
+    ''' 功能：用户点击 DataGridView 某一行时，同步更新"当前记录位置"标签。
+    '''       不需要手动绑定字段（DataBindings 已在 Load 时建立，切换行会自动刷新）。
+    '''       涉及对象：grdAuthorTitles、objCurrencyManager、txtRecordPosition。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【历史踩坑】
+    '''   原代码在此事件中调用 BindFields()，每次点击 Grid 都会重绑 21 个控件，
+    '''   3000 行滚动时导致严重卡顿（本次已优化）。
+    ''' 【机制说明】
+    '''   - DataGridView 的 CurrentRow 变化会自动同步 CurrencyManager.Position。
+    '''   - 因此无需再手动赋值 Position，只需刷新位置标签即可。
+    ''' </remarks>
     Private Sub grdAuthorTitles_SelectionChanged(sender As Object, e As EventArgs) Handles grdAuthorTitles.SelectionChanged
-        'On Error Resume Next
-        Dim intPosition As Integer = grdAuthorTitles.CurrentRow.Index
-        BindFields()
-        objCurrencyManager.Position = intPosition
+        ' 用户点击 Grid 行 → CurrencyManager.Position 自动同步 → 只需刷新标签
         ShowPosition()
     End Sub
 
