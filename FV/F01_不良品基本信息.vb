@@ -3,6 +3,7 @@ Imports System.Data           '使用DatSet和DataView类所必须的.
 Imports System.Data.OleDb     '使用OleDbConnection、OleDbAdapter、OleDbCommand、OleDbParameter类所必须的.
 Imports System.Drawing        '使用颜色命名空间
 Imports System.Diagnostics
+
 ' ============================================================
 ' F01_不良品基本信息 - 模块开发备忘
 ' ============================================================
@@ -16,6 +17,10 @@ Imports System.Diagnostics
 ' ============================================================
 
 Public Class F01_不良品基本信息
+    ' 【记录用户排序选择】用于更新/删除后恢复用户排序（-1 表示未设置）
+    Private intLastSortIndex As Integer = -1
+
+
     'OleDbConnection/objConnection1th	电话线（连接通道）
     'OleDbCommand	你说的话（Sql 语句）
     'OleDbDataAdapter	接线员（帮你把话传过去、把答复拿回来）,专门问"不良品信息"的接线员
@@ -65,7 +70,8 @@ Public Class F01_不良品基本信息
     ' 参数1：SQL 查询语句（从 不良品信息 表查询所有字段，按 发生日期 排序）
     ' 参数2：数据库连接对象（objConnection1th）
     ' 说明：此适配器在窗体加载时执行，用于获取全部记录。
-    Dim objDataAdapter As New OleDbDataAdapter("SELECT 不良品信息.* FROM 不良品信息 ORDER BY 发生日期", objConnection1th)
+    ' 【性能优化】SQL 直接降序，避免 DataView.Sort 事后重排（省 ~1000ms）
+    Dim objDataAdapter As New OleDbDataAdapter("SELECT 不良品信息.* FROM 不良品信息 ORDER BY 发生日期 DESC", objConnection1th)
 
 
     ' 【数据适配器2（辅助查询）】
@@ -129,6 +135,12 @@ Public Class F01_不良品基本信息
         ' 原因：数据库连接（网络路径）可能因网络波动、权限问题失败，
         '       必须捕获异常避免整个窗体加载失败。
         Try
+            ' 保存用户当前的排序选择（供更新/删除后恢复）
+            ' 说明：若为首次加载（objDataView 为 Nothing），intLastSortIndex 记为 -1，
+            '       后续不会触发恢复逻辑。
+            If objDataView IsNot Nothing AndAlso 排序字段.SelectedIndex >= 0 Then
+                intLastSortIndex = 排序字段.SelectedIndex
+            End If
             ' ============================================================
             ' ★★★ 第2步：重新初始化 DataSet（确保干净状态） ★★★
             ' ============================================================
@@ -148,11 +160,23 @@ Public Class F01_不良品基本信息
             ' ============================================================
             ' ★★★ 第4步：初始化 DataView 和 CurrencyManager ★★★
             ' ============================================================
-            ' DataView：为 DataSet 提供动态视图，支持排序、筛选，而不影响原始数据。
-            ' CurrencyManager：管理绑定到同一数据源的所有控件的当前记录位置，
-            '                  后续导航按钮（上一条/下一条）通过它实现同步。
-            objDataView = New DataView(objDataSet.Tables("bl"))
-            objCurrencyManager = CType(Me.BindingContext(objDataView), CurrencyManager)
+            ' 【历史踩坑】原代码每次 New DataView，导致 Grid.DataSource 仍指向旧对象，
+            '             出现"数据刷新了但 Grid 看不到变化"的问题。
+            '             现改为：首次创建，后续复用（只更新 Table），
+            '             所有调用点（添加/更新/删除）自动受益。
+            ' 【注意】Sort 必须在 Table 更新后重新应用，否则排序会丢失。
+            If objDataView Is Nothing Then
+                ' 首次调用：创建 DataView 和 CurrencyManager
+                objDataView = New DataView(objDataSet.Tables("bl"))
+                objCurrencyManager = CType(Me.BindingContext(objDataView), CurrencyManager)
+            Else
+                ' 后续调用：复用 DataView，只替换 Table
+                objDataView.Table = objDataSet.Tables("bl")
+            End If
+
+            ' ---- 应用默认排序（发生日期降序） ----
+            ' 说明：Table 变更后 Sort 会失效，需重新设置。
+            objDataView.Sort = "发生日期 DESC"
 
             ' ============================================================
             ' ★★★ 第5步：状态栏提示（如果存在） ★★★
@@ -270,33 +294,36 @@ Public Class F01_不良品基本信息
     ''' 功能：格式化"发生日期"文本框内容为短日期（yyyy/MM/dd），
     '''       并在 txtRecordPosition 文本框中显示当前记录位置（如 "3 of 120"）。
     '''       涉及对象：GroupBox1 内的"发生日期"控件、txtRecordPosition 控件。
-    '''       触发场景：任何记录导航（首条/上一条/下一条/末条）后调用，
-    '''                 确保界面上的日期格式统一、记录位置实时同步。
+    '''       触发场景：任何记录导航（首条/上一条/下一条/末条）后调用。
     ''' </summary>
     ''' <remarks>
+    ''' 【性能优化】
+    '''   原代码用 Try...Catch 处理空值/格式错误，首次调用必然抛异常，
+    '''   耗时约 120ms（异常构造开销大）。
+    '''   现改用 Date.TryParse：不抛异常，返回 Boolean，避免走异常路径。
     ''' 【机制说明】
     '''   - 记录总数来自 objCurrencyManager.Count（当前 DataView 的行数）。
     '''   - 当前索引来自 objCurrencyManager.Position（从 0 开始，显示时 +1）。
-    ''' 【历史踩坑】
-    '''   - 当记录为空或"发生日期"字段为 DBNull 时，直接 CType 转换会抛异常，
-    '''     故使用 Try...Catch 兜底：转换失败则用当前系统日期填充，保证界面不崩溃。
     ''' </remarks>
     Private Sub ShowPosition()
         ' ============================================================
-        ' ★★★ 第1步：格式化"发生日期"为短日期 ★★★
+        ' ★★★ 第1步：格式化"发生日期"为短日期（TryParse，不抛异常） ★★★
         ' ============================================================
         ' 原因：DataView 绑定到文本框后，日期可能带时间部分（如 2025/01/01 0:00:00），
         '       统一格式为 yyyy/MM/dd 以便阅读。
-        ' 历史踩坑：空记录或 DBNull 会导致 CType 失败，故用 Try 包裹。
-        Try
-            ' 尝试将文本框内容转换为 Date 类型，再按短日期格式回写
-            发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")
-        Catch e As System.Exception
-            ' 转换失败（如空值）时：先用当前系统日期兜底，避免文本框为空导致后续逻辑出错
-            GroupBox1.Controls("发生日期").Text = CType(Now, String)
-            ' 再次格式化（此时必定成功）
-            发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")
-        End Try
+        ' 优化：用 Date.TryParse 替代 CType + Try...Catch，避免异常开销。
+        Dim dtParsed As Date
+        Dim strDateText As String = GroupBox1.Controls("发生日期").Text
+
+        If Date.TryParse(strDateText, dtParsed) Then
+            ' 解析成功：按短日期格式回写
+            发生日期.Text = Format(dtParsed, "yyyy/MM/dd")
+        Else
+            ' 解析失败（如空值、格式错误）：不抛异常，静默跳过
+            ' 说明：原代码在此处填入系统日期，会误导用户；
+            '       改为保留空值，让用户在编辑时自行填写。
+            发生日期.Text = ""
+        End If
 
         ' ============================================================
         ' ★★★ 第2步：显示当前记录位置 ★★★
@@ -306,6 +333,34 @@ Public Class F01_不良品基本信息
         txtRecordPosition.Text = objCurrencyManager.Position + 1 &
         " of " & objCurrencyManager.Count()
     End Sub
+
+
+
+    'Private Sub ShowPosition()
+    '    ' ============================================================
+    '    ' ★★★ 第1步：格式化"发生日期"为短日期 ★★★
+    '    ' ============================================================
+    '    ' 原因：DataView 绑定到文本框后，日期可能带时间部分（如 2025/01/01 0:00:00），
+    '    '       统一格式为 yyyy/MM/dd 以便阅读。
+    '    ' 历史踩坑：空记录或 DBNull 会导致 CType 失败，故用 Try 包裹。
+    '    Try
+    '        ' 尝试将文本框内容转换为 Date 类型，再按短日期格式回写
+    '        发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")
+    '    Catch e As System.Exception
+    '        ' 转换失败（如空值）时：先用当前系统日期兜底，避免文本框为空导致后续逻辑出错
+    '        GroupBox1.Controls("发生日期").Text = CType(Now, String)
+    '        ' 再次格式化（此时必定成功）
+    '        发生日期.Text = Format(CType(GroupBox1.Controls("发生日期").Text, Date), "yyyy/MM/dd")
+    '    End Try
+
+    '    ' ============================================================
+    '    ' ★★★ 第2步：显示当前记录位置 ★★★
+    '    ' ============================================================
+    '    ' 说明：Position 从 0 开始，显示时 +1 更符合用户习惯（如 "1 of 120"）。
+    '    '       Count 为当前 DataView 的记录总数（受筛选影响）。
+    '    txtRecordPosition.Text = objCurrencyManager.Position + 1 &
+    '    " of " & objCurrencyManager.Count()
+    'End Sub
 
 
     ''' <summary>
@@ -513,75 +568,60 @@ Public Class F01_不良品基本信息
     '''   2. 数据加载通过 FillDataSetAndView() 完成，该方法内部已加异常处理。
     '''   3. 列样式设置必须在 Grid 绑定数据源之后，否则 AutoGenerateColumns 会覆盖样式。
     ''' </remarks>
+    ''' 
     Private Sub F01_不良品基本信息_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Dim sw As New Stopwatch()
+        Dim swTotal As New Stopwatch()
+        swTotal.Start()
 
         ' ============================================================
-        ' ★★★ 开启 DataGridView 双缓冲，改善 3000 行滚动性能 ★★★
+        ' ★★★ 计时①：FillDataSetAndView（数据加载）
         ' ============================================================
-        ' 【原理】双缓冲先把内容绘制到内存，再一次性输出到屏幕，
-        '         避免逐行绘制造成的闪烁和卡顿。
-        ' 【说明】DoubleBuffered 是受保护属性，无法直接设置，
-        '         需通过反射访问基类的 Protected 属性（这是 WinForms 通用技巧）。
-        ' 【历史踩坑】不设置该属性时，3000 行滚动明显"一愣一愣"。
+        sw.Restart()
+        FillDataSetAndView()
+        sw.Stop()
+        Debug.WriteLine("① FillDataSetAndView: " & sw.ElapsedMilliseconds & "ms")
+
+        ' ============================================================
+        ' ★★★ 计时②：Grid 绑定 + 双缓冲
+        ' ============================================================
+        sw.Restart()
+        ' 开启双缓冲（反射方式，改善 3000 行滚动）
         Dim objProp As System.Reflection.PropertyInfo = GetType(DataGridView).GetProperty(
-            "DoubleBuffered",
-            System.Reflection.BindingFlags.Instance Or System.Reflection.BindingFlags.NonPublic)
+        "DoubleBuffered",
+        System.Reflection.BindingFlags.Instance Or System.Reflection.BindingFlags.NonPublic)
         If objProp IsNot Nothing Then
             objProp.SetValue(grdAuthorTitles, True, Nothing)
         End If
 
-        ' ============================================================
-        ' ★★★ 第1步：加载数据并刷新界面基础状态 ★★★
-        ' ============================================================
-        ' FillDataSetAndView()：填充 objDataSet → 构建 objDataView → 获取 objCurrencyManager
-        ' ShowPosition()：刷新"当前记录位置"标签（如 "1 of 2617"）
-        FillDataSetAndView()
-        ShowPosition()
-
-        ' ============================================================
-        ' ★★★ 第2步：将 Grid 绑定到 objDataView ★★★
-        ' ============================================================
-        ' 【关键】必须绑定 objDataView，而非 objDataSet：
-        '   - RowFilter 只对 DataView 生效，绑定 DataSet 会导致筛选功能失效（本次踩坑）。
-        '   - DataView 自带表结构，无需再设 DataMember。
-        ' AutoGenerateColumns = True：让 Grid 根据数据源自动创建所有列。
         grdAuthorTitles.AutoGenerateColumns = True
         grdAuthorTitles.DataSource = objDataView
+        sw.Stop()
+        Debug.WriteLine("② Grid 绑定+双缓冲: " & sw.ElapsedMilliseconds & "ms")
 
         ' ============================================================
-        ' ★★★ 新增：绑定字段到 GroupBox1 内控件 ★★★
+        ' ★★★ 计时③：BindFields（控件绑定）
         ' ============================================================
-        ' 【关键】BindFields() 只在此处调用一次，建立持久绑定。
-        '   后续切换记录时，CurrencyManager 会自动同步控件显示，
-        '   无需在 SelectionChanged 里重复调用（历史踩坑：曾因重复调用导致 3000 行卡顿）。
-        ' 调用时机：必须在 FillDataSetAndView() 之后，因为 objDataView 已就绪。
+        sw.Restart()
         BindFields()
-
+        sw.Stop()
+        Debug.WriteLine("③ BindFields: " & sw.ElapsedMilliseconds & "ms")
 
         ' ============================================================
-        ' ★★★ 第3步：配置 DataGridView 列标题与单元格样式 ★★★
+        ' ★★★ 计时④：列样式设置
         ' ============================================================
-        ' 说明：所有列样式设置必须在 Grid 绑定数据源之后执行，
-        '       否则 AutoGenerateColumns 重新生成列时会覆盖此处设置（历史踩坑）。
-
-        ' ---- 3.1 定义通用样式对象 ----
-        ' objAlignRightCellStyle：右对齐样式，用于金额类列标题。
+        sw.Restart()
         Dim objAlignRightCellStyle As New DataGridViewCellStyle
         objAlignRightCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
 
-        ' objAlternatingCellStyle：交替行背景色，提升可读性。
         Dim objAlternatingCellStyle As New DataGridViewCellStyle()
         objAlternatingCellStyle.BackColor = Color.WhiteSmoke
         grdAuthorTitles.AlternatingRowsDefaultCellStyle = objAlternatingCellStyle
 
-        ' objCurrencyCellStyle：货币格式样式，用于金额类单元格（加工费用/材料费用/损失成本）。
         Dim objCurrencyCellStyle As New DataGridViewCellStyle()
         objCurrencyCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft
         objCurrencyCellStyle.Format = "¥#,##0.00"
 
-        ' ---- 3.2 设置各列标题文字 ----
-        ' 说明：Grid 自动生成的列标题默认是英文字段名或数据库列名，
-        '       需逐一映射为中文标题，便于用户理解。
         grdAuthorTitles.Columns(0).HeaderText = "管理编号"
         grdAuthorTitles.Columns(1).HeaderText = "发生日期"
         grdAuthorTitles.Columns(2).HeaderText = "客户"
@@ -598,135 +638,330 @@ Public Class F01_不良品基本信息
         grdAuthorTitles.Columns(13).HeaderText = "材料费用"
         grdAuthorTitles.Columns(14).HeaderText = "损失成本"
         grdAuthorTitles.Columns(15).HeaderText = "不良现象及原因"
-        grdAuthorTitles.Columns(15).Width = 130                 ' 现象描述较长，加宽便于阅读
+        grdAuthorTitles.Columns(15).Width = 130
         grdAuthorTitles.Columns(16).HeaderText = "备注"
         grdAuthorTitles.Columns(17).HeaderText = "重量"
         grdAuthorTitles.Columns(18).HeaderText = "处置完成"
-        grdAuthorTitles.Columns(18).Width = 60                  ' 布尔值只需小宽度
+        grdAuthorTitles.Columns(18).Width = 60
         grdAuthorTitles.Columns(19).HeaderText = "因素确定"
         grdAuthorTitles.Columns(20).HeaderText = "图片路径"
 
-        ' ---- 3.3 金额类列设置特殊样式（标题右对齐 + 单元格货币格式） ----
-        ' 说明：Columns("列名") 通过列名引用，需保证列名与数据库字段一致。
-        grdAuthorTitles.Columns("加工费用").HeaderCell.Value = "加工费用_内"  ' 标题改写便于区分
+        grdAuthorTitles.Columns("加工费用").HeaderCell.Value = "加工费用_内"
         grdAuthorTitles.Columns("加工费用").HeaderCell.Style = objAlignRightCellStyle
         grdAuthorTitles.Columns("加工费用").DefaultCellStyle = objCurrencyCellStyle
-
         grdAuthorTitles.Columns("材料费用").HeaderCell.Style = objAlignRightCellStyle
         grdAuthorTitles.Columns("材料费用").DefaultCellStyle = objCurrencyCellStyle
-
         grdAuthorTitles.Columns("损失成本").HeaderCell.Style = objAlignRightCellStyle
         grdAuthorTitles.Columns("损失成本").DefaultCellStyle = objCurrencyCellStyle
 
-        ' ---- 3.4 释放临时样式对象 ----
-        ' 说明：样式已赋值给 Grid，临时对象可置 Nothing 释放引用（GC 后续回收）。
         objCurrencyCellStyle = Nothing
         objAlternatingCellStyle = Nothing
         objAlignRightCellStyle = Nothing
+        sw.Stop()
+        Debug.WriteLine("④ 列样式设置: " & sw.ElapsedMilliseconds & "ms")
 
         ' ============================================================
-        ' ★★★ 第4步：填充"排序字段"下拉框 ★★★
+        ' ★★★ 计时⑤：硬编码下拉框填充
         ' ============================================================
-        ' 说明：myArray 是模块级数组，包含所有可排序字段名，
-        '       在 BindFields 或类顶部定义，此处直接复用。
-        ' 【良好习惯】Clear 后 AddRange，避免重复调用 Load 时累积重复项。
+        ' 【性能优化】用 BeginUpdate/EndUpdate 包裹批量填充，
+        '             避免每次 Add 都触发 ComboBox 重绘（省 ~100ms）。
+        sw.Restart()
+
+        ' ---- 排序字段：数组批量填充（本身已高效） ----
         排序字段.Items.Clear()
         排序字段.Items.AddRange(myArray)
-        排序字段.SelectedIndex = 0  ' 默认选第一项（"管理编号"）
+        排序字段.SelectedIndex = 0
 
-        ' ============================================================
-        ' ★★★ 第5步：填充"客户"下拉框 ★★★
-        ' ============================================================
-        ' 说明：客户列表目前硬编码，后续建议迁移到数据库表统一维护（TODO）。
+        ' ---- 客户：逐项 Add，用 BeginUpdate 优化 ----
+        客户.BeginUpdate()
         客户.Items.Clear()
         客户.Items.Add("日本日立") : 客户.Items.Add("德國久保田") : 客户.Items.Add("日本久保田")
         客户.Items.Add("常州现代") : 客户.Items.Add("GE") : 客户.Items.Add("印度日立")
         客户.Items.Add("发注至总公司") : 客户.Items.Add("苏州斗山山猫") : 客户.Items.Add("烟台斗山")
         客户.Items.Add("VOLVO") : 客户.Items.Add("远景能源")
+        客户.EndUpdate()
 
-        ' ============================================================
-        ' ★★★ 第6步：填充"供应商"下拉框 ★★★
-        ' ============================================================
-        ' 说明：同客户列表，建议后续统一迁移到数据表。
+        ' ---- 供应商：逐项 Add，用 BeginUpdate 优化 ----
+        供应商.BeginUpdate()
         供应商.Items.Clear()
         供应商.Items.Add("荣程A") : 供应商.Items.Add("新顺章B") : 供应商.Items.Add("海陆C")
         供应商.Items.Add("利元D") : 供应商.Items.Add("广源E") : 供应商.Items.Add("瑞鑫F")
         供应商.Items.Add("纽威G") : 供应商.Items.Add("荣冠H") : 供应商.Items.Add("派克L")
+        供应商.EndUpdate()
 
-        ' ============================================================
-        ' ★★★ 第7步：填充"类型区分"下拉框 ★★★
-        ' ============================================================
-        ' 说明：I/N、O/T、Assembly 是内部分类编码，含义由业务侧约定。
+        ' ---- 类型区分：逐项 Add，用 BeginUpdate 优化 ----
+        类型区分.BeginUpdate()
         类型区分.Items.Clear()
         类型区分.Items.Add("I/N") : 类型区分.Items.Add("O/T") : 类型区分.Items.Add("Assembly")
+        类型区分.EndUpdate()
+
+        sw.Stop()
+        Debug.WriteLine("⑤ 硬编码下拉框: " & sw.ElapsedMilliseconds & "ms")
+
+        ' ★★★ 计时⑥：数据库读取下拉框（惰性化）
+        ' ============================================================
+        ' 【性能优化】惰性化：产品规格/加工费用/材料费用的联动查询
+        '             推迟到用户实际修改"产品规格"时触发，
+        '             Load 里只填充必要的两个下拉框。
+        sw.Restart()
+        objConnection1th.Open()
+        Try
+            ' ---- 发现过程下拉框 ----
+            objDataAdapter1th.SelectCommand = New OleDbCommand()
+            objDataAdapter1th.SelectCommand.Connection = objConnection1th
+            objDataAdapter1th.SelectCommand.CommandText = "select distinct 赔偿比例.* from 赔偿比例 ORDER BY 比例"
+            objDataSet1th = New DataSet()
+            objDataAdapter1th.Fill(objDataSet1th, "wpxx04")
+            Dim tb1 As DataTable = objDataSet1th.Tables("wpxx04")
+            发现过程.Items.Clear()
+            For inCounter = 0 To tb1.Rows.Count - 1
+                发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString())
+            Next
+
+            ' ---- 不良类型下拉框 ----
+            objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型 from 不良类型分类"
+            objDataSet1th = New DataSet()
+            objDataAdapter1th.Fill(objDataSet1th, "wpxx14")
+            Dim tb2 As DataTable = objDataSet1th.Tables("wpxx14")
+            不良类型.Items.Clear()
+            For inCounter = 0 To tb2.Rows.Count - 1
+                不良类型.Items.Add(tb2.Rows(inCounter).Item(0).ToString())
+            Next
+        Finally
+            objConnection1th.Close()
+        End Try
+        sw.Stop()
+        Debug.WriteLine("⑥ 数据库读取下拉框: " & sw.ElapsedMilliseconds & "ms")
 
         ' ============================================================
-        ' ★★★ 第8步：触发"产品规格"选中事件，联动刷新其他下拉框 ★★★
+        ' ★★★ 计时⑦：排序 + ShowPosition
         ' ============================================================
-        ' 说明：产品规格选中后会触发 SelectedIndexChanged，联动加载相关选项。
-        '       此处传入 Nothing 手动触发一次，确保初始状态下下拉框已填充。
-        产品规格_SelectedIndexChanged(Nothing, Nothing)
-
-        ' ============================================================
-        ' ★★★ 第9步：填充"发现过程"下拉框（从"赔偿比例"表动态读取） ★★★
-        ' ============================================================
-        ' 【机制说明】
-        '   - 用 objDataAdapter1th 执行临时查询，填充到 objDataSet1th，再从表中循环读取。
-        '   - SQL 用 SELECT DISTINCT 去重，ORDER BY 比例 保证顺序稳定。
-        ' 【连接来源】
-        '   objDataAdapter1th 的连接不是声明时绑定的，而是在
-        '   产品规格_SelectedIndexChanged 事件中通过下面两行绑定：
-        '       objDataAdapter1th.SelectCommand = New OleDbCommand()
-        '       objDataAdapter1th.SelectCommand.Connection = objConnection1th
-        '   因此 Load 里必须先调用 产品规格_SelectedIndexChanged(Nothing, Nothing)
-        '   完成初始化，才能执行本段的 Fill 操作。
-        '   ⚠ TODO：该事件用了 On Error Resume Next，会吞异常，后续应改为 Try...Catch。
-        ' 【历史踩坑】
-        '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
-        objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "赔偿比例.*" & " from " & "赔偿比例 ORDER BY 比例"
-        objDataSet1th = New DataSet()                          ' 重新初始化，避免数据累积
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx04")        ' 第二参数为内存表名，便于后续引用
-        Dim tb1 As DataTable = objDataSet1th.Tables("wpxx04")  ' 取出表对象
-        发现过程.Items.Clear()
-        For inCounter = 0 To tb1.Rows.Count - 1                ' 遍历表行填充下拉框
-            发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString())
-        Next
-
-        ' ============================================================
-        ' ★★★ 第10步：填充"不良类型"下拉框（从"不良类型分类"表动态读取） ★★★
-        ' ============================================================
-        ' 【机制说明】
-        '   - 与"发现过程"类似，使用 objDataAdapter1th 执行临时查询。
-        '   - SQL 用 SELECT DISTINCT 去重，来源为"不良类型分类"表。
-        ' 【连接来源】
-        '   同第9步：依赖 产品规格_SelectedIndexChanged 中初始化的连接。
-        ' 【历史踩坑】
-        '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
-        objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型 from 不良类型分类"
-        objDataSet1th = New DataSet()                          ' 重新初始化，避免数据累积
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx14")        ' 第二参数为内存表名，便于后续引用
-        Dim tb2 As DataTable = objDataSet1th.Tables("wpxx14")  ' 取出表对象
-        不良类型.Items.Clear()
-        For inCounter = 0 To tb2.Rows.Count - 1                ' 遍历表行填充下拉框
-            不良类型.Items.Add(tb2.Rows(inCounter).Item(0).ToString())
-        Next
-
-        ' ============================================================
-        ' ★★★ 第11步：默认按"发生日期"降序排列（新记录在顶部） ★★★
-        ' ============================================================
-        ' 【优化说明】原作者在"添加"后才排序，导致打开窗体时视图
-        '             按"管理编号"排列，与用户预期的"最近不良在顶部"不符。
-        '   现改为：Load 完成后立即按"发生日期 DESC"排序，
-        '           保持打开、添加、查询三种场景的排序一致。
-        ' 【历史踩坑】
-        '   - 若直接改 objDataView.Sort，不会自动刷新 CurrencyManager 位置，
-        '     需配合 ShowPosition() 确保标签同步。
-        objDataView.Sort = "发生日期 DESC"
+        sw.Restart()
+        ' 【性能优化】SQL 已 ORDER BY DESC，无需再 Sort
         If 排序字段.Items.Count > 1 Then
-            排序字段.SelectedIndex = 1   ' 下拉框同步显示"发生日期"
+            排序字段.SelectedIndex = 1
         End If
-        ShowPosition()                   ' 刷新"当前记录位置"标签
+        ShowPosition()
+        sw.Stop()
+        Debug.WriteLine("⑦ 排序+ShowPosition: " & sw.ElapsedMilliseconds & "ms")
+
+        swTotal.Stop()
+        Debug.WriteLine("=== Load 总耗时: " & swTotal.ElapsedMilliseconds & "ms ===")
     End Sub
+    'Private Sub F01_不良品基本信息_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    '    ' ============================================================
+    '    ' ★★★ 开启 DataGridView 双缓冲，改善 3000 行滚动性能 ★★★
+    '    ' ============================================================
+    '    ' 【原理】双缓冲先把内容绘制到内存，再一次性输出到屏幕，
+    '    '         避免逐行绘制造成的闪烁和卡顿。
+    '    ' 【说明】DoubleBuffered 是受保护属性，无法直接设置，
+    '    '         需通过反射访问基类的 Protected 属性（这是 WinForms 通用技巧）。
+    '    ' 【历史踩坑】不设置该属性时，3000 行滚动明显"一愣一愣"。
+    '    Dim objProp As System.Reflection.PropertyInfo = GetType(DataGridView).GetProperty(
+    '        "DoubleBuffered",
+    '        System.Reflection.BindingFlags.Instance Or System.Reflection.BindingFlags.NonPublic)
+    '    If objProp IsNot Nothing Then
+    '        objProp.SetValue(grdAuthorTitles, True, Nothing)
+    '    End If
+
+    '    ' ============================================================
+    '    ' ★★★ 第1步：加载数据并刷新界面基础状态 ★★★
+    '    ' ============================================================
+    '    ' FillDataSetAndView()：填充 objDataSet → 构建 objDataView → 获取 objCurrencyManager
+    '    ' ShowPosition()：刷新"当前记录位置"标签（如 "1 of 2617"）
+    '    FillDataSetAndView()
+    '    ShowPosition()
+
+    '    ' ============================================================
+    '    ' ★★★ 第2步：将 Grid 绑定到 objDataView ★★★
+    '    ' ============================================================
+    '    ' 【关键】必须绑定 objDataView，而非 objDataSet：
+    '    '   - RowFilter 只对 DataView 生效，绑定 DataSet 会导致筛选功能失效（本次踩坑）。
+    '    '   - DataView 自带表结构，无需再设 DataMember。
+    '    ' AutoGenerateColumns = True：让 Grid 根据数据源自动创建所有列。
+    '    grdAuthorTitles.AutoGenerateColumns = True
+    '    grdAuthorTitles.DataSource = objDataView
+
+    '    ' ============================================================
+    '    ' ★★★ 新增：绑定字段到 GroupBox1 内控件 ★★★
+    '    ' ============================================================
+    '    ' 【关键】BindFields() 只在此处调用一次，建立持久绑定。
+    '    '   后续切换记录时，CurrencyManager 会自动同步控件显示，
+    '    '   无需在 SelectionChanged 里重复调用（历史踩坑：曾因重复调用导致 3000 行卡顿）。
+    '    ' 调用时机：必须在 FillDataSetAndView() 之后，因为 objDataView 已就绪。
+    '    BindFields()
+
+
+    '    ' ============================================================
+    '    ' ★★★ 第3步：配置 DataGridView 列标题与单元格样式 ★★★
+    '    ' ============================================================
+    '    ' 说明：所有列样式设置必须在 Grid 绑定数据源之后执行，
+    '    '       否则 AutoGenerateColumns 重新生成列时会覆盖此处设置（历史踩坑）。
+
+    '    ' ---- 3.1 定义通用样式对象 ----
+    '    ' objAlignRightCellStyle：右对齐样式，用于金额类列标题。
+    '    Dim objAlignRightCellStyle As New DataGridViewCellStyle
+    '    objAlignRightCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight
+
+    '    ' objAlternatingCellStyle：交替行背景色，提升可读性。
+    '    Dim objAlternatingCellStyle As New DataGridViewCellStyle()
+    '    objAlternatingCellStyle.BackColor = Color.WhiteSmoke
+    '    grdAuthorTitles.AlternatingRowsDefaultCellStyle = objAlternatingCellStyle
+
+    '    ' objCurrencyCellStyle：货币格式样式，用于金额类单元格（加工费用/材料费用/损失成本）。
+    '    Dim objCurrencyCellStyle As New DataGridViewCellStyle()
+    '    objCurrencyCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft
+    '    objCurrencyCellStyle.Format = "¥#,##0.00"
+
+    '    ' ---- 3.2 设置各列标题文字 ----
+    '    ' 说明：Grid 自动生成的列标题默认是英文字段名或数据库列名，
+    '    '       需逐一映射为中文标题，便于用户理解。
+    '    grdAuthorTitles.Columns(0).HeaderText = "管理编号"
+    '    grdAuthorTitles.Columns(1).HeaderText = "发生日期"
+    '    grdAuthorTitles.Columns(2).HeaderText = "客户"
+    '    grdAuthorTitles.Columns(3).HeaderText = "供应商"
+    '    grdAuthorTitles.Columns(4).HeaderText = "产品规格"
+    '    grdAuthorTitles.Columns(5).HeaderText = "加工设备"
+    '    grdAuthorTitles.Columns(6).HeaderText = "发现过程"
+    '    grdAuthorTitles.Columns(7).HeaderText = "不良类型"
+    '    grdAuthorTitles.Columns(8).HeaderText = "操作者"
+    '    grdAuthorTitles.Columns(9).HeaderText = "类型区分"
+    '    grdAuthorTitles.Columns(10).HeaderText = "不良数量"
+    '    grdAuthorTitles.Columns(11).HeaderText = "完成工序"
+    '    grdAuthorTitles.Columns(12).HeaderText = "加工费用"
+    '    grdAuthorTitles.Columns(13).HeaderText = "材料费用"
+    '    grdAuthorTitles.Columns(14).HeaderText = "损失成本"
+    '    grdAuthorTitles.Columns(15).HeaderText = "不良现象及原因"
+    '    grdAuthorTitles.Columns(15).Width = 130                 ' 现象描述较长，加宽便于阅读
+    '    grdAuthorTitles.Columns(16).HeaderText = "备注"
+    '    grdAuthorTitles.Columns(17).HeaderText = "重量"
+    '    grdAuthorTitles.Columns(18).HeaderText = "处置完成"
+    '    grdAuthorTitles.Columns(18).Width = 60                  ' 布尔值只需小宽度
+    '    grdAuthorTitles.Columns(19).HeaderText = "因素确定"
+    '    grdAuthorTitles.Columns(20).HeaderText = "图片路径"
+
+    '    ' ---- 3.3 金额类列设置特殊样式（标题右对齐 + 单元格货币格式） ----
+    '    ' 说明：Columns("列名") 通过列名引用，需保证列名与数据库字段一致。
+    '    grdAuthorTitles.Columns("加工费用").HeaderCell.Value = "加工费用_内"  ' 标题改写便于区分
+    '    grdAuthorTitles.Columns("加工费用").HeaderCell.Style = objAlignRightCellStyle
+    '    grdAuthorTitles.Columns("加工费用").DefaultCellStyle = objCurrencyCellStyle
+
+    '    grdAuthorTitles.Columns("材料费用").HeaderCell.Style = objAlignRightCellStyle
+    '    grdAuthorTitles.Columns("材料费用").DefaultCellStyle = objCurrencyCellStyle
+
+    '    grdAuthorTitles.Columns("损失成本").HeaderCell.Style = objAlignRightCellStyle
+    '    grdAuthorTitles.Columns("损失成本").DefaultCellStyle = objCurrencyCellStyle
+
+    '    ' ---- 3.4 释放临时样式对象 ----
+    '    ' 说明：样式已赋值给 Grid，临时对象可置 Nothing 释放引用（GC 后续回收）。
+    '    objCurrencyCellStyle = Nothing
+    '    objAlternatingCellStyle = Nothing
+    '    objAlignRightCellStyle = Nothing
+
+    '    ' ============================================================
+    '    ' ★★★ 第4步：填充"排序字段"下拉框 ★★★
+    '    ' ============================================================
+    '    ' 说明：myArray 是模块级数组，包含所有可排序字段名，
+    '    '       在 BindFields 或类顶部定义，此处直接复用。
+    '    ' 【良好习惯】Clear 后 AddRange，避免重复调用 Load 时累积重复项。
+    '    排序字段.Items.Clear()
+    '    排序字段.Items.AddRange(myArray)
+    '    排序字段.SelectedIndex = 0  ' 默认选第一项（"管理编号"）
+
+    '    ' ============================================================
+    '    ' ★★★ 第5步：填充"客户"下拉框 ★★★
+    '    ' ============================================================
+    '    ' 说明：客户列表目前硬编码，后续建议迁移到数据库表统一维护（TODO）。
+    '    客户.Items.Clear()
+    '    客户.Items.Add("日本日立") : 客户.Items.Add("德國久保田") : 客户.Items.Add("日本久保田")
+    '    客户.Items.Add("常州现代") : 客户.Items.Add("GE") : 客户.Items.Add("印度日立")
+    '    客户.Items.Add("发注至总公司") : 客户.Items.Add("苏州斗山山猫") : 客户.Items.Add("烟台斗山")
+    '    客户.Items.Add("VOLVO") : 客户.Items.Add("远景能源")
+
+    '    ' ============================================================
+    '    ' ★★★ 第6步：填充"供应商"下拉框 ★★★
+    '    ' ============================================================
+    '    ' 说明：同客户列表，建议后续统一迁移到数据表。
+    '    供应商.Items.Clear()
+    '    供应商.Items.Add("荣程A") : 供应商.Items.Add("新顺章B") : 供应商.Items.Add("海陆C")
+    '    供应商.Items.Add("利元D") : 供应商.Items.Add("广源E") : 供应商.Items.Add("瑞鑫F")
+    '    供应商.Items.Add("纽威G") : 供应商.Items.Add("荣冠H") : 供应商.Items.Add("派克L")
+
+    '    ' ============================================================
+    '    ' ★★★ 第7步：填充"类型区分"下拉框 ★★★
+    '    ' ============================================================
+    '    ' 说明：I/N、O/T、Assembly 是内部分类编码，含义由业务侧约定。
+    '    类型区分.Items.Clear()
+    '    类型区分.Items.Add("I/N") : 类型区分.Items.Add("O/T") : 类型区分.Items.Add("Assembly")
+
+    '    ' ============================================================
+    '    ' ★★★ 第8步：触发"产品规格"选中事件，联动刷新其他下拉框 ★★★
+    '    ' ============================================================
+    '    ' 说明：产品规格选中后会触发 SelectedIndexChanged，联动加载相关选项。
+    '    '       此处传入 Nothing 手动触发一次，确保初始状态下下拉框已填充。
+    '    产品规格_SelectedIndexChanged(Nothing, Nothing)
+
+    '    ' ============================================================
+    '    ' ★★★ 第9步：填充"发现过程"下拉框（从"赔偿比例"表动态读取） ★★★
+    '    ' ============================================================
+    '    ' 【机制说明】
+    '    '   - 用 objDataAdapter1th 执行临时查询，填充到 objDataSet1th，再从表中循环读取。
+    '    '   - SQL 用 SELECT DISTINCT 去重，ORDER BY 比例 保证顺序稳定。
+    '    ' 【连接来源】
+    '    '   objDataAdapter1th 的连接不是声明时绑定的，而是在
+    '    '   产品规格_SelectedIndexChanged 事件中通过下面两行绑定：
+    '    '       objDataAdapter1th.SelectCommand = New OleDbCommand()
+    '    '       objDataAdapter1th.SelectCommand.Connection = objConnection1th
+    '    '   因此 Load 里必须先调用 产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '    '   完成初始化，才能执行本段的 Fill 操作。
+    '    '   ⚠ TODO：该事件用了 On Error Resume Next，会吞异常，后续应改为 Try...Catch。
+    '    ' 【历史踩坑】
+    '    '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
+    '    objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "赔偿比例.*" & " from " & "赔偿比例 ORDER BY 比例"
+    '    objDataSet1th = New DataSet()                          ' 重新初始化，避免数据累积
+    '    objDataAdapter1th.Fill(objDataSet1th, "wpxx04")        ' 第二参数为内存表名，便于后续引用
+    '    Dim tb1 As DataTable = objDataSet1th.Tables("wpxx04")  ' 取出表对象
+    '    发现过程.Items.Clear()
+    '    For inCounter = 0 To tb1.Rows.Count - 1                ' 遍历表行填充下拉框
+    '        发现过程.Items.Add(tb1.Rows(inCounter).Item(0).ToString())
+    '    Next
+
+    '    ' ============================================================
+    '    ' ★★★ 第10步：填充"不良类型"下拉框（从"不良类型分类"表动态读取） ★★★
+    '    ' ============================================================
+    '    ' 【机制说明】
+    '    '   - 与"发现过程"类似，使用 objDataAdapter1th 执行临时查询。
+    '    '   - SQL 用 SELECT DISTINCT 去重，来源为"不良类型分类"表。
+    '    ' 【连接来源】
+    '    '   同第9步：依赖 产品规格_SelectedIndexChanged 中初始化的连接。
+    '    ' 【历史踩坑】
+    '    '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
+    '    objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型 from 不良类型分类"
+    '    objDataSet1th = New DataSet()                          ' 重新初始化，避免数据累积
+    '    objDataAdapter1th.Fill(objDataSet1th, "wpxx14")        ' 第二参数为内存表名，便于后续引用
+    '    Dim tb2 As DataTable = objDataSet1th.Tables("wpxx14")  ' 取出表对象
+    '    不良类型.Items.Clear()
+    '    For inCounter = 0 To tb2.Rows.Count - 1                ' 遍历表行填充下拉框
+    '        不良类型.Items.Add(tb2.Rows(inCounter).Item(0).ToString())
+    '    Next
+
+    '    ' ============================================================
+    '    ' ★★★ 第11步：默认按"发生日期"降序排列（新记录在顶部） ★★★
+    '    ' ============================================================
+    '    ' 【优化说明】原作者在"添加"后才排序，导致打开窗体时视图
+    '    '             按"管理编号"排列，与用户预期的"最近不良在顶部"不符。
+    '    '   现改为：Load 完成后立即按"发生日期 DESC"排序，
+    '    '           保持打开、添加、查询三种场景的排序一致。
+    '    ' 【历史踩坑】
+    '    '   - 若直接改 objDataView.Sort，不会自动刷新 CurrencyManager 位置，
+    '    '     需配合 ShowPosition() 确保标签同步。
+    '    objDataView.Sort = "发生日期 DESC"
+    '    If 排序字段.Items.Count > 1 Then
+    '        排序字段.SelectedIndex = 1   ' 下拉框同步显示"发生日期"
+    '    End If
+    '    ShowPosition()                   ' 刷新"当前记录位置"标签
+    'End Sub
 
     ''加载窗体触发事件
     'Private Sub F01_不良品基本信息_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -1090,11 +1325,16 @@ Public Class F01_不良品基本信息
     '''   - 使用参数化 SQL（OleDbParameter）避免 SQL 注入和日期/文本类型转换错误。
     '''   - 字段顺序需与 INSERT INTO 语句严格一致。
     ''' 【历史踩坑】
-    '''   1. 日期字段（发生日期）在 Access 中为 Date 类型，需用 CDate() 转换，
-    '''      直接用字符串可能被 Access 按错误格式解析。
+    '''   1. 日期字段（发生日期）在 Access 中为 Date 类型，需用 CDate() 转换。
     '''   2. 插入后必须重新 Fill 数据源，否则 Grid 看不到新记录。
     '''   3. 原逻辑用"筛选新记录"方式显示，导致其他记录被 RowFilter 过滤掉，
     '''      用户误以为数据丢失。现改为"显示全部 + 定位到新记录"。
+    '''   4. 【重要】必须在 FillDataSetAndView 之前保存新记录的 ID，
+    '''      因为 Fill 会重建 DataView 和 CurrencyManager，
+    '''      导致 GroupBox1 控件被重新绑定到第一条记录，管理编号.Text 会被覆盖，
+    '''      后续用 管理编号.Text 匹配就找不到新记录了（本次踩坑）。
+    '''   5. 【重要】FillDataSetAndView 内部重建了 objDataView，
+    '''      Grid 的 DataSource 需重新绑定才能看到新数据（已在 FillDataSetAndView 中修复）。
     ''' </remarks>
     Private Sub 添加_Click(sender As Object, e As EventArgs) Handles 添加.Click
         ' ============================================================
@@ -1143,57 +1383,67 @@ Public Class F01_不良品基本信息
             objConnection1th.Close()
 
             ' ============================================================
-            ' ★★★ 第3步：刷新全部数据并定位到新记录 ★★★
+            ' ★★★ 第3步：保存新记录 ID（必须在 Fill 之前） ★★★
             ' ============================================================
-            ' 【设计意图】显示全部记录（而非筛选），让用户既能看到新记录，
-            '             也不丢失其他记录的上下文。
+            ' 【关键】FillDataSetAndView 会重建 DataView 和 CurrencyManager，
+            '         导致 GroupBox1 控件被重绑到第一条记录，管理编号.Text 会被覆盖。
+            '         因此必须在此处先保存新记录的 ID。
+            Dim strNewRecordId As String = 管理编号.Text.Trim()
+
             MessageBox.Show("添加成功！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-            ' ---- 3.1 重新加载全部数据 ----
+            ' ============================================================
+            ' ★★★ 第4步：刷新数据并定位到新记录 ★★★
+            ' ============================================================
+            ' ---- 4.1 重新加载全部数据 ----
             FillDataSetAndView()
 
-            ' ---- 3.2 清空查询条件，确保显示全部记录 ----
-            ' 原因：如果 查询条件.Text 有残留，后续查询会再次过滤数据。
+            ' ---- 4.2 清空查询条件，确保显示全部记录 ----
             查询条件.Text = ""
 
-            ' ---- 3.3 按"发生日期"降序排序，让新记录在顶部可见 ----
-            ' 【优化说明】
-            '   原作者使用"按管理编号排序 + 筛选新记录"方案，存在两个问题：
-            '     ① 管理编号排序后，新记录可能出现在列表中间，用户不易找到；
-            '     ② 筛选导致其他记录消失，用户误以为数据丢失。
-            '   现改为：按"发生日期 DESC"排序 + 显示全部记录 + 定位到新记录。
-            '   原因：日期越晚通常越需要关注，新记录自然排在顶部，符合业务直觉。
-            '   ⚠ 只影响本次"添加"后的显示，不改变用户手动排序的行为。
-            objDataView.Sort = "发生日期 DESC"
+            ' ---- 4.3 保持下拉框与视图一致 ----
+            ' 【说明】排序已在 FillDataSetAndView 中设置为"发生日期 DESC"，
+            '         此处只同步下拉框选项，让用户看到当前排序依据。
             If 排序字段.Items.Count > 1 Then
-                排序字段.SelectedIndex = 1   ' 1 = 发生日期，保持下拉框与视图一致
+                排序字段.SelectedIndex = 1
             End If
 
-            ' ---- 3.4 定位到刚添加的新记录 ----
-            ' 说明：通过"管理编号"字段匹配刚添加的记录，找到其在 DataView 中的索引。
+            ' ---- 4.4 定位到刚添加的新记录 ----
+            ' 说明：使用保存的 strNewRecordId 匹配，而非 管理编号.Text
+            '       （后者在 FillDataSetAndView 后已被覆盖为第一条记录的值）。
             Dim intNewRow As Integer = -1
             For i As Integer = 0 To objDataView.Count - 1
-                If objDataView(i)("管理编号").ToString().Trim() = 管理编号.Text.Trim() Then
+                If objDataView(i)("管理编号").ToString().Trim() = strNewRecordId Then
                     intNewRow = i
                     Exit For
                 End If
             Next
 
-            ' ---- 3.5 同步 CurrencyManager 位置与 Grid 显示 ----
+            ' ---- 4.5 同步 CurrencyManager 位置与 Grid 显示 ----
             If intNewRow >= 0 Then
                 objCurrencyManager.Position = intNewRow
                 ShowPosition()
+
                 RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
                 grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intNewRow).Cells(0)
                 AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
-                grdAuthorTitles.FirstDisplayedScrollingRowIndex = intNewRow   ' 滚动到新记录
+
+                ' ---- 让新记录显示在屏幕中部（往上偏移 10 行） ----
+                ' 【原因】FirstDisplayedScrollingRowIndex = intNewRow 会让目标行在底部，
+                '         因为它保证"底部有数据填充"（WinForms 固有限制）。
+                '         往上偏移 10 行可让目标行显示在屏幕中偏上，视觉上更明显。
+                ' 【边界处理】若目标行在前 10 行内，则顶部设为 0。
+                Dim intScrollTarget As Integer = intNewRow - 10
+                If intScrollTarget < 0 Then intScrollTarget = 0
+                grdAuthorTitles.FirstDisplayedScrollingRowIndex = intScrollTarget
             Else
-                ShowPosition()   ' 定位失败时至少刷新位置标签
+                ' 定位失败（理论上不会发生），至少刷新位置标签
+                ShowPosition()
             End If
 
             ToolStripLabel1.Text = "Record Added"   ' 状态栏提示
 
-            ' ---- 3.6 锁定金额类字段（防误改） ----
+            ' ---- 4.6 锁定金额类字段（防误改） ----
             重量.Enabled = False
             损失成本.Enabled = False
             材料费用.Enabled = False
@@ -1209,209 +1459,272 @@ Public Class F01_不良品基本信息
         End Try
     End Sub
 
-
-    ''新建按钮事件
-    'Private Sub 新建_Click(sender As Object, e As EventArgs) Handles 新建.Click
-    '    Dim i As Byte = 0             '声明局部变量
-    '    myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分",
-    '        "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注", "重量", "处置完成", "因素确定", "图片路径"}
-    '    For i = 0 To UBound(myArray)  '清空简单控件值
-    '        GroupBox1.Controls(myArray(i).ToString).Text = ""
-    '    Next i
-    '    GroupBox1.Controls(myArray(10).ToString).Text = 1
-    '    产品规格.SelectedIndex = 0  '默认选择第一项
-    '    类型区分.SelectedIndex = 0  '默认选择第一项
-    '    发现过程.SelectedIndex = 0
-    '    '管理编号.Enabled = False      '设置禁止使用控件
-    'End Sub
-
-    ''添加按钮事件
-    'Private Sub 添加_Click(sender As Object, e As EventArgs) Handles 添加.Click
-    '    'Dim intMaxID As Integer     '声明一个局部变量intPosition作为记录位置,intMaxID作为最大连续数字'Declare local variables and objects..  
-    '    'Dim strID As String = ""    '变量用来存储authors表的主键并设置authors表的新键
-    '    Dim objCommand As OleDbCommand = New OleDbCommand() '创建一个新的查询.
-    '    '创建一个命令实例并传入SQL字符串  Create a new SqlCommand object..
-    '    '从表设备编号表中按照指定条件设备编号匹配数据库最后条的记录
-    '    '存贮当前记录位置给变量 Save the current record position..
-    '    'Dim maxIdCommand As OleDbCommand = New OleDbCommand _
-    '    '("SELECT TOP 1 * FROM 不良品信息 ORDER BY 序列号 DESC", objConnection1th)
-    '    'objConnection1th.Open()   '打开数据库连接 Open the connection, execute the command SELECT TOP 1 * FROM 表名 ORDER BY 排序字段 DESC
-    '    'Dim maxId As Object = maxIdCommand.ExecuteScalar()  '调用SqlCommand的一个执行方法(只返回一行一列).并把结果赋值给变量
-    '    'If maxId Is DBNull.Value Then                       '如果返回结果是空值那么执行    If the MaxID column is null..
-    '    '    intMaxID = 1000                                 '设置一个默认值1000.Set a default value of 1000..
-    '    'Else
-    '    '    strID = CType(maxId, String)                    '否则执行将maxId换成String型.strId.otherwise set the strID variable to the value in MaxID..
-    '    '    intMaxID = CType(strID.Remove(0, 2), Integer)   '利用Remove方法删除sb前缀,转换整型赋值给变量intMaxID.Get the integer part of the string..
-    '    '    intMaxID += 1                                   '变量加1.Increment the value..
-    '    'End If
-    '    '变量转换成字符串,并与DM连接,构建一个新主键.Finally, set the new ID..'strID = "SB" & intMaxID.ToString
-    '    ''变量转换成字符串,并与DM连接,构建一个新主键.Finally, set the new ID..
-    '    'Select Case Len(intMaxID.ToString)
-    '    '    Case 1
-    '    '        strID = "XL00" & intMaxID.ToString
-    '    '    Case 2
-    '    '        strID = "XL0" & intMaxID.ToString
-    '    '    Case Else
-    '    '        strID = "XL" & intMaxID.ToString
-    '    'End Select
-
-    '    objCommand.Connection = objConnection1th '设置命令对象的属性 Set the SqlCommand object properties..'将连接字符串的连接对象赋值给Connection属性
-    '    objConnection1th.Open()
-
-    '    排序字段.SelectedIndex = 0
-    '    查询条件.Text = 管理编号.Text
-
-    '    'myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
-    '    'objCommand.CommandText = "INSERT INTO 不良品信息 " &
-    '    '"(管理编号, 发生日期, 客户, 供应商, 产品规格, 加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, 加工费用, 材料费用, 损失成本, 不良现象及原因) " &
-    '    '"VALUES(@管理编号, @发生日期, @客户, @供应商, @产品规格, @加工设备, @发现过程, @不良类型, @操作者, @类型区分, @不良数量, @完成工序, @加工费用, @材料费用, @损失成本, @不良现象及原因)"
-    '    '添加在SQL中的CommandText属性占位符参数,参数为指定Parameters集合列..'AddWithValue方法接受参数名和要添加的对象 
-    '    'Add parameters For the placeholders In the SQL In the 'CommandText property..Parameter for the title_id column..
-    '    objCommand.CommandText = "INSERT INTO 不良品信息 " &
-    '    "(管理编号, 发生日期, 客户, 供应商, 产品规格, 加工设备, 发现过程, 不良类型, 操作者, 类型区分, 不良数量, 完成工序, 加工费用, 材料费用, 损失成本, 不良现象及原因, 备注, 重量, 处置完成, 因素确定, 图片路径) " &
-    '    "VALUES(@管理编号, @发生日期, @客户, @供应商, @产品规格, @加工设备, @发现过程, @不良类型, @操作者, @类型区分, @不良数量, @完成工序, @加工费用, @材料费用, @损失成本, @不良现象及原因, @备注, @重量, @处置完成, @因素确定, @图片路径)"
-
-    '    objCommand.Parameters.AddWithValue("@管理编号", 管理编号.Text)          '指定参数写入值,下同.
-    '    objCommand.Parameters.AddWithValue("@发生日期", 发生日期.Text).DbType = DbType.Date
-    '    objCommand.Parameters.AddWithValue("@客户", 客户.Text)
-    '    objCommand.Parameters.AddWithValue("@供应商", 供应商.Text) '转换日期类型
-    '    objCommand.Parameters.AddWithValue("@产品规格", 产品规格.Text)
-    '    objCommand.Parameters.AddWithValue("@加工设备", 加工设备.Text)
-    '    objCommand.Parameters.AddWithValue("@发现过程", 发现过程.Text)
-    '    objCommand.Parameters.AddWithValue("@不良类型", 不良类型.Text)
-    '    objCommand.Parameters.AddWithValue("@操作者", 操作者.Text)
-    '    objCommand.Parameters.AddWithValue("@类型区分", 类型区分.Text)
-    '    objCommand.Parameters.AddWithValue("@不良数量", 不良数量.Text).DbType = DbType.Single
-    '    objCommand.Parameters.AddWithValue("@完成工序", 完成工序.Text)
-    '    objCommand.Parameters.AddWithValue("@加工费用", 加工费用.Text).DbType = DbType.Single
-    '    objCommand.Parameters.AddWithValue("@材料费用", 材料费用.Text).DbType = DbType.Single
-    '    objCommand.Parameters.AddWithValue("@损失成本", 损失成本.Text).DbType = DbType.Single
-    '    objCommand.Parameters.AddWithValue("@不良现象及原因", 不良现象及原因.Text)
-    '    objCommand.Parameters.AddWithValue("@备注", 备注.Text)
-    '    objCommand.Parameters.AddWithValue("@重量", 重量.Text).DbType = DbType.Single
-    '    objCommand.Parameters.AddWithValue("@处置完成", 处置完成.Checked).DbType = DbType.Boolean '试试可不可以删
-    '    objCommand.Parameters.AddWithValue("@因素确定", 因素确定.Text) '试试可不可以删
-    '    objCommand.Parameters.AddWithValue("@图片路径", 图片路径.Text) '试试可不可以删
-    '    'For i = 0 To UBound(myArray)
-    '    '    If myArray(i).ToString <> "维修单号" Then   '如果名称只要不是维修单号,那么要执行.
-    '    '        If GroupBox1.Controls(myArray(i).ToString).Text.Length = 0 Then MsgBox("请输入完整数据在添加数据") : _
-    '    '            新建_Click(Nothing, Nothing) : objConnection1th.Close() : Exit Sub
-    '    '    End If
-    '    'Next i
-    '    Try                               '截取异常'执行命令对象插入新数据  Execute the SqlCommand object to insert the new data..
-    '        objCommand.ExecuteNonQuery()  '执行命令对象以更新数据(主要对数据库操作)
-    '    Catch SqlExceptionErr As OleDbException         '声明异常类型
-    '        MessageBox.Show(SqlExceptionErr.Message)    '如果出错,提示异常类型错误信息
-    '    End Try                                         '结束截取
-    '    objConnection1th.Close()                        '关闭数据库连接 Close the connection..
-    '    F01_不良品基本信息_Load(Nothing, Nothing)         '调用方法填充数据到指定字段及绑定控件  Fill the dataset and bind the fields..
-    '    objCurrencyManager.Position = objCurrencyManager.Count - 1   '设置你保存的那个记录位置    Set the record position to the one that you saved..
-    '    ShowPosition()                                               '标签显示位置.
-    '    RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
-    '    'grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(objCurrencyManager.Count - 1).Cells(0)    '视图控件指针选择指定行第一个单元格
-    '    执行查询_Click(Nothing, Nothing)
-    '    AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
-    '    ToolStripLabel1.Text = "Record Added"    '状态栏显示你添加的信息   Display a message that the record was added..
-
-    '    重量.Enabled = False
-    '    损失成本.Enabled = False
-    '    材料费用.Enabled = False
-    '    加工费用.Enabled = False
-
-
-    'End Sub
-
-    '更新数据库
+    ''' <summary>
+    ''' 功能：将当前编辑的控件值通过参数化 UPDATE 语句写回 Access 数据库，
+    '''       成功后重新加载数据，并尽力保持用户的排序选择与当前记录位置。
+    '''       涉及对象：objConnection1th、OleDbCommand、objDataView、objCurrencyManager。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【关键机制】
+    '''   - 使用参数化 SQL（OleDbParameter），避免注入与类型转换错误。
+    '''   - WHERE 条件用"管理编号"（主键），确保只更新当前记录。
+    ''' 【历史踩坑】
+    '''   1. 日期/金额/布尔字段必须显式指定 DbType，否则 Access 可能类型不匹配。
+    '''   2. 原代码在更新后重置 排序字段.SelectedIndex = 0，会打乱用户选择，
+    '''      且 执行查询_Click 会把 Position 重置为 0，导致定位失效。
+    '''      现改为：保留排序选择，只刷新数据，定位回原记录。
+    ''' </remarks>
     Private Sub 更新_Click(sender As Object, e As EventArgs) Handles 更新.Click
-        '声明一个局部变量和创建一个命令对象  Declare local variables and objects..
-        Dim intPosition As Integer
-        Dim objCommand As OleDbCommand = New OleDbCommand()
-        intPosition = objCurrencyManager.Position  '当前记录位置赋值给变量intPosstion. Save the current record position..
-        objCommand.Connection = objConnection1th '设置命令对象一些属性 Set the SqlCommand object properties..
-        排序字段.SelectedIndex = 0
-        查询条件.Text = 管理编号.Text
-        'SQL语句表示按照指定条件,更新表字段..
-        'myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
-        ' '接着使用SQL字符串设置CommandText属性.
-        objCommand.CommandText = "UPDATE 不良品信息 " &
-            "SET 发生日期 = @发生日期,客户 = @客户,供应商 = @供应商,产品规格 = @产品规格,加工设备 = @加工设备,
-发现过程 = @发现过程,不良类型 = @不良类型,操作者 = @操作者,类型区分 = @类型区分,不良数量 = @不良数量,完成工序 = @完成工序,
-加工费用 = @加工费用,材料费用 = @材料费用,损失成本 = @损失成本,不良现象及原因 = @不良现象及原因,备注 = @备注,重量 = @重量,处置完成 = @处置完成,因素确定 = @因素确定,图片路径 = @图片路径 WHERE 管理编号 = @管理编号"
-        objCommand.CommandType = CommandType.Text '命令类型为默认CommandType.Text类型,可以省略
-        '向Parameters(执行的SQL语句如果以参数形式传递,那么将形成一个参数集合)集合添加适当的参数
-        ' Add parameters for the placeholders in the SQL in the
-        ' CommandText property..
-        '型号规格字段以相应的文本框Text属性传递给参数设定值      Parameter for the title field..
-        objCommand.Parameters.AddWithValue("@发生日期", 发生日期.Text).DbType = DbType.Date  '转换类型.
-        objCommand.Parameters.AddWithValue("@客户", 客户.Text)
-        objCommand.Parameters.AddWithValue("@供应商", 供应商.Text)
-        objCommand.Parameters.AddWithValue("@产品规格", 产品规格.Text)
-        objCommand.Parameters.AddWithValue("@加工设备", 加工设备.Text)
-        objCommand.Parameters.AddWithValue("@发现过程", 发现过程.Text)
-        objCommand.Parameters.AddWithValue("@不良类型", 不良类型.Text)
-        objCommand.Parameters.AddWithValue("@操作者", 操作者.Text)
-        objCommand.Parameters.AddWithValue("@类型区分", 类型区分.Text)
-        objCommand.Parameters.AddWithValue("@不良数量", 不良数量.Text)
-        objCommand.Parameters.AddWithValue("@完成工序", 完成工序.Text)
-        objCommand.Parameters.AddWithValue("@加工费用", 加工费用.Text).DbType = DbType.Single  '转换类型.
-        objCommand.Parameters.AddWithValue("@材料费用", 材料费用.Text).DbType = DbType.Single  '转换类型.
-        objCommand.Parameters.AddWithValue("@损失成本", 损失成本.Text).DbType = DbType.Single  '转换类型.
-        objCommand.Parameters.AddWithValue("@不良现象及原因", 不良现象及原因.Text)
-        objCommand.Parameters.AddWithValue("@备注", 备注.Text)
-        objCommand.Parameters.AddWithValue("@重量", 重量.Text).DbType = DbType.Single  '转换类型.
-        objCommand.Parameters.AddWithValue("@处置完成", 处置完成.Checked).DbType = DbType.Boolean  '转换类型.
-        objCommand.Parameters.AddWithValue("@因素确定", 因素确定.Text)
-        objCommand.Parameters.AddWithValue("@图片路径", 图片路径.Text)
-        objCommand.Parameters.AddWithValue _
-            ("@管理编号", BindingContext(objDataView).Current("管理编号"))
+        ' ============================================================
+        ' ★★★ 第1步：保存当前记录位置与排序选择 ★★★
+        ' ============================================================
+        ' 原因：更新后需要定位回原记录，且不应改变用户的排序选择。
+        Dim intPosition As Integer = objCurrencyManager.Position
+        Dim intSortIndex As Integer = 排序字段.SelectedIndex
+        ' 保存当前记录的"管理编号"，用于更新后定位
+        Dim strCurrentId As String = BindingContext(objDataView).Current("管理编号").ToString()
 
-        objConnection1th.Open()    '打开带连接字符的数据库连接  Open the connection..
-        objCommand.ExecuteNonQuery()   '执行命令对象以更新数据 Execute the SqlCommand object to update the data..
-        objConnection1th.Close()    '关闭数据库连接  Close the connection..
-        F01_不良品基本信息_Load(Nothing, Nothing) '调用方法显示数据和绑定字段  Fill the DataSet and bind the fields..
-        objCurrencyManager.Position = intPosition   ' 设置你保存过的记录位置 Set the record position to the one that you saved..
-        ShowPosition() '加载窗体后,CurrencyManager默认显示的第一条记录,所以重新调用ShowPositon过程显示正确记录位置. Show the current record position..
-        '显示状态信息  Display a message that the record was updated..
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
-        'grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)                     '视图控件指针选择指定行第一个单元格
-        执行查询_Click(Nothing, Nothing)
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
-        ToolStripLabel1.Text = "Record Updated"
+        ' ============================================================
+        ' ★★★ 第2步：构建 UPDATE 语句并执行 ★★★
+        ' ============================================================
+        Try
+            Dim objCommand As New OleDbCommand()
+            objCommand.Connection = objConnection1th
+            objCommand.CommandType = CommandType.Text
+
+            ' ---- 构建 UPDATE 语句（参数化） ----
+            objCommand.CommandText = "UPDATE 不良品信息 " &
+            "SET 发生日期 = @发生日期, 客户 = @客户, 供应商 = @供应商, 产品规格 = @产品规格, " &
+            "加工设备 = @加工设备, 发现过程 = @发现过程, 不良类型 = @不良类型, 操作者 = @操作者, " &
+            "类型区分 = @类型区分, 不良数量 = @不良数量, 完成工序 = @完成工序, " &
+            "加工费用 = @加工费用, 材料费用 = @材料费用, 损失成本 = @损失成本, " &
+            "不良现象及原因 = @不良现象及原因, 备注 = @备注, 重量 = @重量, " &
+            "处置完成 = @处置完成, 因素确定 = @因素确定, 图片路径 = @图片路径 " &
+            "WHERE 管理编号 = @管理编号"
+
+            ' ---- 添加参数（顺序可任意，名称必须与 SQL 一致） ----
+            objCommand.Parameters.AddWithValue("@发生日期", 发生日期.Text).DbType = DbType.Date
+            objCommand.Parameters.AddWithValue("@客户", 客户.Text)
+            objCommand.Parameters.AddWithValue("@供应商", 供应商.Text)
+            objCommand.Parameters.AddWithValue("@产品规格", 产品规格.Text)
+            objCommand.Parameters.AddWithValue("@加工设备", 加工设备.Text)
+            objCommand.Parameters.AddWithValue("@发现过程", 发现过程.Text)
+            objCommand.Parameters.AddWithValue("@不良类型", 不良类型.Text)
+            objCommand.Parameters.AddWithValue("@操作者", 操作者.Text)
+            objCommand.Parameters.AddWithValue("@类型区分", 类型区分.Text)
+            objCommand.Parameters.AddWithValue("@不良数量", 不良数量.Text)
+            objCommand.Parameters.AddWithValue("@完成工序", 完成工序.Text)
+            objCommand.Parameters.AddWithValue("@加工费用", 加工费用.Text).DbType = DbType.Single
+            objCommand.Parameters.AddWithValue("@材料费用", 材料费用.Text).DbType = DbType.Single
+            objCommand.Parameters.AddWithValue("@损失成本", 损失成本.Text).DbType = DbType.Single
+            objCommand.Parameters.AddWithValue("@不良现象及原因", 不良现象及原因.Text)
+            objCommand.Parameters.AddWithValue("@备注", 备注.Text)
+            objCommand.Parameters.AddWithValue("@重量", 重量.Text).DbType = DbType.Single
+            objCommand.Parameters.AddWithValue("@处置完成", 处置完成.Checked).DbType = DbType.Boolean
+            objCommand.Parameters.AddWithValue("@因素确定", 因素确定.Text)
+            objCommand.Parameters.AddWithValue("@图片路径", 图片路径.Text)
+            ' WHERE 条件：用保存的 strCurrentId，避免用户改了"管理编号"后找不到原记录
+            objCommand.Parameters.AddWithValue("@管理编号", strCurrentId)
+
+            ' ---- 执行更新 ----
+            objConnection1th.Open()
+            objCommand.ExecuteNonQuery()
+            objConnection1th.Close()
+
+            ' ============================================================
+            ' ★★★ 第3步：刷新数据并定位回原记录 ★★★
+            ' ============================================================
+            F01_不良品基本信息_Load(Nothing, Nothing)
+            ' ---- 恢复用户原排序 ----
+            ' 【设计意图】更新是局部操作，不应打断用户的排序选择。
+            '             用户可能正在按"客户"排序排查问题，更新后不应跳回默认排序。
+            If intLastSortIndex >= 0 AndAlso 排序字段.Items.Count > intLastSortIndex Then
+                排序字段.SelectedIndex = intLastSortIndex
+                ' 按用户选择的字段重新排序
+                Select Case intLastSortIndex
+                    Case 0 : objDataView.Sort = "管理编号"
+                    Case 1 : objDataView.Sort = "发生日期 DESC"
+                    Case 2 : objDataView.Sort = "客户"
+                    Case 3 : objDataView.Sort = "供应商"
+                    Case 4 : objDataView.Sort = "产品规格"
+                    Case 5 : objDataView.Sort = "加工设备"
+                    Case 6 : objDataView.Sort = "发现过程"
+                    Case 7 : objDataView.Sort = "不良类型"
+                    Case 8 : objDataView.Sort = "操作者"
+                    Case 9 : objDataView.Sort = "类型区分"
+                    Case 10 : objDataView.Sort = "不良数量"
+                    Case 11 : objDataView.Sort = "完成工序"
+                    Case 12 : objDataView.Sort = "加工费用"
+                    Case 13 : objDataView.Sort = "材料费用"
+                    Case 14 : objDataView.Sort = "损失成本"
+                    Case 15 : objDataView.Sort = "不良现象及原因"
+                    Case 16 : objDataView.Sort = "备注"
+                    Case 17 : objDataView.Sort = "重量"
+                    Case 18 : objDataView.Sort = "处置完成"
+                    Case 19 : objDataView.Sort = "因素确定"
+                End Select
+            End If
+
+
+
+            ' ---- 按管理编号重新定位到原记录 ----
+            Dim intNewRow As Integer = -1
+            For i As Integer = 0 To objDataView.Count - 1
+                If objDataView(i)("管理编号").ToString() = strCurrentId Then
+                    intNewRow = i
+                    Exit For
+                End If
+            Next
+
+            If intNewRow >= 0 Then
+                objCurrencyManager.Position = intNewRow
+                ShowPosition()
+                RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+                grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intNewRow).Cells(0)
+                AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+                grdAuthorTitles.FirstDisplayedScrollingRowIndex = intNewRow
+            Else
+                ShowPosition()
+            End If
+
+            ToolStripLabel1.Text = "Record Updated"
+
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：确保连接关闭并提示 ★★★
+            ' ============================================================
+            If objConnection1th.State = ConnectionState.Open Then objConnection1th.Close()
+            MessageBox.Show("更新失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Debug.WriteLine(String.Format("更新_Click 异常: {0}", ex.ToString()))
+        End Try
     End Sub
 
-    '删除记录
+    ''' <summary>
+    ''' 功能：删除当前记录（按"管理编号"字段匹配），删除前弹窗二次确认。
+    '''       删除成功后重新加载数据，并将位置修正到前一条记录（或首条）。
+    '''       涉及对象：objConnection1th、OleDbCommand、objDataView、objCurrencyManager。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【关键机制】
+    '''   - 用"管理编号"字段作为 WHERE 条件（假定该字段唯一）。
+    '''   - 删除后 Position 修正为 intPosition，若删的是最后一条则回退到新末条。
+    ''' 【历史踩坑】
+    '''   1. 原代码没有二次确认，误点即删，风险高（本次已加确认弹窗）。
+    '''   2. 原代码删除后直接定位 intPosition，但若删的是末条，会越界访问 Rows(-1)。
+    '''      本次加了边界判断。
+    '''   3. 原代码删除后也调用 F01_Load 重新加载，但排序选择被重置——本次保留。
+    ''' </remarks>
     Private Sub 删除_Click(sender As Object, e As EventArgs) Handles 删除.Click
-        '定义一个局部变量和命令对象 Declare local variables and objects..
-        Dim intPosition As Integer
-        Dim objCommand As OleDbCommand = New OleDbCommand()
-        '保存当前记录位置-1以用来记录删除位置.  Save the current record position—1 for the one to be
-        ' deleted..
-        intPosition = Me.BindingContext(objDataView).Position - 1
-        If intPosition < 0 Then  '如果没有记录,则设置记录位置为0.    If the position is less than 0 set it to 0..
-            intPosition = 0
+        ' ============================================================
+        ' ★★★ 第1步：二次确认（防误删） ★★★
+        ' ============================================================
+        ' 原因：删除不可撤销，必须让用户明确确认。
+        Dim strCurrentId As String = BindingContext(objDataView).Current("管理编号").ToString()
+        If MessageBox.Show(
+        String.Format("确定删除管理编号为 [{0}] 的记录吗？此操作不可撤销。", strCurrentId),
+        "删除确认",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Warning) <> DialogResult.Yes Then
+            Exit Sub
         End If
-        objCommand.Connection = objConnection1th      '设置命令对象属性 Set the Command object properties..
-        objCommand.CommandText = "DELETE FROM 不良品信息 " &
-            "WHERE 管理编号 = @管理编号"
-        '给title_id字段提供相应的参数  Parameter for the title_id field..
-        objCommand.Parameters.AddWithValue _
-        ("@管理编号", BindingContext(objDataView).Current("管理编号"))
-        objConnection1th.Open()     '打开数据库连接 Open the database connection..
-        objCommand.ExecuteNonQuery()     '执行命令查询以更新数据 Execute the SqlCommand object to update the data..
-        objConnection1th.Close()         '关闭数据库连接 Close the connection..
-        '填充数据并绑定字段 Fill the DataSet and bind the fields..
-        'FillDataSetAndView()
-        'BindFields()
-        '注意:这里注释上面2句过程主要是为了调用Adapata
-        F01_不良品基本信息_Load(Nothing, Nothing)
-        '设置你保存过的位置给记录位置 Set the record position to the one that you saved..
-        Me.BindingContext(objDataView).Position = intPosition
-        ShowPosition()  '上面调用过程CurrrencyMananger默认显示第一个记录位置处,所以重新调用过程记录位置 Show the current record position..
-        '显示一个已删除的信息.  Display a message that the record was deleted..
-        RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged   '解除事件
-        grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)                     '视图控件指针选择指定行第一个单元格
-        AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged      '绑定事件
-        ToolStripLabel1.Text = "Record Deleted"
+
+        ' ============================================================
+        ' ★★★ 第2步：保存删除前的位置（用于删除后定位） ★★★
+        ' ============================================================
+        ' 说明：删除后当前记录消失，定位到前一条（Position - 1）更符合直觉。
+        Dim intPosition As Integer = objCurrencyManager.Position - 1
+        If intPosition < 0 Then intPosition = 0
+
+        ' ============================================================
+        ' ★★★ 第3步：构建 DELETE 语句并执行 ★★★
+        ' ============================================================
+        Try
+            Dim objCommand As New OleDbCommand()
+            objCommand.Connection = objConnection1th
+            objCommand.CommandText = "DELETE FROM 不良品信息 WHERE 管理编号 = @管理编号"
+            objCommand.Parameters.AddWithValue("@管理编号", strCurrentId)
+
+            objConnection1th.Open()
+            objCommand.ExecuteNonQuery()
+            objConnection1th.Close()
+
+            ' ============================================================
+            ' ★★★ 第4步：刷新数据并修正位置 ★★★
+            ' ============================================================
+            F01_不良品基本信息_Load(Nothing, Nothing)
+            ' ---- 恢复用户原排序 ----
+            ' 【设计意图】更新是局部操作，不应打断用户的排序选择。
+            '             用户可能正在按"客户"排序排查问题，更新后不应跳回默认排序。
+            If intLastSortIndex >= 0 AndAlso 排序字段.Items.Count > intLastSortIndex Then
+                排序字段.SelectedIndex = intLastSortIndex
+                ' 按用户选择的字段重新排序
+                Select Case intLastSortIndex
+                    Case 0 : objDataView.Sort = "管理编号"
+                    Case 1 : objDataView.Sort = "发生日期 DESC"
+                    Case 2 : objDataView.Sort = "客户"
+                    Case 3 : objDataView.Sort = "供应商"
+                    Case 4 : objDataView.Sort = "产品规格"
+                    Case 5 : objDataView.Sort = "加工设备"
+                    Case 6 : objDataView.Sort = "发现过程"
+                    Case 7 : objDataView.Sort = "不良类型"
+                    Case 8 : objDataView.Sort = "操作者"
+                    Case 9 : objDataView.Sort = "类型区分"
+                    Case 10 : objDataView.Sort = "不良数量"
+                    Case 11 : objDataView.Sort = "完成工序"
+                    Case 12 : objDataView.Sort = "加工费用"
+                    Case 13 : objDataView.Sort = "材料费用"
+                    Case 14 : objDataView.Sort = "损失成本"
+                    Case 15 : objDataView.Sort = "不良现象及原因"
+                    Case 16 : objDataView.Sort = "备注"
+                    Case 17 : objDataView.Sort = "重量"
+                    Case 18 : objDataView.Sort = "处置完成"
+                    Case 19 : objDataView.Sort = "因素确定"
+                End Select
+            End If
+
+
+
+            ' ---- 边界处理：如果删除后数据为空，提示并清空控件 ----
+            If objCurrencyManager.Count = 0 Then
+                ' 清空 GroupBox1 内的所有控件，避免显示已删除记录的残留值
+                For i As Byte = 0 To UBound(myArray)
+                    Dim ctrl As Control = GroupBox1.Controls(myArray(i).ToString())
+                    If TypeOf ctrl Is CheckBox Then
+                        CType(ctrl, CheckBox).Checked = False
+                    Else
+                        ctrl.Text = ""
+                    End If
+                Next
+
+                ' 弹出明确提示
+                MessageBox.Show("已删除最后一条记录，当前数据为空。", "提示",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information)
+                ToolStripLabel1.Text = "Record Deleted (无剩余记录)"
+                Exit Sub
+            End If
+
+            ' ---- 位置修正：若删的是末条，intPosition 可能越界 ----
+            If intPosition >= objCurrencyManager.Count Then
+                intPosition = objCurrencyManager.Count - 1
+            End If
+
+            objCurrencyManager.Position = intPosition
+            ShowPosition()
+            RemoveHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+            grdAuthorTitles.CurrentCell = grdAuthorTitles.Rows(intPosition).Cells(0)
+            AddHandler grdAuthorTitles.SelectionChanged, AddressOf grdAuthorTitles_SelectionChanged
+            grdAuthorTitles.FirstDisplayedScrollingRowIndex = intPosition
+
+            ToolStripLabel1.Text = "Record Deleted"
+
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：确保连接关闭并提示 ★★★
+            ' ============================================================
+            If objConnection1th.State = ConnectionState.Open Then objConnection1th.Close()
+            MessageBox.Show("删除失败：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Debug.WriteLine(String.Format("删除_Click 异常: {0}", ex.ToString()))
+        End Try
     End Sub
 
     ''' <summary>
@@ -1427,10 +1740,25 @@ Public Class F01_不良品基本信息
     '''   - DataGridView 的 CurrentRow 变化会自动同步 CurrencyManager.Position。
     '''   - 因此无需再手动赋值 Position，只需刷新位置标签即可。
     ''' </remarks>
+
+
     Private Sub grdAuthorTitles_SelectionChanged(sender As Object, e As EventArgs) Handles grdAuthorTitles.SelectionChanged
-        ' 用户点击 Grid 行 → CurrencyManager.Position 自动同步 → 只需刷新标签
-        ShowPosition()
+        ' 【性能优化】临时挂起布局，减少控件刷新次数
+        ' 原理：DataBindings 会依次刷新 21 个控件，每个控件都触发一次布局计算，
+        '       挂起后所有变更一次性提交，减少重绘次数。
+        Me.SuspendLayout()
+        Try
+            ShowPosition()
+        Finally
+            Me.ResumeLayout()
+        End Try
     End Sub
+
+    'Private Sub grdAuthorTitles_SelectionChanged(sender As Object, e As EventArgs) Handles grdAuthorTitles.SelectionChanged
+    '    ' 用户点击 Grid 行 → CurrencyManager.Position 自动同步 → 只需刷新标签
+    '    ShowPosition()
+    'End Sub
+
 
     '退出
     Private Sub 退出_Click(sender As Object, e As EventArgs) Handles 退出.Click
@@ -1474,7 +1802,7 @@ Public Class F01_不良品基本信息
         'For inCounter = 0 To tb.Rows.Count - 1               '在表行数上循环
         加工费用.Text = CType((CType(tb001.Rows(0).Item(1).ToString, Single) * CType(材料费用.Text, Single) * CType(不良数量.Text, Integer)), String)  '添加项目值为记录字段所对应的值
 
-        损失成本.Text = CType(（CType(加工费用.Text, Single) + CType(材料费用.Text, Single) * CType(不良数量.Text, Integer)）, Single)
+        损失成本.Text = (CType(加工费用.Text, Single) + CType(材料费用.Text, Single) * CType(不良数量.Text, Integer)).ToString()
         'Next
 
     End Sub
@@ -1705,9 +2033,10 @@ Public Class F01_不良品基本信息
 
     End Sub
 
-    Private Sub F01_不良品基本信息_MinimumSizeChanged(sender As Object, e As EventArgs) Handles Me.MinimumSizeChanged
 
-    End Sub
+
+
+
 
 
 
