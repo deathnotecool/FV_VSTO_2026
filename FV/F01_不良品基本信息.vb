@@ -12,8 +12,8 @@ Imports System.Diagnostics
 ' 【历史踩坑】
 '   1. 曾漏掉"不良类型"，导致下拉框为空（数据源：不良类型分类 表）。
 '   2. Grid 必须绑定 objDataView 而非 objDataSet，否则 RowFilter 不生效。
-'   3. objDataAdapter1th 的连接在 产品规格_SelectedIndexChanged 中初始化，
-'      依赖 Load 中提前调用 产品规格_SelectedIndexChanged(Nothing, Nothing)。
+'   3. objDataAdapter1th 的连接在 联动查询_SelectedIndexChanged 中初始化，
+'      依赖 Load 中提前调用 联动查询_SelectedIndexChanged(Nothing, Nothing)。
 ' ============================================================
 
 Public Class F01_不良品基本信息
@@ -900,7 +900,7 @@ Public Class F01_不良品基本信息
     '    ' ============================================================
     '    ' 说明：产品规格选中后会触发 SelectedIndexChanged，联动加载相关选项。
     '    '       此处传入 Nothing 手动触发一次，确保初始状态下下拉框已填充。
-    '    产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '    联动查询_SelectedIndexChanged(Nothing, Nothing)
 
     '    ' ============================================================
     '    ' ★★★ 第9步：填充"发现过程"下拉框（从"赔偿比例"表动态读取） ★★★
@@ -910,10 +910,10 @@ Public Class F01_不良品基本信息
     '    '   - SQL 用 SELECT DISTINCT 去重，ORDER BY 比例 保证顺序稳定。
     '    ' 【连接来源】
     '    '   objDataAdapter1th 的连接不是声明时绑定的，而是在
-    '    '   产品规格_SelectedIndexChanged 事件中通过下面两行绑定：
+    '    '   联动查询_SelectedIndexChanged 事件中通过下面两行绑定：
     '    '       objDataAdapter1th.SelectCommand = New OleDbCommand()
     '    '       objDataAdapter1th.SelectCommand.Connection = objConnection1th
-    '    '   因此 Load 里必须先调用 产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '    '   因此 Load 里必须先调用 联动查询_SelectedIndexChanged(Nothing, Nothing)
     '    '   完成初始化，才能执行本段的 Fill 操作。
     '    '   ⚠ TODO：该事件用了 On Error Resume Next，会吞异常，后续应改为 Try...Catch。
     '    ' 【历史踩坑】
@@ -934,7 +934,7 @@ Public Class F01_不良品基本信息
     '    '   - 与"发现过程"类似，使用 objDataAdapter1th 执行临时查询。
     '    '   - SQL 用 SELECT DISTINCT 去重，来源为"不良类型分类"表。
     '    ' 【连接来源】
-    '    '   同第9步：依赖 产品规格_SelectedIndexChanged 中初始化的连接。
+    '    '   同第9步：依赖 联动查询_SelectedIndexChanged 中初始化的连接。
     '    ' 【历史踩坑】
     '    '   objDataAdapter1th 是模块级对象，多次 Fill 前需重新 New DataSet 避免数据累积。
     '    objDataAdapter1th.SelectCommand.CommandText = "select distinct 不良类型 from 不良类型分类"
@@ -1070,7 +1070,7 @@ Public Class F01_不良品基本信息
 
     '    类型区分.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
     '    类型区分.Items.Add("I/N") ： 类型区分.Items.Add("O/T") ： 类型区分.Items.Add("Assembly")
-    '    产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '    联动查询_SelectedIndexChanged(Nothing, Nothing)
     '    '维修类型.SelectedIndex = 0  '默认选择第一项
 
 
@@ -1860,7 +1860,7 @@ Public Class F01_不良品基本信息
     '''   - 此处只做 UI 联动，不涉及数据库写操作。
     '''   - 本方法不直接 Handles 其他下拉框，避免与已有独立事件方法重复触发。
     ''' </remarks>
-    Private Sub 产品规格_SelectedIndexChanged(sender As Object, e As EventArgs) _
+    Private Sub 联动查询_SelectedIndexChanged(sender As Object, e As EventArgs) _
     Handles 产品规格.SelectedIndexChanged
         ' ============================================================
         ' ★★★ 第1步：异常处理外层 ★★★
@@ -1939,11 +1939,11 @@ Public Class F01_不良品基本信息
     End Sub
 
     Private Sub 类型区分_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 类型区分.SelectedIndexChanged
-        产品规格_SelectedIndexChanged(Nothing, Nothing)
+        联动查询_SelectedIndexChanged(Nothing, Nothing)
     End Sub
 
     Private Sub 发现过程_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 发现过程.SelectedIndexChanged
-        产品规格_SelectedIndexChanged(Nothing, Nothing)
+        联动查询_SelectedIndexChanged(Nothing, Nothing)
         完成工序.Text = Split(发现过程.Text, "（")(0)
 
     End Sub
@@ -2031,7 +2031,7 @@ Public Class F01_不良品基本信息
     '''      现加 Try...Catch，失败时记录日志并跳过，不阻塞用户。
     ''' 【注意】
     '''   - 本方法只填充"产品规格"下拉框，不触发联动计算；
-    '''     用户选完产品规格后由 产品规格_SelectedIndexChanged 触发联动。
+    '''     用户选完产品规格后由 联动查询_SelectedIndexChanged 触发联动。
     '''   - SQL 拼接存在注入风险，但内部工具用户均为同事，风险可接受（TODO：后续可改参数化）。
     ''' </remarks>
     Private Sub 供应商_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 供应商.SelectedIndexChanged
@@ -2098,59 +2098,146 @@ Public Class F01_不良品基本信息
         查询条件.Text = ""
     End Sub
 
-
-
+    ''' <summary>
+    ''' 功能：弹出文件选择对话框（可多选），将选中的第一个图片复制到共享盘固定目录，
+    '''       并更新"图片路径"文本框为共享盘路径。
+    '''       涉及对象：xlapp（Excel Application）、图片路径（TextBox）、
+    '''               My.Computer.FileSystem（文件操作）。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【设计意图】
+    '''   - 图片统一存放在共享盘，便于多人查看；不直接存用户本地路径（可能失效）。
+    '''   - 使用 xlapp.GetOpenFilename（Excel 的对话框）而非 WinForms 的 OpenFileDialog，
+    '''     与 Excel 环境一致（如用户熟悉 Excel 的文件选择器）。
+    ''' 【历史踩坑】
+    '''   1. 原代码 bytPosition 声明为 Byte，路径长度超过 255 会溢出。
+    '''      现改为 Integer（.NET 推荐）。
+    '''   2. 原代码无异常处理，文件复制失败（权限/网络/磁盘满）会崩溃。
+    '''      现加 Try...Catch，失败时提示用户。
+    '''   3. 原代码用 Kill 删除同名文件，若 Kill 失败（如文件被占用）会抛异常。
+    '''      现改为 File.Delete（更安全）+ 异常捕获。
+    '''   4. 目标目录未检查是否存在。若共享盘目录被删，复制会失败。
+    '''      现加目录存在性检查。
+    ''' 【注意】
+    '''   - 只取用户选择的第一个文件；多选时忽略后续文件（设计如此）。
+    '''   - 若用户在对话框中取消，objFileArray 不是数组，直接退出。
+    ''' </remarks>
     Private Sub btnImport_Click(sender As Object, e As EventArgs) Handles btnImport.Click
-        '声明一个变体型变量(在VB.net中已经不能再称之为变体型变量，而是Object.
-        Dim objFileArray As Object, arrFileArrayResetting() As String
-        objFileArray = xlapp.GetOpenFilename("所有文件(*.*）,*.*", , , , True) '弹出一个选择文件的对话框,并设置可以多选.
-        Dim strRecordPath As String = "\\192.168.3.250\Erpupgrade\王飞共享体系资料\1 Pictures\", bytPosition As Byte, bytAfterNamePosition As Byte, strFileName As String
+        ' ============================================================
+        ' ★★★ 第1步：弹出文件选择对话框 ★★★
+        ' ============================================================
+        ' 说明：xlapp.GetOpenFilename 是 Excel 的文件选择对话框，
+        '       倒数第二个参数 True 表示"允许多选"。
+        Dim objFileArray As Object
+        objFileArray = xlapp.GetOpenFilename("所有文件(*.*),*.*", , , , True)
 
-
-        'IsArray函数判定是否是数组,如果用户选择了文件(此时变量objFilearr是数组,如果没有选择文件则返回值不是数组)
-        If IsArray(objFileArray) Then
-            '重置数组维数,这里减1表示,上一数组下标是从1开始的.以下语句还可以改成:
-            'Dim arr(objFileArray.LongLength - 1) As Object   '声明一个下标为0,上标为文件数量-1的数组变量
-            ReDim arrFileArrayResetting(UBound(objFileArray) - 1)
-            '被复制的下数组标为1,数组拷贝到目标数组,起始放置点为0,即目标数组下标处开始存放被复制的数组元素.
-            objFileArray.CopyTo(arrFileArrayResetting, 0)
-
-            图片路径.Text = arrFileArrayResetting(0)
-            bytPosition = InStr(1, StrReverse(图片路径.Text), "\")   '计算文件名称前面的“\”的位置
-            bytAfterNamePosition = InStr(1, StrReverse(图片路径.Text), ".")   '计算文件名称前面的“\”的位置
-            strFileName = Mid(图片路径.Text, Len(图片路径.Text) - bytPosition + 2)
-
-            If My.Computer.FileSystem.FileExists(strRecordPath & strFileName) = True Then Kill(strRecordPath & strFileName) '如果存在指定的文件夹,那么执行  Kill()
-            System.IO.File.Copy(图片路径.Text, strRecordPath & strFileName)
-
-            图片路径.Text = strRecordPath & strFileName
-
-
-
-
-
-
-            '将选择的所有文件名称导入到列表框中,并去除文件名称,在指定的文本框中显示文件路径.
-            '打开路径.Items.AddRange(arrFileArrayResetting)
-            'Replace(objFileArray(1), Dir(objFileArray(1)), "")
-            '打开路径.Text = arrFileArrayResetting(0)
-            '打开路径.Text = Replace(arrFileArrayResetting(0), "D:", "\\192.168.3.250")
-            '图片路径.Text = arrFileArrayResetting(0)
-        Else
-            Exit Sub  '结束过程
+        ' 用户取消 → 返回值不是数组 → 直接退出
+        If Not IsArray(objFileArray) Then
+            Exit Sub
         End If
+
+        ' ============================================================
+        ' ★★★ 第2步：异常处理外层 ★★★
+        ' ============================================================
+        Try
+            ' ---- 2.1 取第一个文件路径 ----
+            Dim strSelectedFile As String = CStr(objFileArray(1))   ' Excel 返回的数组从 1 开始
+
+            ' ---- 2.2 目标共享盘目录 ----
+            Dim strRecordPath As String = "\\192.168.3.250\Erpupgrade\王飞共享体系资料\1 Pictures\"
+
+            ' 检查目标目录是否存在
+            If Not My.Computer.FileSystem.DirectoryExists(strRecordPath) Then
+                MessageBox.Show("共享盘目录不存在，请检查网络连接：" & vbCrLf & strRecordPath,
+                            "目录不存在", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                Exit Sub
+            End If
+
+            ' ---- 2.3 提取文件名 ----
+            ' 【优化】bytPosition 改为 Integer，避免路径超过 255 时溢出（原 Byte 类型隐患）
+            Dim strFileName As String = System.IO.Path.GetFileName(strSelectedFile)
+
+            ' ---- 2.4 若共享盘已有同名文件，先删除 ----
+            Dim strTargetPath As String = strRecordPath & strFileName
+            If My.Computer.FileSystem.FileExists(strTargetPath) Then
+                System.IO.File.Delete(strTargetPath)   ' 比 Kill 更安全（保留异常信息）
+            End If
+
+            ' ---- 2.5 复制文件到共享盘 ----
+            System.IO.File.Copy(strSelectedFile, strTargetPath, True)   ' True = 覆盖
+
+            ' ---- 2.6 更新"图片路径"文本框 ----
+            图片路径.Text = strTargetPath
+
+        Catch ex As Exception
+            ' ---- 异常处理：文件复制失败时给出友好提示 ----
+            MessageBox.Show("复制文件失败：" & ex.Message,
+                        "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Debug.WriteLine(String.Format("btnImport_Click 异常: {0}", ex.ToString()))
+        End Try
     End Sub
 
+    ''' <summary>
+    ''' 功能：根据"图片路径"文本框中的路径，在 PictureBox1 中显示图片。
+    '''       涉及对象：图片路径（TextBox）、PictureBox1。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【历史踩坑】
+    '''   1. 原代码无异常处理，路径无效/文件不存在时程序崩溃。
+    '''      现加 Try...Catch 并提示用户。
+    '''   2. 【重要】Image.FromFile 会锁定图片文件！
+    '''      若之后再次导入同名文件（File.Delete 删除旧文件），会因"文件被占用"失败。
+    '''      解决方案：用 FileStream 打开后复制到 MemoryStream，再创建 Image，
+    '''              这样 Image 不锁定原文件（本方法已用此方案）。
+    '''   3. 原代码未释放上一张图片，多次加载会导致内存泄漏。
+    '''      解决方案：加载新图前先释放 PictureBox1.Image（本方法已实现）。
+    ''' 【注意】
+    '''   - 只显示图片，不处理其他类型文件（原代码注释里有打开 xls 的逻辑，已废弃）。
+    ''' </remarks>
     Private Sub btnOpenFile_Click(sender As Object, e As EventArgs) Handles btnOpenFile.Click
-        'On Error Resume Next
-        'If InStr(图片路径.Text, "xls") > 0 Then     '如果是包含有xls后缀存储名
-        '    xlapp.Workbooks.Open(图片路径.Text)     '打开EXCEL
-        'Else                                        '否则
-        '    'Shell("winword.exe " & 存放位置.Text, vbMaximizedFocus)   'shell函数打开word文档程序    
-        '    Shell("explorer.exe " & 图片路径.Text, vbMaximizedFocus)   '打开所有资源程序
-        'End If                  '结束语句
-        'If Err.Number <> 0 Then MsgBox("打开对应文件失败",, "提示")
-        PictureBox1.Image = Image.FromFile(图片路径.Text)
+        ' ============================================================
+        ' ★★★ 第1步：路径合法性检查 ★★★
+        ' ============================================================
+        If String.IsNullOrWhiteSpace(图片路径.Text) Then
+            MessageBox.Show("图片路径为空，请先导入图片。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Exit Sub
+        End If
+
+        If Not My.Computer.FileSystem.FileExists(图片路径.Text) Then
+            MessageBox.Show("文件不存在：" & vbCrLf & 图片路径.Text,
+                        "文件不存在", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Exit Sub
+        End If
+
+        ' ============================================================
+        ' ★★★ 第2步：加载图片（避免锁定文件） ★★★
+        ' ============================================================
+        Try
+            ' ---- 2.1 释放上一张图片（避免内存泄漏） ----
+            ' 【关键】PictureBox1.Image 需要显式 Dispose，否则 GDI 资源累积。
+            If PictureBox1.Image IsNot Nothing Then
+                PictureBox1.Image.Dispose()
+                PictureBox1.Image = Nothing
+            End If
+
+            ' ---- 2.2 用 FileStream + MemoryStream 加载，避免锁定原文件 ----
+            ' 【原因】Image.FromFile 会锁定文件，导致后续无法删除/覆盖同名文件。
+            Dim objImage As Image
+            Using fs As New System.IO.FileStream(图片路径.Text, System.IO.FileMode.Open, System.IO.FileAccess.Read)
+                Using ms As New System.IO.MemoryStream()
+                    fs.CopyTo(ms)
+                    ms.Position = 0
+                    objImage = Image.FromStream(ms)
+                End Using
+            End Using
+
+            PictureBox1.Image = objImage
+
+        Catch ex As Exception
+            MessageBox.Show("加载图片失败：" & ex.Message,
+                        "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Debug.WriteLine(String.Format("btnOpenFile_Click 异常: {0}", ex.ToString()))
+        End Try
     End Sub
 
 
@@ -2506,7 +2593,7 @@ Public Class F01_不良品基本信息
 
     '        类型区分.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
     '        类型区分.Items.Add("I/N") ： 类型区分.Items.Add("O/T")
-    '        产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '        联动查询_SelectedIndexChanged(Nothing, Nothing)
     '        '维修类型.SelectedIndex = 0  '默认选择第一项
 
 
@@ -2938,7 +3025,7 @@ Public Class F01_不良品基本信息
     '        Globals.Ribbons.Ribbon1.btn不良品信息.Enabled = True
     '    End Sub
 
-    '    Private Sub 产品规格_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 产品规格.SelectedIndexChanged
+    '    Private Sub 联动查询_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 产品规格.SelectedIndexChanged
     '        On Error Resume Next
     '        objDataAdapter1th.SelectCommand = New OleDbCommand()            '初始化一个命令对象
     '        objDataAdapter1th.SelectCommand.Connection = objConnection1th   '建立与数据库的连接
@@ -2969,11 +3056,11 @@ Public Class F01_不良品基本信息
     '    End Sub
 
     '    Private Sub 类型区分_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 类型区分.SelectedIndexChanged
-    '        产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '        联动查询_SelectedIndexChanged(Nothing, Nothing)
     '    End Sub
 
     '    Private Sub 发现过程_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 发现过程.SelectedIndexChanged
-    '        产品规格_SelectedIndexChanged(Nothing, Nothing)
+    '        联动查询_SelectedIndexChanged(Nothing, Nothing)
     '        完成工序.Text = Split(发现过程.Text, "（")(0)
 
     '    End Sub
