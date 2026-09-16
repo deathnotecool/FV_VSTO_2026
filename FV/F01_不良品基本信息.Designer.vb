@@ -743,7 +743,7 @@ Partial Class F01_不良品基本信息
         Me.退出.Name = "退出"
         Me.退出.Size = New System.Drawing.Size(53, 28)
         Me.退出.TabIndex = 25
-        Me.退出.Text = "&Exit"
+        Me.退出.Text = "退出"
         Me.退出.UseVisualStyleBackColor = True
         '
         '执行查询

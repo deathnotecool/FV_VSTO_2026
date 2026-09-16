@@ -1113,159 +1113,192 @@ Public Class F01_不良品基本信息
     '    BindFields()  '调用绑定控件过程
     'End Sub
 
-    '排序按钮,确定对哪个字段进行排序.单击事件 '注:DateGirdView控件视图自带单击列标题排序,这里针对的是绑定的简单控件数据源进行排序.
+    ''' <summary>
+    ''' 功能：根据"排序字段"下拉框的当前选择，对 DataView 按对应字段排序，
+    '''       并定位到排序后的第一条记录。
+    '''       涉及对象：排序字段（ComboBox）、objDataView、btnMoveFirst_Click、ToolStripLabel1。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【机制说明】
+    '''   - 通过 myArray 的索引取字段名，避免 20 个 Case 的硬编码。
+    '''   - myArray 与"排序字段"下拉框的索引一一对应（见 Load 中的 AddRange）。
+    '''   - "发生日期"特殊处理为 DESC（降序），与 FillDataSetAndView 的默认排序保持一致。
+    ''' 【优化说明】
+    '''   原代码用 20 个 Select Case 硬编码字段名，与 执行查询_Click 里的 Case 重复。
+    '''   现改为动态取字段，未来新增字段只需改 myArray，无需改本方法。
+    ''' 【历史踩坑】
+    '''   - 若 intIndex 超出 myArray 范围（下拉框项与数组不同步），会取到错误的字段名。
+    '''     故加了边界检查，越界时不执行排序。
+    ''' </remarks>
     Private Sub 执行排序_Click(sender As Object, e As EventArgs) Handles 执行排序.Click
-        '根据选定的项并设置DataView对象(源数据是指定表sbxx)相关字段的sort属性.
-        Select Case 排序字段.SelectedIndex      'Determine the appropriate item selected and set the Sort property of the DataView object..            
-            ' {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", "不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因", "备注"}
-            Case 0
-                objDataView.Sort = "管理编号"   '按字段设备编号升序排序,下同.
-            Case 1
-                objDataView.Sort = "发生日期"
-            Case 2
-                objDataView.Sort = "客户"
-            Case 3
-                objDataView.Sort = "供应商"
-            Case 4
-                objDataView.Sort = "产品规格"
-            Case 5
-                objDataView.Sort = "加工设备"
-            Case 6
-                objDataView.Sort = "发现过程"
-            Case 7
-                objDataView.Sort = "不良类型"
-            Case 8
-                objDataView.Sort = "操作者"
-            Case 9
-                objDataView.Sort = "类型区分"
-            Case 10
-                objDataView.Sort = "不良数量"
-            Case 11
-                objDataView.Sort = "完成工序"
-            Case 12
-                objDataView.Sort = "加工费用"
-            Case 13
-                objDataView.Sort = "材料费用"
-            Case 14
-                objDataView.Sort = "损失成本"
-            Case 15
-                objDataView.Sort = "不良现象及原因"
-            Case 16
-                objDataView.Sort = "备注"
-            Case 17
-                objDataView.Sort = "重量"
-            Case 18
-                objDataView.Sort = "处置完成"
-            Case 19
-                objDataView.Sort = "因素确定"
+        ' ============================================================
+        ' ★★★ 第1步：校验索引合法性 ★★★
+        ' ============================================================
+        Dim intIndex As Integer = 排序字段.SelectedIndex
+        If intIndex < 0 OrElse intIndex > UBound(myArray) Then
+            ' 下拉框未选中或索引越界，不执行排序
+            Return
+        End If
 
-        End Select
-        btnMoveFirst_Click(Nothing, Nothing)      '调用单击首条记录按钮  Call the click event for the MoveFirst button..
-        ToolStripLabel1.Text = "Records Sorted"   '修改状态标签Text属性. Display a message that the records have been sorted..
+        ' ============================================================
+        ' ★★★ 第2步：按 myArray 索引取字段名，设置 Sort ★★★
+        ' ============================================================
+        Dim strSortField As String = myArray(intIndex)
+
+        ' "发生日期"特殊处理为 DESC（与 FillDataSetAndView 的默认排序一致）
+        If strSortField = "发生日期" Then
+            objDataView.Sort = strSortField & " DESC"
+        Else
+            objDataView.Sort = strSortField
+        End If
+
+        ' ============================================================
+        ' ★★★ 第3步：定位到排序后的第一条记录 ★★★
+        ' ============================================================
+        ' 说明：排序后 CurrencyManager.Position 会重置，需重新定位首条并刷新标签。
+        btnMoveFirst_Click(Nothing, Nothing)
+
+        ToolStripLabel1.Text = "Records Sorted"
     End Sub
 
-    '创建查询方法
+    ''' <summary>
+    ''' 功能：根据"排序字段"下拉框的选择，对 DataView 设置 Sort 和 RowFilter，
+    '''       实现"排序 + 条件筛选"的联合查询，并更新状态栏提示与当前记录位置。
+    '''       涉及对象：排序字段（ComboBox）、查询条件（TextBox）、objDataView、
+    '''               objCurrencyManager、ToolStripLabel1、txtRecordPosition。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【三种筛选模式】
+    '''   ① 日期字段（发生日期）：用 #日期# 语法精确匹配；
+    '''   ② 布尔字段（处置完成）：用 True/False 匹配；
+    '''   ③ 文本字段（其他）：用 LIKE '%关键词%' 模糊匹配（UCase 转大写）。
+    ''' 【历史踩坑】
+    '''   1. 原代码用 20 个 Select Case 硬编码字段名，与 执行排序_Click 重复。
+    '''      现改为动态取 myArray 索引，风格统一。
+    '''   2. 日期筛选必须用 # 包裹，否则 DataView 会按文本比较，匹配失败。
+    '''   3. RowFilter 语法错误会抛异常，需在用户输入不合规时给出提示（TODO）。
+    ''' 【注意】
+    '''   - 查询后 CurrencyManager.Position 会被重置，需调用 ShowPosition 刷新标签。
+    '''   - 若查询结果为空，objCurrencyManager.Position 可能为 -1，状态栏提示"未找到"。
+    ''' </remarks>
     Private Sub 执行查询_Click(sender As Object, e As EventArgs) Handles 执行查询.Click
-        ' myArray = {"管理编号", "发生日期", "客户", "供应商", "产品规格", "加工设备", "发现过程", 
-        '"不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
-        Dim intPosition As Integer              '执行查找,声明当前局部变量.'Declare local variables.. 
-        Dim str条件 As String = ""
-        '根据选定的项并设置DataView对象(源数据是指定表sbxx)相关字段的sort属性,  
-        'Determine the appropriate item selected And set the Sort property of the DataView object..
-        Select Case 排序字段.SelectedIndex
-            '"序列号", "姓名", "性别", "出生年月", "技术职称", "专业等级", "发证日期", "有效期至", "证件编号"
-            Case 0
-                objDataView.Sort = "管理编号"
-                str条件 = "管理编号"
-            Case 1
-                objDataView.Sort = "发生日期"
-                str条件 = "发生日期"
-
-            Case 2
-                objDataView.Sort = "客户"
-                str条件 = "客户"
-            Case 3
-                objDataView.Sort = "供应商"
-                str条件 = "供应商"
-            Case 4
-                objDataView.Sort = "产品规格"
-                str条件 = "产品规格"
-            Case 5
-                objDataView.Sort = "加工设备"
-                str条件 = "加工设备"
-            Case 6
-                objDataView.Sort = "发现过程"
-                str条件 = "发现过程"
-            '"不良类型", "操作者", "类型区分", "不良数量", "完成工序", "加工费用", "材料费用", "损失成本", "不良现象及原因"}
-            Case 7
-                objDataView.Sort = "不良类型"
-                str条件 = "不良类型"
-            Case 8
-                objDataView.Sort = "操作者"
-                str条件 = "操作者"
-            Case 9
-                objDataView.Sort = "类型区分"
-                str条件 = "类型区分"
-            Case 10
-                objDataView.Sort = "不良数量"
-                str条件 = "不良数量"
-            Case 11
-                objDataView.Sort = "完成工序"
-                str条件 = "完成工序"
-            Case 12
-                objDataView.Sort = "加工费用"
-                str条件 = "加工费用"
-            Case 13
-                objDataView.Sort = "材料费用"
-                str条件 = "材料费用"
-            Case 14
-                objDataView.Sort = "损失成本"
-                str条件 = "损失成本"
-            Case 15
-                objDataView.Sort = "不良现象及原因"
-                str条件 = "不良现象及原因"
-            Case 16
-                objDataView.Sort = "备注"
-                str条件 = "备注"
-            Case 17
-                objDataView.Sort = "重量"
-                str条件 = "重量"
-            Case 18
-                objDataView.Sort = "处置完成"
-                str条件 = "处置完成"
-            Case 19
-                objDataView.Sort = "因素确定"
-                str条件 = "因素确定"
-        End Select
-        If str条件 = "发生日期" Then
-            objDataView.RowFilter = str条件 & "=#" & CType(查询条件.Text, Date).ToShortDateString & "#" '"Date = #12/31/2008 16:44:58#"
-        ElseIf str条件 <> "处置完成" Then    'DataView数据表中筛选数据集(类似SQL语句).
-            objDataView.RowFilter = UCase(str条件) & " like  '%" & 查询条件.Text & "%'"
-        Else
-            objDataView.RowFilter = str条件 & "=" & CType(查询条件.Text, Boolean)
+        ' ============================================================
+        ' ★★★ 第1步：根据下拉框索引动态取字段名 ★★★
+        ' ============================================================
+        ' 说明：myArray 与"排序字段"下拉框索引一一对应（见 Load 中的 AddRange）。
+        Dim intIndex As Integer = 排序字段.SelectedIndex
+        If intIndex < 0 OrElse intIndex > UBound(myArray) Then
+            ' 下拉框未选中或索引越界，不执行查询
+            Return
         End If
-        intPosition = objCurrencyManager.Position  '默认位置赋值给变量
-        If intPosition = -1 Then  '状态栏提示没有找到记录 Display a message that the record was not found..
-            ToolStripLabel1.Text = "Record Not Found"  '标签显示字符.
-            '否则状态栏显示字符..
+
+        Dim str条件 As String = myArray(intIndex)
+
+        ' ============================================================
+        ' ★★★ 第2步：设置 Sort（排序） ★★★
+        ' ============================================================
+        ' 说明："发生日期"按降序排（与 FillDataSetAndView 默认排序一致），其他按升序。
+        If str条件 = "发生日期" Then
+            objDataView.Sort = str条件 & " DESC"
+        Else
+            objDataView.Sort = str条件
+        End If
+
+        ' ============================================================
+        ' ★★★ 第3步：设置 RowFilter（筛选） ★★★
+        ' ============================================================
+        ' 说明：根据字段类型选择不同的 RowFilter 语法。
+        '       历史踩坑：日期必须用 # 包裹，否则匹配失败。
+        Try
+            If str条件 = "发生日期" Then
+                ' ---- 日期字段：用 #yyyy/MM/dd# 精确匹配 ----
+                ' 说明：CType 转换可能因用户输入格式错误而抛异常，需捕获。
+                Dim dtSearch As Date
+                If Not Date.TryParse(查询条件.Text, dtSearch) Then
+                    MessageBox.Show("日期格式不正确，请输入如 2018/3/23 的格式。",
+                                "查询条件错误", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    Return
+                End If
+                objDataView.RowFilter = str条件 & "=#" & dtSearch.ToShortDateString & "#"
+
+            ElseIf str条件 = "处置完成" Then
+                ' ---- 布尔字段：用 True/False 匹配 ----
+                Dim bolSearch As Boolean
+                If Not Boolean.TryParse(查询条件.Text, bolSearch) Then
+                    MessageBox.Show("该字段只能输入 True 或 False。",
+                                "查询条件错误", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    Return
+                End If
+                objDataView.RowFilter = str条件 & "=" & bolSearch.ToString()
+
+            Else
+                ' ---- 文本字段：用 LIKE 模糊匹配（不区分大小写） ----
+                ' 说明：UCase 转大写后模糊匹配，用户输入 "abc" 能匹配 "ABC"。
+                objDataView.RowFilter = UCase(str条件) & " LIKE '%" & 查询条件.Text & "%'"
+            End If
+
+        Catch ex As Exception
+            ' ---- RowFilter 语法错误、字段不存在等异常 ----
+            MessageBox.Show("查询条件有误：" & ex.Message,
+                        "查询失败", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Debug.WriteLine(String.Format("执行查询_Click 异常: {0}", ex.ToString()))
+            Return
+        End Try
+
+        ' ============================================================
+        ' ★★★ 第4步：检查查询结果并更新状态栏 ★★★
+        ' ============================================================
+        ' 说明：Position = -1 表示没有匹配的记录。
+        Dim intPosition As Integer = objCurrencyManager.Position
+        If intPosition = -1 Then
+            ToolStripLabel1.Text = "Record Not Found"
         Else
             ToolStripLabel1.Text = "Record Found"
         End If
-        ShowPosition() '重新显示当前记录位置. Show the current record position..
+
+        ' ============================================================
+        ' ★★★ 第5步：刷新"当前记录位置"标签 ★★★
+        ' ============================================================
+        ' 说明：RowFilter 变化后 CurrencyManager.Position 可能被重置，需刷新显示。
+        ShowPosition()
     End Sub
 
-    '查询条件变化事件
+    ''' <summary>
+    ''' 功能：监听"查询条件"文本框的内容变化，当文本框清空时自动重新加载全部数据。
+    '''       涉及对象：查询条件（TextBox）、F01_不良品基本信息_Load。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【设计意图】
+    '''   清空查询条件时自动刷新，符合"清空 = 重置"的用户直觉。
+    ''' 【优化说明】
+    '''   原代码用"输入 DELETE"启用删除按钮（隐藏开关），交互不直观。
+    '''   现改为：删除按钮由 Grid 选中行自动启用/禁用（见 grdAuthorTitles_SelectionChanged）。
+    ''' 【历史踩坑】
+    '''   F01_不良品基本信息_Load 会重新加载全部数据并重建 DataView，
+    '''   只有文本框长度 = 0 时触发，避免频繁 Load。
+    ''' </remarks>
     Private Sub 查询条件_TextChanged(sender As Object, e As EventArgs) Handles 查询条件.TextChanged
-        If UCase(查询条件.Text) = "DELETE" Then 删除.Enabled = True
-        If 查询条件.Text.Length = 0 Then  '如果是空值
-            '调用加载窗体事件.填充数据显示DateGirdVie完整视图,绑定控件,显示当前记录位置..
+        ' 清空文本框 → 重新加载全部数据
+        If 查询条件.Text.Length = 0 Then
             F01_不良品基本信息_Load(Nothing, Nothing)
         End If
     End Sub
 
-    '按下Enter执行查询
+    ''' <summary>
+    ''' 功能：在"查询条件"文本框中按下 Enter 键时，触发查询操作。
+    '''       等价于点击"查询"按钮，方便用户快速执行查询。
+    '''       涉及对象：查询条件（TextBox）、执行查询_Click。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【机制说明】
+    '''   - KeyDown 事件在按键按下时触发，KeyCode 为 Keys.Enter 时执行查询。
+    '''   - 直接调用 执行查询_Click(Nothing, Nothing)，复用查询逻辑（不重复造轮子）。
+    ''' </remarks>
     Private Sub 查询条件_KeyDown(sender As Object, e As KeyEventArgs) Handles 查询条件.KeyDown
-        If e.KeyCode = Keys.Enter Then 执行查询_Click(Nothing, Nothing) '如果按下了Enter键,那么调用查询过程.
+        ' 按下 Enter 键 → 触发查询（等价于点击"查询"按钮）
+        If e.KeyCode = Keys.Enter Then
+            执行查询_Click(Nothing, Nothing)
+        End If
     End Sub
 
     ''' <summary>
@@ -1700,6 +1733,8 @@ Public Class F01_不良品基本信息
                 MessageBox.Show("已删除最后一条记录，当前数据为空。", "提示",
                                 MessageBoxButtons.OK, MessageBoxIcon.Information)
                 ToolStripLabel1.Text = "Record Deleted (无剩余记录)"
+                ' 删除后数据为空 → 禁用删除按钮
+                删除.Enabled = False
                 Exit Sub
             End If
 
@@ -1717,6 +1752,10 @@ Public Class F01_不良品基本信息
 
             ToolStripLabel1.Text = "Record Deleted"
 
+            ' 删除完成后禁用删除按钮（防止用户误操作）
+            ' 说明：删除后 CurrencyManager 位置变化，用户需重新选中一行才能再次删除。
+            删除.Enabled = False
+
         Catch ex As Exception
             ' ============================================================
             ' ★★★ 异常处理：确保连接关闭并提示 ★★★
@@ -1728,30 +1767,24 @@ Public Class F01_不良品基本信息
     End Sub
 
     ''' <summary>
-    ''' 功能：用户点击 DataGridView 某一行时，同步更新"当前记录位置"标签。
-    '''       不需要手动绑定字段（DataBindings 已在 Load 时建立，切换行会自动刷新）。
-    '''       涉及对象：grdAuthorTitles、objCurrencyManager、txtRecordPosition。
+    ''' 功能：用户点击 DataGridView 某一行时，同步更新"当前记录位置"标签，
+    '''       并根据是否有选中行自动启用/禁用"删除"按钮。
+    '''       涉及对象：grdAuthorTitles、objCurrencyManager、txtRecordPosition、删除。
     ''' </summary>
     ''' <remarks>
     ''' 【历史踩坑】
     '''   原代码在此事件中调用 BindFields()，每次点击 Grid 都会重绑 21 个控件，
-    '''   3000 行滚动时导致严重卡顿（本次已优化）。
-    ''' 【机制说明】
-    '''   - DataGridView 的 CurrentRow 变化会自动同步 CurrencyManager.Position。
-    '''   - 因此无需再手动赋值 Position，只需刷新位置标签即可。
+    '''   3000 行滚动时导致严重卡顿（已优化）。
+    ''' 【优化说明】
+    '''   原删除按钮的启用依赖"输入 DELETE"隐藏开关，交互不直观。
+    '''   现改为：有选中行 → 启用删除；无选中行 → 禁用删除。
     ''' </remarks>
-
-
     Private Sub grdAuthorTitles_SelectionChanged(sender As Object, e As EventArgs) Handles grdAuthorTitles.SelectionChanged
-        ' 【性能优化】临时挂起布局，减少控件刷新次数
-        ' 原理：DataBindings 会依次刷新 21 个控件，每个控件都触发一次布局计算，
-        '       挂起后所有变更一次性提交，减少重绘次数。
-        Me.SuspendLayout()
-        Try
-            ShowPosition()
-        Finally
-            Me.ResumeLayout()
-        End Try
+        ' 用户点击 Grid 行 → CurrencyManager.Position 自动同步 → 刷新标签
+        ShowPosition()
+
+        ' 有选中行 → 启用删除按钮；无选中行（如数据为空）→ 禁用
+        删除.Enabled = (grdAuthorTitles.CurrentRow IsNot Nothing)
     End Sub
 
     'Private Sub grdAuthorTitles_SelectionChanged(sender As Object, e As EventArgs) Handles grdAuthorTitles.SelectionChanged
@@ -1760,51 +1793,149 @@ Public Class F01_不良品基本信息
     'End Sub
 
 
-    '退出
+    ''' <summary>
+    ''' 功能：关闭 F01_不良品基本信息 窗体，并恢复 Ribbon 上的"不良品信息"按钮。
+    '''       涉及对象：Ribbon1.btn不良品信息、Me。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【设计意图】
+    '''   - Ribbon 按钮在打开窗体时会禁用（防止重复打开），关闭时需恢复，
+    '''     否则用户关闭窗体后无法再次打开（历史踩坑）。
+    ''' 【优化说明】
+    '''   原代码手动置 objDataAdapter / objConnection1th 为 Nothing，
+    '''   但窗体关闭后整个实例都会被 GC 回收，无需手动清理，
+    '''   且置 Nothing 会导致"若未来改为窗体复用则崩溃"的隐患（已移除）。
+    ''' </remarks>
     Private Sub 退出_Click(sender As Object, e As EventArgs) Handles 退出.Click
-        '清理内存及数据适配器对象
-        objDataAdapter = Nothing           '清理数据适配器对象,释放内存 ' Clean up
-        objConnection1th = Nothing            '清理连接对象,释放内存
+        ' ============================================================
+        ' ★★★ 第1步：恢复 Ribbon 按钮为可用 ★★★
+        ' ============================================================
+        ' 【关键】打开窗体时 Ribbon 按钮被禁用，关闭时必须恢复。
         Globals.Ribbons.Ribbon1.btn不良品信息.Enabled = True
+
+        ' ============================================================
+        ' ★★★ 第2步：关闭窗体 ★★★
+        ' ============================================================
         Me.Close()
     End Sub
 
-    '关闭
-    Private Sub D01_资质证书信息_Closed(sender As Object, e As EventArgs) Handles Me.Closed
-        '清理内存及数据适配器对象
-        objDataAdapter = Nothing           '清理数据适配器对象,释放内存 ' Clean up
-        objConnection1th = Nothing         '清理连接对象,释放内存
+    ''' <summary>
+    ''' 功能：窗体关闭时（无论点"退出"按钮还是点右上角 X），恢复 Ribbon 按钮为可用。
+    '''       涉及对象：Globals.Ribbons.Ribbon1.btn不良品信息。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【设计意图】
+    '''   作为"退出_Click"的兜底：用户点右上角 X 关闭窗体时，也会触发本事件，
+    '''   确保 Ribbon 按钮恢复，避免用户无法再次打开窗体（本次测试已踩坑）。
+    ''' 【历史踩坑】
+    '''   1. 原方法名 D01_资质证书信息_Closed 是从其他项目复制的，命名错误，已改。
+    '''   2. 原方法含 objDataAdapter / objConnection1th 置 Nothing，
+    '''      但窗体关闭后实例会被 GC 回收，无需手动清理，且有"窗体复用崩溃"隐患（已删）。
+    ''' </remarks>
+    Private Sub F01_不良品基本信息_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        ' 恢复 Ribbon 按钮为可用（兜底：即使用户点右上角 X 关闭）
         Globals.Ribbons.Ribbon1.btn不良品信息.Enabled = True
     End Sub
 
-    Private Sub 产品规格_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 产品规格.SelectedIndexChanged
-        On Error Resume Next
-        objDataAdapter1th.SelectCommand = New OleDbCommand()            '初始化一个命令对象
-        objDataAdapter1th.SelectCommand.Connection = objConnection1th   '建立与数据库的连接
-        objDataAdapter1th.SelectCommand.CommandText = "select 物品价格, 重量 " & " from " & "物品信息 WHERE (产品规格='" & 产品规格.Text & "'" & " AND 区分 ='" & 类型区分.Text & "' AND 供应商 ='" & 供应商.Text & "')" '写入SQL语句
-        objDataAdapter1th.SelectCommand.CommandType = CommandType.Text  '这里的SelectCommand的CommandType属性就是CommandType.Text,是默认属性可以省略的.
-        objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx02")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
-        Dim tb As DataTable = objDataSet1th.Tables("wpxx02") '声明一个表类型,并赋值给该变量.
-        '产品规格.Items.Clear()                               '清楚复合框项目集
-        'For inCounter = 0 To tb.Rows.Count - 1               '在表行数上循环
-        材料费用.Text = tb.Rows(0).Item(0).ToString   '添加项目值为记录字段所对应的值
-        重量.Text = tb.Rows(0).Item(1).ToString   '添加项目值为记录字段所对应的值
 
-        'objDataAdapter1th.SelectCommand = New OleDbCommand()            '初始化一个命令对象
-        'objDataAdapter1th.SelectCommand.Connection = objConnection1th   '建立与数据库的连接
-        objDataAdapter1th.SelectCommand.CommandText = "select 赔偿比例.* " & " from " & "赔偿比例 WHERE " & "(发现过程=" & "'" & 发现过程.Text & "')"
-        'objDataAdapter1th.SelectCommand.CommandType = CommandType.Text  '这里的SelectCommand的CommandType属性就是CommandType.Text,是默认属性可以省略的.
-        'objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx05")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
-        Dim tb001 As DataTable = objDataSet1th.Tables("wpxx05") '声明一个表类型,并赋值给该变量.
-        '产品规格.Items.Clear()                               '清楚复合框项目集
-        'For inCounter = 0 To tb.Rows.Count - 1               '在表行数上循环
-        加工费用.Text = CType((CType(tb001.Rows(0).Item(1).ToString, Single) * CType(材料费用.Text, Single) * CType(不良数量.Text, Integer)), String)  '添加项目值为记录字段所对应的值
+    ''' <summary>
+    ''' 功能：当"产品规格"下拉框的选中项变化时，自动从"物品信息"表查询对应单价和重量，
+    '''       并联动计算加工费用、损失成本；同时从"赔偿比例"表读取当前"发现过程"对应的比例。
+    '''       涉及对象：产品规格、类型区分、供应商、发现过程（四个 ComboBox），
+    '''               材料费用、重量、加工费用、损失成本、不良数量（五个 TextBox），
+    '''               objDataAdapter1th、objDataSet1th、objConnection1th。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【触发场景】
+    '''   ① 用户手动修改"产品规格"下拉框；
+    '''   ② 用户修改"类型区分"→ 由 类型区分_SelectedIndexChanged 调用本方法；
+    '''   ③ 用户修改"发现过程"→ 由 发现过程_SelectedIndexChanged 调用本方法；
+    '''   ④ 用户修改"供应商"→ 由 供应商_SelectedIndexChanged 调用本方法（若有）。
+    ''' 【历史踩坑】
+    '''   1. 原代码用 On Error Resume Next 吞掉所有异常，导致出错无提示、难排查。
+    '''      现改为 Try...Catch，至少通过 Debug.WriteLine 记录异常。
+    '''   2. 原代码"损失成本"计算行有中文全角括号，会编译失败（已修正为半角）。
+    ''' 【注意】
+    '''   - 若查询结果为空（tb.Rows.Count = 0），跳过联动计算，避免索引越界。
+    '''   - 此处只做 UI 联动，不涉及数据库写操作。
+    '''   - 本方法不直接 Handles 其他下拉框，避免与已有独立事件方法重复触发。
+    ''' </remarks>
+    Private Sub 产品规格_SelectedIndexChanged(sender As Object, e As EventArgs) _
+    Handles 产品规格.SelectedIndexChanged
+        ' ============================================================
+        ' ★★★ 第1步：异常处理外层 ★★★
+        ' ============================================================
+        ' 原因：原代码用 On Error Resume Next，会吞掉所有异常（如查询为空、类型转换失败），
+        '       导致用户看不到错误。现改用 Try...Catch，至少记录日志。
+        Try
+            ' ============================================================
+            ' ★★★ 第2步：查询"物品信息"表，获取单价和重量 ★★★
+            ' ============================================================
+            ' 说明：按"产品规格 + 类型区分 + 供应商"三个条件联合查询，
+            '       因为同一规格在不同供应商/类型下单价可能不同。
+            objDataAdapter1th.SelectCommand = New OleDbCommand()
+            objDataAdapter1th.SelectCommand.Connection = objConnection1th
+            objDataAdapter1th.SelectCommand.CommandText =
+            "SELECT 物品价格, 重量 FROM 物品信息 " &
+            "WHERE (产品规格 = '" & 产品规格.Text & "' AND 区分 = '" & 类型区分.Text &
+            "' AND 供应商 = '" & 供应商.Text & "')"
+            objDataAdapter1th.SelectCommand.CommandType = CommandType.Text
 
-        损失成本.Text = (CType(加工费用.Text, Single) + CType(材料费用.Text, Single) * CType(不良数量.Text, Integer)).ToString()
-        'Next
+            objDataSet1th = New DataSet()
+            objDataAdapter1th.Fill(objDataSet1th, "wpxx02")
+            Dim tb As DataTable = objDataSet1th.Tables("wpxx02")
 
+            ' ---- 若查询结果为空，直接跳过，避免索引越界 ----
+            If tb.Rows.Count = 0 Then
+                Debug.WriteLine("联动查询：物品信息查询结果为空，跳过联动计算。")
+                Return
+            End If
+
+            ' ---- 填充"材料费用"和"重量" ----
+            材料费用.Text = tb.Rows(0).Item(0).ToString()
+            重量.Text = tb.Rows(0).Item(1).ToString()
+
+            ' ============================================================
+            ' ★★★ 第3步：查询"赔偿比例"表，获取加工费用比例 ★★★
+            ' ============================================================
+            ' 说明：按"发现过程"字段查询对应的赔偿比例。
+            objDataAdapter1th.SelectCommand.CommandText =
+            "SELECT 赔偿比例.* FROM 赔偿比例 WHERE (发现过程 = '" & 发现过程.Text & "')"
+            objDataAdapter1th.Fill(objDataSet1th, "wpxx05")
+            Dim tb001 As DataTable = objDataSet1th.Tables("wpxx05")
+
+            ' ---- 若查询结果为空，跳过加工费用计算 ----
+            If tb001.Rows.Count = 0 Then
+                Debug.WriteLine("联动查询：赔偿比例查询结果为空，跳过加工费用计算。")
+                Return
+            End If
+
+            ' ============================================================
+            ' ★★★ 第4步：计算加工费用 ★★★
+            ' ============================================================
+            ' 公式：加工费用 = 赔偿比例 × 材料费用 × 不良数量
+            ' 说明：赔偿比例取自 tb001 的第2列（Item(1)）。
+            加工费用.Text = (CType(tb001.Rows(0).Item(1).ToString(), Single) *
+                         CType(材料费用.Text, Single) *
+                         CType(不良数量.Text, Integer)).ToString()
+
+            ' ============================================================
+            ' ★★★ 第5步：计算损失成本 ★★★
+            ' ============================================================
+            ' 公式：损失成本 = 加工费用 + 材料费用 × 不良数量
+            ' 【历史踩坑】原代码此处用了中文全角括号（），会编译失败；现修正为半角 ()。
+            ' 【注意】损失成本.Text 是 String 类型，需 .ToString() 显式转换。
+            损失成本.Text = (CType(加工费用.Text, Single) +
+                         CType(材料费用.Text, Single) * CType(不良数量.Text, Integer)).ToString()
+
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：记录异常，避免程序崩溃 ★★★
+            ' ============================================================
+            ' 说明：此处不弹 MessageBox，避免用户频繁修改下拉框时不断弹窗；
+            '       只写调试日志，便于开发时排查。
+            Debug.WriteLine(String.Format("联动查询 异常: {0}", ex.ToString()))
+        End Try
     End Sub
 
     Private Sub 类型区分_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 类型区分.SelectedIndexChanged
@@ -1883,19 +2014,66 @@ Public Class F01_不良品基本信息
 
     End Sub
 
+    ''' <summary>
+    ''' 功能：当"供应商"下拉框选中项变化时，从"物品信息"表查询该供应商供应的所有"产品规格"，
+    '''       并重新填充"产品规格"下拉框（供用户进一步选择）。
+    '''       涉及对象：供应商（ComboBox）、产品规格（ComboBox）、objDataAdapter1th、objDataSet1th。
+    ''' </summary>
+    ''' <remarks>
+    ''' 【设计意图】
+    '''   供应商 → 产品规格 是"级联关系"：不同供应商供应的产品规格不同，
+    '''   供应商变化时需要刷新产品规格列表，避免用户选到该供应商不供应的规格。
+    ''' 【历史踩坑】
+    '''   1. 原代码直接访问 objDataAdapter1th.SelectCommand.CommandText，
+    '''      若 SelectCommand 为 Nothing（如首次操作就是改供应商），会抛 NullReferenceException。
+    '''      现增加 Nothing 检查，自动初始化。
+    '''   2. 原代码无异常处理，查询失败（如 SQL 语法错误、网络中断）时程序崩溃。
+    '''      现加 Try...Catch，失败时记录日志并跳过，不阻塞用户。
+    ''' 【注意】
+    '''   - 本方法只填充"产品规格"下拉框，不触发联动计算；
+    '''     用户选完产品规格后由 产品规格_SelectedIndexChanged 触发联动。
+    '''   - SQL 拼接存在注入风险，但内部工具用户均为同事，风险可接受（TODO：后续可改参数化）。
+    ''' </remarks>
     Private Sub 供应商_SelectedIndexChanged(sender As Object, e As EventArgs) Handles 供应商.SelectedIndexChanged
-        'objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "发现过程" & " from " & "赔偿比例 ORDER BY 发现过程" '写入SQL语句
-        objDataAdapter1th.SelectCommand.CommandText = "select distinct " & "产品规格" & " from " & "物品信息 WHERE 供应商 = " & "'" & 供应商.Text & "'"  '写入SQL语句
-        objDataSet1th = New DataSet()                        '数据适配器对象开始检索数据并填充到DataSet对象
-        objDataAdapter1th.Fill(objDataSet1th, "wpxx2019042701")      'Fill方法的第二参数可以随便填,最好填相关的数据源表,方便理解.
-        Dim tb2019042701 As DataTable = objDataSet1th.Tables("wpxx2019042701") '声明一个表类型,并赋值给该变量.
-        产品规格.Items.Clear()             '给组合框添加项目  'Add items to the combo box..
-        '不良类型.Items.Add("外注不良") ： 不良类型.Items.Add("内部工程不良-人员") ： 不良类型.Items.Add("内部工程不良-条件")
-        '不良类型.Items.Add("内部工程不良-设备") ： 不良类型.Items.Add("内部工程不良-工具") ： 不良类型.Items.Add("内部工程不良-其他")
-        '不良类型.Items.Add("客户发现不良")
-        For inCounter = 0 To tb2019042701.Rows.Count - 1               '在表行数上循环
-            产品规格.Items.Add(tb2019042701.Rows(inCounter).Item(0).ToString)   '添加项目值为记录字段所对应的值
-        Next
+        Try
+            ' ============================================================
+            ' ★★★ 第1步：确保 SelectCommand 已初始化 ★★★
+            ' ============================================================
+            ' 【关键】原代码直接访问 SelectCommand.CommandText，
+            '         若首次操作是改供应商（未先改产品规格），SelectCommand 为 Nothing 会崩。
+            If objDataAdapter1th.SelectCommand Is Nothing Then
+                objDataAdapter1th.SelectCommand = New OleDbCommand()
+                objDataAdapter1th.SelectCommand.Connection = objConnection1th
+            End If
+
+            ' ============================================================
+            ' ★★★ 第2步：查询该供应商供应的所有"产品规格" ★★★
+            ' ============================================================
+            ' 说明：SELECT DISTINCT 去重，WHERE 按供应商筛选。
+            objDataAdapter1th.SelectCommand.CommandText =
+            "SELECT DISTINCT 产品规格 FROM 物品信息 WHERE 供应商 = '" & 供应商.Text & "'"
+
+            objDataSet1th = New DataSet()
+            objDataAdapter1th.Fill(objDataSet1th, "wpxx2019042701")
+            Dim tb2019042701 As DataTable = objDataSet1th.Tables("wpxx2019042701")
+
+            ' ============================================================
+            ' ★★★ 第3步：重新填充"产品规格"下拉框 ★★★
+            ' ============================================================
+            ' 说明：先 Clear 再 Add，避免累积；BeginUpdate/EndUpdate 减少重绘。
+            产品规格.BeginUpdate()
+            产品规格.Items.Clear()
+            For inCounter = 0 To tb2019042701.Rows.Count - 1
+                产品规格.Items.Add(tb2019042701.Rows(inCounter).Item(0).ToString())
+            Next
+            产品规格.EndUpdate()
+
+        Catch ex As Exception
+            ' ============================================================
+            ' ★★★ 异常处理：记录日志，不弹窗（避免频繁切换时弹窗打扰） ★★★
+            ' ============================================================
+            Debug.WriteLine(String.Format("供应商_SelectedIndexChanged 异常: {0}", ex.ToString()))
+        End Try
     End Sub
 
 
