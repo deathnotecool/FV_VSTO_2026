@@ -96,6 +96,7 @@ Partial Class F01_不良品基本信息
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.btnDataImport = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         CType(Me.grdAuthorTitles, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ToolStrip1.SuspendLayout()
@@ -694,6 +695,7 @@ Partial Class F01_不良品基本信息
         Me.GroupBox2.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.GroupBox2.Controls.Add(Me.btnDataImport)
         Me.GroupBox2.Controls.Add(Me.btnDisplayingRedData)
         Me.GroupBox2.Controls.Add(Me.btnReseting)
         Me.GroupBox2.Controls.Add(Me.退出)
@@ -721,7 +723,7 @@ Partial Class F01_不良品基本信息
         Me.btnDisplayingRedData.Location = New System.Drawing.Point(19, 239)
         Me.btnDisplayingRedData.Margin = New System.Windows.Forms.Padding(4)
         Me.btnDisplayingRedData.Name = "btnDisplayingRedData"
-        Me.btnDisplayingRedData.Size = New System.Drawing.Size(340, 31)
+        Me.btnDisplayingRedData.Size = New System.Drawing.Size(267, 31)
         Me.btnDisplayingRedData.TabIndex = 31
         Me.btnDisplayingRedData.Text = "未处理记录请点该按钮查看"
         Me.btnDisplayingRedData.UseVisualStyleBackColor = True
@@ -879,6 +881,15 @@ Partial Class F01_不良品基本信息
         Me.PictureBox1.TabIndex = 0
         Me.PictureBox1.TabStop = False
         '
+        'btnDataImport
+        '
+        Me.btnDataImport.Location = New System.Drawing.Point(307, 239)
+        Me.btnDataImport.Name = "btnDataImport"
+        Me.btnDataImport.Size = New System.Drawing.Size(51, 31)
+        Me.btnDataImport.TabIndex = 32
+        Me.btnDataImport.Text = "导入"
+        Me.btnDataImport.UseVisualStyleBackColor = True
+        '
         'F01_不良品基本信息
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
@@ -981,4 +992,5 @@ Partial Class F01_不良品基本信息
     Friend WithEvents Label22 As Windows.Forms.Label
     Friend WithEvents btnDisplayingRedData As Windows.Forms.Button
     Friend WithEvents txtPathEqual As Windows.Forms.TextBox
+    Friend WithEvents btnDataImport As Windows.Forms.Button
 End Class
