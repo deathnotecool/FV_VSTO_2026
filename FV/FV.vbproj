@@ -459,6 +459,13 @@
     <Compile Include="K04_发注编号信息管理.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_FmeaMain.Designer.vb">
+      <DependentUpon>L_FmeaMain.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_FmeaMain.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="M_FmeaDb.vb" />
     <Compile Include="Spec.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -705,6 +712,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="K04_发注编号信息管理.resx">
       <DependentUpon>K04_发注编号信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="L_FmeaMain.resx">
+      <DependentUpon>L_FmeaMain.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Spec.resx">
       <CustomToolNamespace>My.Resources</CustomToolNamespace>

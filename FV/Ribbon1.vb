@@ -1433,185 +1433,7 @@ Public Class Ribbon1
 
     Private Sub Button1_Click_1(sender As Object, e As RibbonControlEventArgs) Handles Button1.Click
 
-        '.... 7点30分上班 代码开始...
-
-        On Error Resume Next    '没有这一句数据库(记录集)测试错误...
-        Dim myData As String, myArray() As String， rs As Object       '声明变量,数据库路径
-        Dim i As Byte = 0, rngSelection As Excel.Range, bytCounter As Byte, dan As Single, shuang As Single, san As Single '声明变量
-        Dim rng3 As Excel.Range, rng4 As Excel.Range, k As Integer = 0, j As Byte = 0
-        xlapp.ScreenUpdating = False    '禁止屏幕刷新，提升工作效率
-        myData = "\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\人力资源管理.accdb"  '指定数据库名称，三星笔记本本地测试
-        Dim bytCounter1 As Byte = 0
-
-        ''____________________备份数据、记录区域___________________________
-        'Targetsht = xlapp.ActiveSheet    '对公共变量赋值，在执行撤消时会用到 Targetsht
-        'TargetRng = Targetsht.UsedRange.Address '对公共变量赋值，在执行备份和撤消时会用到TargetRng
-        'Call 备份(Targetsht, TargetRng)
-        'Globals.Ribbons.Ribbon1.btnUndo.Enabled = True  '这里代码调用的是VSTO EXCEL加载项的撤销方法
-        ''____________________备份数据、记录区域___________________________
-        ' ============================================================
-        ' ★★★ 第1步：备份数据（用于撤销） ★★★
-        ' ============================================================
-        M2_调用的任务.BackupActiveSheet()
-        Globals.Ribbons.Ribbon1.btnUndo.Enabled = True
-
-
-        '("Provider=Microsoft.Ace.OleDb.12.0;Data Source=\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\人力资源管理.accdb")  '公司共享盘
-        'myData = "F:\2 笔记记录\8 过程信息管理\文件管理\文件管理.accdb"  '家里台式机测试
-        'myData = "D:\2 笔记记录\0 过程信息管理笔记\文件管理\文件管理.accdb" '三星笔记本本地测试
-        '给变量赋值为一维数组,改数组变量是公共变量
-        myArray = {"分类", "日期", "加班倍数", "备注"}
-        '建立与数据库的连接,创建数据库连接对象(ADO的最顶层),这里还没指定数据库连接,打开指定数据库
-        cnn = CreateObject("adodb.Connection")
-        '引用cnn(ado最顶层对象)
-        With cnn    '引用数据库连接对象
-            .Provider = "microsoft.Ace.OLEDB.12.0"   '指定数据库引擎提供者是Access
-            .Open(myData)                            '建立指定的数据库连接
-        End With    '结束语句
-        rngSelection = xlapp.Selection  '将选择区域赋值给变量...
-        bytCounter = rngSelection.Rows.Count + 1    '从第2行单元格开始选择区域的总行数+第1行的数量赋值给变量..
-        xlapp.Columns("f:o").Delete     '删除f:o列...
-        'xlapp.Range("d1:d100").Cut(xlapp.Range("dd1"))  '剪切后，粘贴到目标单元格（B2）...
-        'xlapp.Columns("D:D").NumberFormatLocal = "@"
-        'xlapp.Range("dd1:dd100").Cut(xlapp.Range("d1"))
-
-        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count '从第2行到最后一行上遍历写入公式...
-            xlapp.Cells(j, 200).FormulaR1C1 = "=SUBSTITUTE(RC[-199],""."",""/"")"  '写入公式，用“/”代替“.”。
-            xlapp.Cells(j, 200).Value = xlapp.Cells(j, 200).Value  '去除公式，只写入值.
-        Next
-        xlapp.Cells(2, 200).CurrentRegion.Cut(xlapp.Range("a2")) '剪切已替换完成的日期值，写入到A2单元格为起点...
-        xlapp.Range("aa2:aa" & bytCounter).FormulaR1C1 = "=WEEKDAY(RC[-26],2)"  '写入公式（不需要遍历，公式可以相对引用单元格），获取星期...
-        xlapp.Range("aa2:aa" & bytCounter).Value = xlapp.Range("aa2:aa" & bytCounter).Value  '去除公式，单元格只写入值...
-        xlapp.Range("aa2").CurrentRegion.Cut(xlapp.Range("b2"))  '剪切后，粘贴到目标单元格（B2）...
-        '数组值批量写入到单元格中...
-        xlapp.Range("f1:m1").Value = {"正常上班时间", "正常下班时间", "超8小时时长", "超8小时有效时长", "是否正常", "单总时长", "双总时长", "三总时长"}
-        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count  '从第2行到最后一行遍历...
-            If xlapp.Range("d" & j).Value <> "" Then  '如果不为空值（上班打卡...）
-                'If Hour(xlapp.Range("d" & j).Value) < 17 Then  '小于5点上班，即判定为白班工作时间...
-                If xlapp.Range("d" & j).Value < 0.71 Then  '小于5点上班，即判定为白班工作时间...
-                    '写入上班开始时间，由公式转换成值...
-                    xlapp.Range("f" & j).Value = "7:30" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
-                    xlapp.Range("g" & j).Value = "16:30" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
-
-                    '写入公式，上下班时间间隔多少小时及分钟...
-                    xlapp.Range("h" & j).FormulaR1C1 = "=TEXT(MOD(RC[-3]-RC[-1],1),""hh小时mm分"")"
-                    xlapp.Range("h" & j).Value = xlapp.Range("h" & j).Value  '去除公式，写入值...
-
-                    '如果白班不满1小时的加班，则判定没有加班,否则将小时数加分钟...
-                    xlapp.Range("i" & j).FormulaR1C1 =
-         "=IF(VALUE(MID(RC[-1],1,2))=0,0,VALUE(MID(RC[-1],1,2))+IF(VALUE(MID(RC[-1],LEN(RC[-1])-2,2))>=30,0.5,0)-0.5)"
-                    xlapp.Range("i" & j).Value = xlapp.Range("i" & j).Value  '去除公式写入值...
-                    '看是否早退、迟到、加班时长超过5.5小时，如果为以上任意一种情形，那么判断为非正常上班时间...
-                    xlapp.Range("j" & j).FormulaR1C1 = "=IF(OR((RC[-4]-RC[-6])<0,(RC[-5]-RC[-3])<0,RC[-1]>5.5),""非正常上班时间"",""正常上班时间"")" : xlapp.Range("j" & j).Value = xlapp.Range("j" & j).Value
-                    '如果为正常上班时间，且非星期1-5，那么将加班时间计算为8+有效加班时间...
-                    xlapp.Range("k" & j).FormulaR1C1 = "=IF(AND(RC[-1]=""正常上班时间"",RC[-9]>5),8+RC[-2],RC[-2])"
-                    xlapp.Range("k" & j).Value = xlapp.Range("k" & j).Value '去除公式，写入值...
-                    If xlapp.Range("j" & j).Value = "非正常上班时间" Then  '如果是非正常上班时间,那么加班时间清零...
-                        'xlapp.Range("j" & j).EntireRow.Interior.Color = 255
-                        xlapp.Range("j" & j).EntireRow.Font.Color = -16776961
-                    End If
-                Else
-                    bytCounter1 = bytCounter1 + 1
-                    '判定为夜班，那么...
-                    'xlapp.Range("f" & j).Value = "19:00" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
-                    'xlapp.Range("g" & j).Value = "3:30" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
-
-                    xlapp.Range("f" & j).Value = "19:00" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
-                    xlapp.Range("g" & j).Value = "3:30" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
-                    xlapp.Range("h" & j).FormulaR1C1 = "=TEXT(MOD(RC[-3]-RC[-1],1),""hh小时mm分"")" : xlapp.Range("h" & j).Value = xlapp.Range("h" & j).Value
-                    xlapp.Range("i" & j).FormulaR1C1 =
-         "=VALUE(MID(RC[-1],1,2))+IF(VALUE(MID(RC[-1],LEN(RC[-1])-2,2))>=30,0.5,0)"
-                    xlapp.Range("i" & j).Value = xlapp.Range("i" & j).Value
-                    xlapp.Range("j" & j).FormulaR1C1 = "=IF(OR((RC[-4]-RC[-6])<0,(RC[-5]-RC[-3])<0,RC[-1]>5.5),""非正常上班时间"",""正常上班时间"")" : xlapp.Range("j" & j).Value = xlapp.Range("j" & j).Value
-                    xlapp.Range("k" & j).FormulaR1C1 = "=IF(AND(RC[-1]=""正常上班时间"",RC[-9]>5),8+RC[-2],RC[-2])"
-                    xlapp.Range("k" & j).Value = xlapp.Range("k" & j).Value
-                    '非正常上班时间，所在单元格整行填充颜色为红色...
-                    If xlapp.Range("j" & j).Value = "非正常上班时间" Then
-                        'xlapp.Range("j" & j).EntireRow.Interior.Color = 255
-                        xlapp.Range("j" & j).EntireRow.Font.Color = -16776961
-                    End If
-                End If
-            End If
-        Next
-        '如果是星期天加班时间，逐一剪切写入右偏移1格的单元格...
-        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
-            If xlapp.Range("b" & j).Value > 5 Then
-                xlapp.Range("k" & j).Cut(xlapp.Range("l" & j))
-            End If
-        Next
-
-        rs = CreateObject("ADODB.Recordset")   '创建一个无信息的记录集对象,方便引用
-        '打开(创建)指定数据库表(文件基本信息)的记录集,第一参数数据库表名,第二参数数据库对象(已经打开指定的数据库连接),3参数使用的指定的游标类型,4参数是锁定类型,这里设置可操作记录的锁定类型
-        rs.Open("调休与节假日", cnn, 1, 3)
-        rs.MoveFirst    '移动到首条记录上
-        '从第2行到最后一行遍历...
-        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
-            For i = 1 To rs.RecordCount                                                     '在1到记录数量上循环
-                'If rs.Fields("日期").value.ToString Like "*" & xlapp.Range("a" & j).Value.ToString & "*" Then 
-                '这个like是VB的语法不能用SQL语法 "%" & myId & "%"
-                '如果数据库的日期（记录集字段日期）=所在单元格日期值，那么执行...
-                If rs.Fields("日期").value.ToString = xlapp.Range("a" & j).Value.ToString Then
-                    '如果数据库中的字段“分类”等于“调休日”，且员工已打卡上班...
-                    If rs.Fields("分类").value.ToString = "调休日" And xlapp.Range("d" & j).Value.ToString <> "" Then
-                        xlapp.Range("k" & j).Value = xlapp.Range("l" & j).Value - 8 '调休日（一般为星期6、日）减去8小时...
-                        xlapp.Range("l" & j).Value = ""   '清空原星期6，7加班时间，并退出For循环...
-                        Exit For
-                        '如果匹配的数据库字段“分类”为节假日，且3倍上班...
-                    ElseIf rs.Fields("分类").value.ToString = "节假日" And rs.Fields("加班倍数").value = 3 And xlapp.Range("d" & j).Value.ToString <> "" Then
-                        '三倍有效加班时间+8个小时...
-                        xlapp.Range("m" & j).Value = xlapp.Range("i" & j).Value + 8
-                        xlapp.Range("k" & j).Value = "" : xlapp.Range("l" & j).Value = "" : Exit For  '清空原先的加班时间，并退出循环...
-                        '如果日期节假日为2倍上班...
-                    ElseIf rs.Fields("分类").value.ToString = "节假日" And rs.Fields("加班倍数").value = 2 And xlapp.Range("d" & j).Value.ToString <> "" Then
-                        xlapp.Range("l" & j).Value = xlapp.Range("i" & j).Value + 8  '有效加班时间+8个小时...
-                        xlapp.Range("k" & j).Value = "" : Exit For  '清空前期预留的加班时间...
-                    End If
-                End If          '结束判断语句
-                rs.MoveNext '移动到下一条记录
-            Next i  '循环
-            i = 0
-            rs.MoveFirst    '移动到首条记录上
-        Next
-        '从第2行到最后一行遍历，统计加班时间
-        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
-            If xlapp.Range("j" & j).Value = "非正常上班时间" Or xlapp.Range("k" & j).Value < 0 Then
-                xlapp.Range("k" & j).Value = "" : xlapp.Range("l" & j).Value = "" : xlapp.Range("m" & j).Value = ""
-            End If
-            dan = dan + xlapp.Range("k" & j).Value
-            shuang = shuang + xlapp.Range("l" & j).Value
-            san = san + xlapp.Range("m" & j).Value
-        Next
-
-        '从第2行到最后一行遍历，填充星期6，7单元格颜色...
-        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
-            If xlapp.Range("b" & j).Value > 5 Then
-                xlapp.Range("b" & j).Offset(0, -1).Resize(1, 13).Interior.ThemeColor = 9
-                xlapp.Range("b" & j).Offset(0, -1).Resize(1, 13).Interior.TintAndShade = 0.399975585192419
-            End If
-        Next
-        xlapp.Range("a2").CurrentRegion.Borders.LineStyle = 1       '加框线
-        xlapp.Range("k" & bytCounter + 1).Value = "单  " & dan & "小时"
-        xlapp.Range("l" & bytCounter + 1).Value = "双  " & shuang & "小时"
-        xlapp.Range("m" & bytCounter + 1).Value = "三  " & san & "小时"
-
-        xlapp.Range("k" & bytCounter + 2 & ":" & "m" & bytCounter + 2).Merge()
-        xlapp.Range("k" & bytCounter + 2).Value = "夜班天数共计:" & bytCounter1 & "天"
-
-
-        xlapp.ScreenUpdating = True    '禁止屏幕刷新，提升工作效率
-
-        ''.......................................................................................
-        'xlapp.OnUndo("撤消[同列相同数据合并]", "撤消") '这里代码调用的是FV.xlam加载项的撤销方法
-
-        ''.......................................................................................
-        '.... 7点30分上班 代码结束戳记...
-
-
-
-
-
-
-        ''....8点开始上班代码.....
+        ''.... 7点30分上班 代码开始...
 
         'On Error Resume Next    '没有这一句数据库(记录集)测试错误...
         'Dim myData As String, myArray() As String， rs As Object       '声明变量,数据库路径
@@ -1627,12 +1449,12 @@ Public Class Ribbon1
         ''Call 备份(Targetsht, TargetRng)
         ''Globals.Ribbons.Ribbon1.btnUndo.Enabled = True  '这里代码调用的是VSTO EXCEL加载项的撤销方法
         '''____________________备份数据、记录区域___________________________
-
         '' ============================================================
         '' ★★★ 第1步：备份数据（用于撤销） ★★★
         '' ============================================================
         'M2_调用的任务.BackupActiveSheet()
         'Globals.Ribbons.Ribbon1.btnUndo.Enabled = True
+
 
         ''("Provider=Microsoft.Ace.OleDb.12.0;Data Source=\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\人力资源管理.accdb")  '公司共享盘
         ''myData = "F:\2 笔记记录\8 过程信息管理\文件管理\文件管理.accdb"  '家里台式机测试
@@ -1668,8 +1490,8 @@ Public Class Ribbon1
         '        'If Hour(xlapp.Range("d" & j).Value) < 17 Then  '小于5点上班，即判定为白班工作时间...
         '        If xlapp.Range("d" & j).Value < 0.71 Then  '小于5点上班，即判定为白班工作时间...
         '            '写入上班开始时间，由公式转换成值...
-        '            xlapp.Range("f" & j).Value = "8:00" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
-        '            xlapp.Range("g" & j).Value = "17:00" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
+        '            xlapp.Range("f" & j).Value = "7:30" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
+        '            xlapp.Range("g" & j).Value = "16:30" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
 
         '            '写入公式，上下班时间间隔多少小时及分钟...
         '            xlapp.Range("h" & j).FormulaR1C1 = "=TEXT(MOD(RC[-3]-RC[-1],1),""hh小时mm分"")"
@@ -1782,9 +1604,187 @@ Public Class Ribbon1
         ''xlapp.OnUndo("撤消[同列相同数据合并]", "撤消") '这里代码调用的是FV.xlam加载项的撤销方法
 
         '''.......................................................................................
+        ''.... 7点30分上班 代码结束戳记...
 
 
-        ''........... 8点开始上班代码结束...................
+
+
+
+
+        '....8点开始上班代码.....
+
+        On Error Resume Next    '没有这一句数据库(记录集)测试错误...
+        Dim myData As String, myArray() As String， rs As Object       '声明变量,数据库路径
+        Dim i As Byte = 0, rngSelection As Excel.Range, bytCounter As Byte, dan As Single, shuang As Single, san As Single '声明变量
+        Dim rng3 As Excel.Range, rng4 As Excel.Range, k As Integer = 0, j As Byte = 0
+        xlapp.ScreenUpdating = False    '禁止屏幕刷新，提升工作效率
+        myData = "\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\人力资源管理.accdb"  '指定数据库名称，三星笔记本本地测试
+        Dim bytCounter1 As Byte = 0
+
+        ''____________________备份数据、记录区域___________________________
+        'Targetsht = xlapp.ActiveSheet    '对公共变量赋值，在执行撤消时会用到 Targetsht
+        'TargetRng = Targetsht.UsedRange.Address '对公共变量赋值，在执行备份和撤消时会用到TargetRng
+        'Call 备份(Targetsht, TargetRng)
+        'Globals.Ribbons.Ribbon1.btnUndo.Enabled = True  '这里代码调用的是VSTO EXCEL加载项的撤销方法
+        ''____________________备份数据、记录区域___________________________
+
+        ' ============================================================
+        ' ★★★ 第1步：备份数据（用于撤销） ★★★
+        ' ============================================================
+        M2_调用的任务.BackupActiveSheet()
+        Globals.Ribbons.Ribbon1.btnUndo.Enabled = True
+
+        '("Provider=Microsoft.Ace.OleDb.12.0;Data Source=\\192.168.3.250\Erpupgrade\王飞共享体系资料\access\人力资源管理.accdb")  '公司共享盘
+        'myData = "F:\2 笔记记录\8 过程信息管理\文件管理\文件管理.accdb"  '家里台式机测试
+        'myData = "D:\2 笔记记录\0 过程信息管理笔记\文件管理\文件管理.accdb" '三星笔记本本地测试
+        '给变量赋值为一维数组,改数组变量是公共变量
+        myArray = {"分类", "日期", "加班倍数", "备注"}
+        '建立与数据库的连接,创建数据库连接对象(ADO的最顶层),这里还没指定数据库连接,打开指定数据库
+        cnn = CreateObject("adodb.Connection")
+        '引用cnn(ado最顶层对象)
+        With cnn    '引用数据库连接对象
+            .Provider = "microsoft.Ace.OLEDB.12.0"   '指定数据库引擎提供者是Access
+            .Open(myData)                            '建立指定的数据库连接
+        End With    '结束语句
+        rngSelection = xlapp.Selection  '将选择区域赋值给变量...
+        bytCounter = rngSelection.Rows.Count + 1    '从第2行单元格开始选择区域的总行数+第1行的数量赋值给变量..
+        xlapp.Columns("f:o").Delete     '删除f:o列...
+        'xlapp.Range("d1:d100").Cut(xlapp.Range("dd1"))  '剪切后，粘贴到目标单元格（B2）...
+        'xlapp.Columns("D:D").NumberFormatLocal = "@"
+        'xlapp.Range("dd1:dd100").Cut(xlapp.Range("d1"))
+
+        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count '从第2行到最后一行上遍历写入公式...
+            xlapp.Cells(j, 200).FormulaR1C1 = "=SUBSTITUTE(RC[-199],""."",""/"")"  '写入公式，用“/”代替“.”。
+            xlapp.Cells(j, 200).Value = xlapp.Cells(j, 200).Value  '去除公式，只写入值.
+        Next
+        xlapp.Cells(2, 200).CurrentRegion.Cut(xlapp.Range("a2")) '剪切已替换完成的日期值，写入到A2单元格为起点...
+        xlapp.Range("aa2:aa" & bytCounter).FormulaR1C1 = "=WEEKDAY(RC[-26],2)"  '写入公式（不需要遍历，公式可以相对引用单元格），获取星期...
+        xlapp.Range("aa2:aa" & bytCounter).Value = xlapp.Range("aa2:aa" & bytCounter).Value  '去除公式，单元格只写入值...
+        xlapp.Range("aa2").CurrentRegion.Cut(xlapp.Range("b2"))  '剪切后，粘贴到目标单元格（B2）...
+        '数组值批量写入到单元格中...
+        xlapp.Range("f1:m1").Value = {"正常上班时间", "正常下班时间", "超8小时时长", "超8小时有效时长", "是否正常", "单总时长", "双总时长", "三总时长"}
+        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count  '从第2行到最后一行遍历...
+            If xlapp.Range("d" & j).Value <> "" Then  '如果不为空值（上班打卡...）
+                'If Hour(xlapp.Range("d" & j).Value) < 17 Then  '小于5点上班，即判定为白班工作时间...
+                If xlapp.Range("d" & j).Value < 0.71 Then  '小于5点上班，即判定为白班工作时间...
+                    '写入上班开始时间，由公式转换成值...
+                    xlapp.Range("f" & j).Value = "8:00" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
+                    xlapp.Range("g" & j).Value = "17:00" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
+
+                    '写入公式，上下班时间间隔多少小时及分钟...
+                    xlapp.Range("h" & j).FormulaR1C1 = "=TEXT(MOD(RC[-3]-RC[-1],1),""hh小时mm分"")"
+                    xlapp.Range("h" & j).Value = xlapp.Range("h" & j).Value  '去除公式，写入值...
+
+                    '如果白班不满1小时的加班，则判定没有加班,否则将小时数加分钟...
+                    xlapp.Range("i" & j).FormulaR1C1 =
+         "=IF(VALUE(MID(RC[-1],1,2))=0,0,VALUE(MID(RC[-1],1,2))+IF(VALUE(MID(RC[-1],LEN(RC[-1])-2,2))>=30,0.5,0)-0.5)"
+                    xlapp.Range("i" & j).Value = xlapp.Range("i" & j).Value  '去除公式写入值...
+                    '看是否早退、迟到、加班时长超过5.5小时，如果为以上任意一种情形，那么判断为非正常上班时间...
+                    xlapp.Range("j" & j).FormulaR1C1 = "=IF(OR((RC[-4]-RC[-6])<0,(RC[-5]-RC[-3])<0,RC[-1]>5.5),""非正常上班时间"",""正常上班时间"")" : xlapp.Range("j" & j).Value = xlapp.Range("j" & j).Value
+                    '如果为正常上班时间，且非星期1-5，那么将加班时间计算为8+有效加班时间...
+                    xlapp.Range("k" & j).FormulaR1C1 = "=IF(AND(RC[-1]=""正常上班时间"",RC[-9]>5),8+RC[-2],RC[-2])"
+                    xlapp.Range("k" & j).Value = xlapp.Range("k" & j).Value '去除公式，写入值...
+                    If xlapp.Range("j" & j).Value = "非正常上班时间" Then  '如果是非正常上班时间,那么加班时间清零...
+                        'xlapp.Range("j" & j).EntireRow.Interior.Color = 255
+                        xlapp.Range("j" & j).EntireRow.Font.Color = -16776961
+                    End If
+                Else
+                    bytCounter1 = bytCounter1 + 1
+                    '判定为夜班，那么...
+                    'xlapp.Range("f" & j).Value = "19:00" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
+                    'xlapp.Range("g" & j).Value = "3:30" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
+
+                    xlapp.Range("f" & j).Value = "19:00" : xlapp.Range("f" & j).Value = xlapp.Range("f" & j).Value
+                    xlapp.Range("g" & j).Value = "3:30" : xlapp.Range("g" & j).Value = xlapp.Range("g" & j).Value
+                    xlapp.Range("h" & j).FormulaR1C1 = "=TEXT(MOD(RC[-3]-RC[-1],1),""hh小时mm分"")" : xlapp.Range("h" & j).Value = xlapp.Range("h" & j).Value
+                    xlapp.Range("i" & j).FormulaR1C1 =
+         "=VALUE(MID(RC[-1],1,2))+IF(VALUE(MID(RC[-1],LEN(RC[-1])-2,2))>=30,0.5,0)"
+                    xlapp.Range("i" & j).Value = xlapp.Range("i" & j).Value
+                    xlapp.Range("j" & j).FormulaR1C1 = "=IF(OR((RC[-4]-RC[-6])<0,(RC[-5]-RC[-3])<0,RC[-1]>5.5),""非正常上班时间"",""正常上班时间"")" : xlapp.Range("j" & j).Value = xlapp.Range("j" & j).Value
+                    xlapp.Range("k" & j).FormulaR1C1 = "=IF(AND(RC[-1]=""正常上班时间"",RC[-9]>5),8+RC[-2],RC[-2])"
+                    xlapp.Range("k" & j).Value = xlapp.Range("k" & j).Value
+                    '非正常上班时间，所在单元格整行填充颜色为红色...
+                    If xlapp.Range("j" & j).Value = "非正常上班时间" Then
+                        'xlapp.Range("j" & j).EntireRow.Interior.Color = 255
+                        xlapp.Range("j" & j).EntireRow.Font.Color = -16776961
+                    End If
+                End If
+            End If
+        Next
+        '如果是星期天加班时间，逐一剪切写入右偏移1格的单元格...
+        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
+            If xlapp.Range("b" & j).Value > 5 Then
+                xlapp.Range("k" & j).Cut(xlapp.Range("l" & j))
+            End If
+        Next
+
+        rs = CreateObject("ADODB.Recordset")   '创建一个无信息的记录集对象,方便引用
+        '打开(创建)指定数据库表(文件基本信息)的记录集,第一参数数据库表名,第二参数数据库对象(已经打开指定的数据库连接),3参数使用的指定的游标类型,4参数是锁定类型,这里设置可操作记录的锁定类型
+        rs.Open("调休与节假日", cnn, 1, 3)
+        rs.MoveFirst    '移动到首条记录上
+        '从第2行到最后一行遍历...
+        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
+            For i = 1 To rs.RecordCount                                                     '在1到记录数量上循环
+                'If rs.Fields("日期").value.ToString Like "*" & xlapp.Range("a" & j).Value.ToString & "*" Then 
+                '这个like是VB的语法不能用SQL语法 "%" & myId & "%"
+                '如果数据库的日期（记录集字段日期）=所在单元格日期值，那么执行...
+                If rs.Fields("日期").value.ToString = xlapp.Range("a" & j).Value.ToString Then
+                    '如果数据库中的字段“分类”等于“调休日”，且员工已打卡上班...
+                    If rs.Fields("分类").value.ToString = "调休日" And xlapp.Range("d" & j).Value.ToString <> "" Then
+                        xlapp.Range("k" & j).Value = xlapp.Range("l" & j).Value - 8 '调休日（一般为星期6、日）减去8小时...
+                        xlapp.Range("l" & j).Value = ""   '清空原星期6，7加班时间，并退出For循环...
+                        Exit For
+                        '如果匹配的数据库字段“分类”为节假日，且3倍上班...
+                    ElseIf rs.Fields("分类").value.ToString = "节假日" And rs.Fields("加班倍数").value = 3 And xlapp.Range("d" & j).Value.ToString <> "" Then
+                        '三倍有效加班时间+8个小时...
+                        xlapp.Range("m" & j).Value = xlapp.Range("i" & j).Value + 8
+                        xlapp.Range("k" & j).Value = "" : xlapp.Range("l" & j).Value = "" : Exit For  '清空原先的加班时间，并退出循环...
+                        '如果日期节假日为2倍上班...
+                    ElseIf rs.Fields("分类").value.ToString = "节假日" And rs.Fields("加班倍数").value = 2 And xlapp.Range("d" & j).Value.ToString <> "" Then
+                        xlapp.Range("l" & j).Value = xlapp.Range("i" & j).Value + 8  '有效加班时间+8个小时...
+                        xlapp.Range("k" & j).Value = "" : Exit For  '清空前期预留的加班时间...
+                    End If
+                End If          '结束判断语句
+                rs.MoveNext '移动到下一条记录
+            Next i  '循环
+            i = 0
+            rs.MoveFirst    '移动到首条记录上
+        Next
+        '从第2行到最后一行遍历，统计加班时间
+        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
+            If xlapp.Range("j" & j).Value = "非正常上班时间" Or xlapp.Range("k" & j).Value < 0 Then
+                xlapp.Range("k" & j).Value = "" : xlapp.Range("l" & j).Value = "" : xlapp.Range("m" & j).Value = ""
+            End If
+            dan = dan + xlapp.Range("k" & j).Value
+            shuang = shuang + xlapp.Range("l" & j).Value
+            san = san + xlapp.Range("m" & j).Value
+        Next
+
+        '从第2行到最后一行遍历，填充星期6，7单元格颜色...
+        For j = 2 To xlapp.Range("a1").CurrentRegion.Rows.Count
+            If xlapp.Range("b" & j).Value > 5 Then
+                xlapp.Range("b" & j).Offset(0, -1).Resize(1, 13).Interior.ThemeColor = 9
+                xlapp.Range("b" & j).Offset(0, -1).Resize(1, 13).Interior.TintAndShade = 0.399975585192419
+            End If
+        Next
+        xlapp.Range("a2").CurrentRegion.Borders.LineStyle = 1       '加框线
+        xlapp.Range("k" & bytCounter + 1).Value = "单  " & dan & "小时"
+        xlapp.Range("l" & bytCounter + 1).Value = "双  " & shuang & "小时"
+        xlapp.Range("m" & bytCounter + 1).Value = "三  " & san & "小时"
+
+        xlapp.Range("k" & bytCounter + 2 & ":" & "m" & bytCounter + 2).Merge()
+        xlapp.Range("k" & bytCounter + 2).Value = "夜班天数共计:" & bytCounter1 & "天"
+
+
+        xlapp.ScreenUpdating = True    '禁止屏幕刷新，提升工作效率
+
+        ''.......................................................................................
+        'xlapp.OnUndo("撤消[同列相同数据合并]", "撤消") '这里代码调用的是FV.xlam加载项的撤销方法
+
+        ''.......................................................................................
+
+
+        '........... 8点开始上班代码结束...................
     End Sub
 
     Private Sub btnFrequency_Click(sender As Object, e As RibbonControlEventArgs) Handles btnFrequency.Click
@@ -3307,5 +3307,15 @@ Public Class Ribbon1
         End Select
     End Function
 
-
+    ''' <summary>
+    ''' 功能：Ribbon 按钮点击，打开 FMEA 工序维护窗体
+    ''' </summary>
+    Private Sub btnOpenFmeaMain_Click(sender As Object, e As RibbonControlEventArgs) Handles btnOpenFmeaMain.Click
+        ' 声明并创建窗体实例
+        Dim f As New L_FmeaMain()
+        ' 显示窗体（非模态，可同时操作 Excel）
+        f.Show()
+        ' 禁用按钮，防止重复打开多个窗口
+        btnOpenFmeaMain.Enabled = False
+    End Sub
 End Class
