@@ -580,7 +580,7 @@ Public Class L_FmeaMain
     ''' <summary>
     ''' 功能：上一条，切到上一条记录
     ''' </summary>
-    Private Sub btnPrev_Click(sender As Object, e As EventArgs) Handles btnPrev.Click, btnFirst.Click
+    Private Sub btnPrev_Click(sender As Object, e As EventArgs) Handles btnPrev.Click
         If dtMain.Rows.Count = 0 Then Return
         If intCurrentRow > 0 Then
             intCurrentRow -= 1
@@ -591,7 +591,7 @@ Public Class L_FmeaMain
     ''' <summary>
     ''' 功能：下一条，切到下一条记录
     ''' </summary>
-    Private Sub btnNext_Click(sender As Object, e As EventArgs) Handles btnNext.Click, btnLast.Click
+    Private Sub btnNext_Click(sender As Object, e As EventArgs) Handles btnNext.Click
         If dtMain.Rows.Count = 0 Then Return
         If intCurrentRow < dtMain.Rows.Count - 1 Then
             intCurrentRow += 1
@@ -672,6 +672,23 @@ Public Class L_FmeaMain
         ShowRecord()
     End Sub
 
+    ''' <summary>
+    ''' 功能：复制当前记录内容，清空编号，进入新增模式
+    ''' </summary>
+    Private Sub btnCopyNew_Click(sender As Object, e As EventArgs) Handles btnCopyNew.Click
+        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then
+            MessageBox.Show("没有可复制的记录")
+            Return
+        End If
+
+        ' 先把当前记录值留在控件上（ShowRecord 已填好），只需清编号
+        blnIsNew = True
+        txtProcessNo.Text = ""            ' 编号清空，让用户填新的
+        txtProcessNo.ReadOnly = False     ' 编号可编辑
+        txtProcessNo.Focus()
+
+        lblStatusBar.Text = "复制新增模式，请填写新编号后保存"
+    End Sub
 
 
 End Class
