@@ -459,6 +459,12 @@
     <Compile Include="K04_发注编号信息管理.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_FmeaDetail.Designer.vb">
+      <DependentUpon>L_FmeaDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_FmeaDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="L_FmeaMain.Designer.vb">
       <DependentUpon>L_FmeaMain.vb</DependentUpon>
     </Compile>
@@ -712,6 +718,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="K04_发注编号信息管理.resx">
       <DependentUpon>K04_发注编号信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="L_FmeaDetail.resx">
+      <DependentUpon>L_FmeaDetail.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="L_FmeaMain.resx">
       <DependentUpon>L_FmeaMain.vb</DependentUpon>

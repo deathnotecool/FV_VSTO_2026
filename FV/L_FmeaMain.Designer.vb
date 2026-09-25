@@ -292,7 +292,7 @@ Partial Class L_FmeaMain
         '
         'btnCopyNew
         '
-        Me.btnCopyNew.Location = New System.Drawing.Point(523, 24)
+        Me.btnCopyNew.Location = New System.Drawing.Point(117, 24)
         Me.btnCopyNew.Name = "btnCopyNew"
         Me.btnCopyNew.Size = New System.Drawing.Size(75, 31)
         Me.btnCopyNew.TabIndex = 9
@@ -301,7 +301,7 @@ Partial Class L_FmeaMain
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(421, 24)
+        Me.btnClose.Location = New System.Drawing.Point(429, 24)
         Me.btnClose.Name = "btnClose"
         Me.btnClose.Size = New System.Drawing.Size(75, 31)
         Me.btnClose.TabIndex = 9
@@ -310,7 +310,7 @@ Partial Class L_FmeaMain
         '
         'btnRefresh
         '
-        Me.btnRefresh.Location = New System.Drawing.Point(319, 24)
+        Me.btnRefresh.Location = New System.Drawing.Point(325, 24)
         Me.btnRefresh.Name = "btnRefresh"
         Me.btnRefresh.Size = New System.Drawing.Size(75, 31)
         Me.btnRefresh.TabIndex = 8
@@ -319,7 +319,7 @@ Partial Class L_FmeaMain
         '
         'btnDelete
         '
-        Me.btnDelete.Location = New System.Drawing.Point(217, 24)
+        Me.btnDelete.Location = New System.Drawing.Point(221, 24)
         Me.btnDelete.Name = "btnDelete"
         Me.btnDelete.Size = New System.Drawing.Size(75, 31)
         Me.btnDelete.TabIndex = 7
@@ -328,7 +328,7 @@ Partial Class L_FmeaMain
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(115, 24)
+        Me.btnSave.Location = New System.Drawing.Point(533, 24)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 31)
         Me.btnSave.TabIndex = 6
