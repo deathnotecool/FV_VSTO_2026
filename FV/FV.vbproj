@@ -904,9 +904,6 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>FV_TemporaryKey.pfx</ManifestKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
     <ManifestCertificateThumbprint>5FCE246C070AACA8EC1A77BBB0ABE61E4C64D07F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
