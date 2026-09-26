@@ -90,10 +90,6 @@
         Me.btn索赔信息查询与导出 = Me.Factory.CreateRibbonButton
         Me.btnGetInform = Me.Factory.CreateRibbonButton
         Me.btnOpenFmeaMain = Me.Factory.CreateRibbonButton
-        Me.btnOpenFmeaDetail = Me.Factory.CreateRibbonButton
-        Me.btnOpenPChart = Me.Factory.CreateRibbonButton
-        Me.btnOpenQualityEvent = Me.Factory.CreateRibbonButton
-        Me.btnOpenReport = Me.Factory.CreateRibbonButton
         Me.Menu12 = Me.Factory.CreateRibbonMenu
         Me.btn电能 = Me.Factory.CreateRibbonButton
         Me.Menu17 = Me.Factory.CreateRibbonMenu
@@ -508,10 +504,6 @@
         Me.Menu14.Items.Add(Me.btn索赔信息查询与导出)
         Me.Menu14.Items.Add(Me.btnGetInform)
         Me.Menu14.Items.Add(Me.btnOpenFmeaMain)
-        Me.Menu14.Items.Add(Me.btnOpenFmeaDetail)
-        Me.Menu14.Items.Add(Me.btnOpenPChart)
-        Me.Menu14.Items.Add(Me.btnOpenQualityEvent)
-        Me.Menu14.Items.Add(Me.btnOpenReport)
         Me.Menu14.Label = "失效管理系统"
         Me.Menu14.Name = "Menu14"
         Me.Menu14.OfficeImageId = "FileStartWorkflow"
@@ -563,33 +555,10 @@
         '
         'btnOpenFmeaMain
         '
+        Me.btnOpenFmeaMain.Image = CType(resources.GetObject("btnOpenFmeaMain.Image"), System.Drawing.Image)
         Me.btnOpenFmeaMain.Label = "FMEA工序维护"
         Me.btnOpenFmeaMain.Name = "btnOpenFmeaMain"
         Me.btnOpenFmeaMain.ShowImage = True
-        '
-        'btnOpenFmeaDetail
-        '
-        Me.btnOpenFmeaDetail.Label = "FMEA明细维护"
-        Me.btnOpenFmeaDetail.Name = "btnOpenFmeaDetail"
-        Me.btnOpenFmeaDetail.ShowImage = True
-        '
-        'btnOpenPChart
-        '
-        Me.btnOpenPChart.Label = "P图维护"
-        Me.btnOpenPChart.Name = "btnOpenPChart"
-        Me.btnOpenPChart.ShowImage = True
-        '
-        'btnOpenQualityEvent
-        '
-        Me.btnOpenQualityEvent.Label = "质量事件录入"
-        Me.btnOpenQualityEvent.Name = "btnOpenQualityEvent"
-        Me.btnOpenQualityEvent.ShowImage = True
-        '
-        'btnOpenReport
-        '
-        Me.btnOpenReport.Label = "现场警示报表"
-        Me.btnOpenReport.Name = "btnOpenReport"
-        Me.btnOpenReport.ShowImage = True
         '
         'Menu12
         '
@@ -1520,10 +1489,6 @@
     Friend WithEvents btnAutoFontSize As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents btnAnalyzeHeatTreatmentData As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents btnOpenFmeaMain As Microsoft.Office.Tools.Ribbon.RibbonButton
-    Friend WithEvents btnOpenFmeaDetail As Microsoft.Office.Tools.Ribbon.RibbonButton
-    Friend WithEvents btnOpenPChart As Microsoft.Office.Tools.Ribbon.RibbonButton
-    Friend WithEvents btnOpenQualityEvent As Microsoft.Office.Tools.Ribbon.RibbonButton
-    Friend WithEvents btnOpenReport As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection

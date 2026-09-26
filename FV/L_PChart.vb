@@ -188,4 +188,5 @@ Public Class L_PChart
         End SyncLock
     End Sub
 
+
 End Class

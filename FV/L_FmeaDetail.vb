@@ -176,6 +176,9 @@ Public Class L_FmeaDetail
 
         SetComboByModeNo(If(IsDBNull(dr("strFailureModeNo")), "", dr("strFailureModeNo").ToString()))
         txtFailureModeName.Text = If(IsDBNull(dr("strFailureModeName")), "", dr("strFailureModeName").ToString())
+        txtProductChar.Text = If(IsDBNull(dr("strProductChar")), "", dr("strProductChar").ToString())
+        txtProcessChar.Text = If(IsDBNull(dr("strProcessChar")), "", dr("strProcessChar").ToString())
+
         txtFailureEffect.Text = If(IsDBNull(dr("memFailureEffect")), "", dr("memFailureEffect").ToString())
         txtFailureCause.Text = If(IsDBNull(dr("memFailureCause")), "", dr("memFailureCause").ToString())
         txtPrevention.Text = If(IsDBNull(dr("memPrevention")), "", dr("memPrevention").ToString())
@@ -217,6 +220,9 @@ Public Class L_FmeaDetail
         cboAP.SelectedIndex = -1
         txtDetailOrder.Text = "0"
         txtRemark.Text = ""
+        txtProductChar.Text = ""
+        txtProcessChar.Text = ""
+
 
         cboFailureModeNo.Enabled = True
         lblStatusBar.Text = "新增模式，请填写后保存"
@@ -469,34 +475,37 @@ Public Class L_FmeaDetail
     ' ========== 数据库操作 ==========
 
     ''' <summary>
-    ''' 功能：插入一条新明细
+    ''' 功能：插入一条新明细记录（带全局写锁）
     ''' </summary>
     Private Sub InsertRecord()
         SyncLock WriteLock
             Dim strSql As String = "INSERT INTO tblFMEA_Detail " &
-                "(lngMainID, strFailureModeNo, strFailureModeName, memFailureEffect, memFailureCause, " &
-                "memPrevention, memDetection, intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
-                "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark) " &
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            "(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
+            "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
+            "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
+            "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark) " &
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
             Using conn As OleDbConnection = GetConnection()
                 Using cmd As New OleDbCommand(strSql, conn)
                     cmd.Parameters.Add("p1", OleDbType.Integer).Value = MainID
-                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = GetModeNoFromCombo()
-                    cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = txtFailureModeName.Text
-                    cmd.Parameters.Add("p4", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
-                    cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = txtFailureCause.Text
-                    cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtPrevention.Text
-                    cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = txtDetection.Text
-                    cmd.Parameters.Add("p8", OleDbType.Integer).Value = CInt(txtSeverity.Text)
-                    cmd.Parameters.Add("p9", OleDbType.Integer).Value = CInt(txtOccurrence.Text)
-                    cmd.Parameters.Add("p10", OleDbType.Integer).Value = CInt(txtDetectionScore.Text)
-                    cmd.Parameters.Add("p11", OleDbType.Integer).Value = CInt(txtRPN.Text)
-                    cmd.Parameters.Add("p12", OleDbType.VarWChar).Value = cboAP.Text
-                    cmd.Parameters.Add("p13", OleDbType.Integer).Value = CInt(txtDetailOrder.Text)
-                    cmd.Parameters.Add("p14", OleDbType.Date).Value = Now
-                    cmd.Parameters.Add("p15", OleDbType.Date).Value = Now
-                    cmd.Parameters.Add("p16", OleDbType.LongVarWChar).Value = txtRemark.Text
+                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = cboFailureModeNo.Text.Trim()
+                    cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = txtFailureModeName.Text.Trim()
+                    cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = txtProductChar.Text.Trim()
+                    cmd.Parameters.Add("p5", OleDbType.VarWChar).Value = txtProcessChar.Text.Trim()
+                    cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
+                    cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = txtFailureCause.Text
+                    cmd.Parameters.Add("p8", OleDbType.LongVarWChar).Value = txtPrevention.Text
+                    cmd.Parameters.Add("p9", OleDbType.LongVarWChar).Value = txtDetection.Text
+                    cmd.Parameters.Add("p10", OleDbType.Integer).Value = CInt(txtSeverity.Text.Trim())
+                    cmd.Parameters.Add("p11", OleDbType.Integer).Value = CInt(txtOccurrence.Text.Trim())
+                    cmd.Parameters.Add("p12", OleDbType.Integer).Value = CInt(txtDetectionScore.Text.Trim())
+                    cmd.Parameters.Add("p13", OleDbType.Integer).Value = CInt(txtRPN.Text.Trim())
+                    cmd.Parameters.Add("p14", OleDbType.VarWChar).Value = cboAP.Text
+                    cmd.Parameters.Add("p15", OleDbType.Integer).Value = CInt(txtDetailOrder.Text.Trim())
+                    cmd.Parameters.Add("p16", OleDbType.Date).Value = Now
+                    cmd.Parameters.Add("p17", OleDbType.Date).Value = Now
+                    cmd.Parameters.Add("p18", OleDbType.LongVarWChar).Value = txtRemark.Text
                     conn.Open()
                     cmd.ExecuteNonQuery()
                 End Using
@@ -505,7 +514,7 @@ Public Class L_FmeaDetail
     End Sub
 
     ''' <summary>
-    ''' 功能：更新当前明细
+    ''' 功能：更新当前明细记录（带全局写锁）
     ''' </summary>
     Private Sub UpdateRecord()
         If dtDetail Is Nothing OrElse dtDetail.Rows.Count = 0 Then Return
@@ -514,28 +523,31 @@ Public Class L_FmeaDetail
         SyncLock WriteLock
             Dim lngID As Long = CLng(dtDetail.Rows(intCurrentRow)("lngID"))
             Dim strSql As String = "UPDATE tblFMEA_Detail SET " &
-                "strFailureModeNo=?, strFailureModeName=?, memFailureEffect=?, memFailureCause=?, " &
-                "memPrevention=?, memDetection=?, intSeverity=?, intOccurrence=?, intDetection=?, " &
-                "intRPN=?, strAP=?, lngProcessOrder=?, dtmUpdateTime=?, memRemark=? " &
-                "WHERE lngID=?"
+            "strFailureModeNo=?, strFailureModeName=?, strProductChar=?, strProcessChar=?, " &
+            "memFailureEffect=?, memFailureCause=?, memPrevention=?, memDetection=?, " &
+            "intSeverity=?, intOccurrence=?, intDetection=?, intRPN=?, strAP=?, " &
+            "lngProcessOrder=?, dtmUpdateTime=?, memRemark=? " &
+            "WHERE lngID=?"
 
             Using conn As OleDbConnection = GetConnection()
                 Using cmd As New OleDbCommand(strSql, conn)
-                    cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = GetModeNoFromCombo()
-                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = txtFailureModeName.Text
-                    cmd.Parameters.Add("p3", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
-                    cmd.Parameters.Add("p4", OleDbType.LongVarWChar).Value = txtFailureCause.Text
-                    cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = txtPrevention.Text
-                    cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtDetection.Text
-                    cmd.Parameters.Add("p7", OleDbType.Integer).Value = CInt(txtSeverity.Text)
-                    cmd.Parameters.Add("p8", OleDbType.Integer).Value = CInt(txtOccurrence.Text)
-                    cmd.Parameters.Add("p9", OleDbType.Integer).Value = CInt(txtDetectionScore.Text)
-                    cmd.Parameters.Add("p10", OleDbType.Integer).Value = CInt(txtRPN.Text)
-                    cmd.Parameters.Add("p11", OleDbType.VarWChar).Value = cboAP.Text
-                    cmd.Parameters.Add("p12", OleDbType.Integer).Value = CInt(txtDetailOrder.Text)
-                    cmd.Parameters.Add("p13", OleDbType.Date).Value = Now
-                    cmd.Parameters.Add("p14", OleDbType.LongVarWChar).Value = txtRemark.Text
-                    cmd.Parameters.Add("p15", OleDbType.Integer).Value = lngID
+                    cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = cboFailureModeNo.Text.Trim()
+                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = txtFailureModeName.Text.Trim()
+                    cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = txtProductChar.Text.Trim()
+                    cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = txtProcessChar.Text.Trim()
+                    cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
+                    cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtFailureCause.Text
+                    cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = txtPrevention.Text
+                    cmd.Parameters.Add("p8", OleDbType.LongVarWChar).Value = txtDetection.Text
+                    cmd.Parameters.Add("p9", OleDbType.Integer).Value = CInt(txtSeverity.Text.Trim())
+                    cmd.Parameters.Add("p10", OleDbType.Integer).Value = CInt(txtOccurrence.Text.Trim())
+                    cmd.Parameters.Add("p11", OleDbType.Integer).Value = CInt(txtDetectionScore.Text.Trim())
+                    cmd.Parameters.Add("p12", OleDbType.Integer).Value = CInt(txtRPN.Text.Trim())
+                    cmd.Parameters.Add("p13", OleDbType.VarWChar).Value = cboAP.Text
+                    cmd.Parameters.Add("p14", OleDbType.Integer).Value = CInt(txtDetailOrder.Text.Trim())
+                    cmd.Parameters.Add("p15", OleDbType.Date).Value = Now
+                    cmd.Parameters.Add("p16", OleDbType.LongVarWChar).Value = txtRemark.Text
+                    cmd.Parameters.Add("p17", OleDbType.Integer).Value = lngID
                     conn.Open()
                     cmd.ExecuteNonQuery()
                 End Using
@@ -569,5 +581,6 @@ Public Class L_FmeaDetail
         Next
         cboFailureModeNo.SelectedIndex = -1
     End Sub
+
 
 End Class

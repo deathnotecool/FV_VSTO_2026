@@ -797,7 +797,6 @@
       <DependentUpon>WN18081502_随机数产生.vb</DependentUpon>
     </EmbeddedResource>
     <None Include="ClassDiagram1.cd" />
-    <None Include="FV_1_TemporaryKey.pfx" />
     <None Include="FV_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="ThisAddIn.Designer.xml">
@@ -904,10 +903,13 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>5FCE246C070AACA8EC1A77BBB0ABE61E4C64D07F</ManifestCertificateThumbprint>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <ManifestKeyFile>FV_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>98CCD0DF731E5D9BE647353F9220463576341D13</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!-- Include the build rules for a Visual Basic project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
