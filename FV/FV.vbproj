@@ -471,6 +471,12 @@
     <Compile Include="L_FmeaMain.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_PChart.Designer.vb">
+      <DependentUpon>L_PChart.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_PChart.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="M_FmeaDb.vb" />
     <Compile Include="Spec.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -725,6 +731,9 @@
     <EmbeddedResource Include="L_FmeaMain.resx">
       <DependentUpon>L_FmeaMain.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="L_PChart.resx">
+      <DependentUpon>L_PChart.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Spec.resx">
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -789,6 +798,7 @@
     </EmbeddedResource>
     <None Include="ClassDiagram1.cd" />
     <None Include="FV_1_TemporaryKey.pfx" />
+    <None Include="FV_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="ThisAddIn.Designer.xml">
       <DependentUpon>ThisAddIn.vb</DependentUpon>
@@ -894,10 +904,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>FV_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>FV_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>6665D79D3BD36532D7A772A88115AD197AAC0582</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>5FCE246C070AACA8EC1A77BBB0ABE61E4C64D07F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

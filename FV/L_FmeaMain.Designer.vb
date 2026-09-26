@@ -68,6 +68,8 @@ Partial Class L_FmeaMain
         Me.lblSection = New System.Windows.Forms.Label()
         Me.lblProcessOrder = New System.Windows.Forms.Label()
         Me.lblProcessNo = New System.Windows.Forms.Label()
+        Me.btnOpenDetail = New System.Windows.Forms.Button()
+        Me.btnOpenPChart = New System.Windows.Forms.Button()
         CType(Me.dgvMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -220,7 +222,7 @@ Partial Class L_FmeaMain
         '
         'btnPrev
         '
-        Me.btnPrev.Location = New System.Drawing.Point(655, 74)
+        Me.btnPrev.Location = New System.Drawing.Point(655, 164)
         Me.btnPrev.Name = "btnPrev"
         Me.btnPrev.Size = New System.Drawing.Size(75, 31)
         Me.btnPrev.TabIndex = 10
@@ -230,7 +232,7 @@ Partial Class L_FmeaMain
         'btnNext
         '
         Me.btnNext.BackColor = System.Drawing.SystemColors.Control
-        Me.btnNext.Location = New System.Drawing.Point(655, 112)
+        Me.btnNext.Location = New System.Drawing.Point(655, 207)
         Me.btnNext.Name = "btnNext"
         Me.btnNext.Size = New System.Drawing.Size(75, 31)
         Me.btnNext.TabIndex = 10
@@ -258,7 +260,7 @@ Partial Class L_FmeaMain
         '
         'btnFirst
         '
-        Me.btnFirst.Location = New System.Drawing.Point(655, 36)
+        Me.btnFirst.Location = New System.Drawing.Point(655, 121)
         Me.btnFirst.Name = "btnFirst"
         Me.btnFirst.Size = New System.Drawing.Size(75, 31)
         Me.btnFirst.TabIndex = 10
@@ -268,7 +270,7 @@ Partial Class L_FmeaMain
         'btnLast
         '
         Me.btnLast.BackColor = System.Drawing.SystemColors.Control
-        Me.btnLast.Location = New System.Drawing.Point(655, 150)
+        Me.btnLast.Location = New System.Drawing.Point(655, 250)
         Me.btnLast.Name = "btnLast"
         Me.btnLast.Size = New System.Drawing.Size(75, 31)
         Me.btnLast.TabIndex = 10
@@ -292,7 +294,7 @@ Partial Class L_FmeaMain
         '
         'btnCopyNew
         '
-        Me.btnCopyNew.Location = New System.Drawing.Point(117, 24)
+        Me.btnCopyNew.Location = New System.Drawing.Point(118, 24)
         Me.btnCopyNew.Name = "btnCopyNew"
         Me.btnCopyNew.Size = New System.Drawing.Size(75, 31)
         Me.btnCopyNew.TabIndex = 9
@@ -301,7 +303,7 @@ Partial Class L_FmeaMain
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(429, 24)
+        Me.btnClose.Location = New System.Drawing.Point(538, 24)
         Me.btnClose.Name = "btnClose"
         Me.btnClose.Size = New System.Drawing.Size(75, 31)
         Me.btnClose.TabIndex = 9
@@ -310,7 +312,7 @@ Partial Class L_FmeaMain
         '
         'btnRefresh
         '
-        Me.btnRefresh.Location = New System.Drawing.Point(325, 24)
+        Me.btnRefresh.Location = New System.Drawing.Point(433, 24)
         Me.btnRefresh.Name = "btnRefresh"
         Me.btnRefresh.Size = New System.Drawing.Size(75, 31)
         Me.btnRefresh.TabIndex = 8
@@ -319,7 +321,7 @@ Partial Class L_FmeaMain
         '
         'btnDelete
         '
-        Me.btnDelete.Location = New System.Drawing.Point(221, 24)
+        Me.btnDelete.Location = New System.Drawing.Point(328, 24)
         Me.btnDelete.Name = "btnDelete"
         Me.btnDelete.Size = New System.Drawing.Size(75, 31)
         Me.btnDelete.TabIndex = 7
@@ -328,7 +330,7 @@ Partial Class L_FmeaMain
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(533, 24)
+        Me.btnSave.Location = New System.Drawing.Point(223, 24)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 31)
         Me.btnSave.TabIndex = 6
@@ -383,7 +385,7 @@ Partial Class L_FmeaMain
         Me.GroupBox2.Size = New System.Drawing.Size(627, 614)
         Me.GroupBox2.TabIndex = 13
         Me.GroupBox2.TabStop = False
-        Me.GroupBox2.Text = "工序信息输入"
+        Me.GroupBox2.Text = "信息输入"
         '
         'cboSection
         '
@@ -532,11 +534,31 @@ Partial Class L_FmeaMain
         Me.lblProcessNo.TabIndex = 10
         Me.lblProcessNo.Text = "工序编号:"
         '
+        'btnOpenDetail
+        '
+        Me.btnOpenDetail.Location = New System.Drawing.Point(655, 293)
+        Me.btnOpenDetail.Name = "btnOpenDetail"
+        Me.btnOpenDetail.Size = New System.Drawing.Size(75, 31)
+        Me.btnOpenDetail.TabIndex = 14
+        Me.btnOpenDetail.Text = "明细维护"
+        Me.btnOpenDetail.UseVisualStyleBackColor = True
+        '
+        'btnOpenPChart
+        '
+        Me.btnOpenPChart.Location = New System.Drawing.Point(655, 336)
+        Me.btnOpenPChart.Name = "btnOpenPChart"
+        Me.btnOpenPChart.Size = New System.Drawing.Size(75, 31)
+        Me.btnOpenPChart.TabIndex = 15
+        Me.btnOpenPChart.Text = "P图维护"
+        Me.btnOpenPChart.UseVisualStyleBackColor = True
+        '
         'L_FmeaMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1529, 720)
+        Me.Controls.Add(Me.btnOpenPChart)
+        Me.Controls.Add(Me.btnOpenDetail)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.dgvMain)
@@ -599,4 +621,6 @@ Partial Class L_FmeaMain
     Friend WithEvents txtProcessNo As Windows.Forms.TextBox
     Friend WithEvents lblProcessNo As Windows.Forms.Label
     Friend WithEvents btnCopyNew As Windows.Forms.Button
+    Friend WithEvents btnOpenDetail As Windows.Forms.Button
+    Friend WithEvents btnOpenPChart As Windows.Forms.Button
 End Class

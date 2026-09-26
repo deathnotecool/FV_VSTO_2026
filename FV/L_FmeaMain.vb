@@ -691,4 +691,47 @@ Public Class L_FmeaMain
     End Sub
 
 
+    ''' <summary>
+    ''' 功能：打开当前工序的明细维护窗体
+    ''' </summary>
+    Private Sub btnOpenDetail_Click(sender As Object, e As EventArgs) Handles btnOpenDetail.Click
+        ' 新增模式下不能打开明细，因为主表还没保存，没有 lngID
+        If blnIsNew Then
+            MessageBox.Show("请先保存主表记录")
+            Return
+        End If
+
+        ' 主表无数据，直接返回
+        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then Return
+
+        ' 取当前行的 lngID，传给明细窗体
+        Dim lngID As Long = CLng(dtMain.Rows(intCurrentRow)("lngID"))
+
+        ' 新建明细窗体，传入主表 ID，模态显示
+        Dim f As New L_FmeaDetail()
+        f.MainID = lngID
+        f.ShowDialog()
+    End Sub
+
+    ''' <summary>
+    ''' 功能：打开当前工序的 P 图维护窗体
+    ''' </summary>
+    Private Sub btnOpenPChart_Click(sender As Object, e As EventArgs) Handles btnOpenPChart.Click
+        ' 新增模式下不能打开，主表还没保存，没有 lngID
+        If blnIsNew Then
+            MessageBox.Show("请先保存主表记录")
+            Return
+        End If
+
+        ' 主表无数据，直接返回
+        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then Return
+
+        ' 取当前行的 lngID，传给 P 图窗体
+        Dim lngID As Long = CLng(dtMain.Rows(intCurrentRow)("lngID"))
+
+        ' 新建 P 图窗体，传入主表 ID，模态显示
+        Dim f As New L_PChart()
+        f.MainID = lngID
+        f.ShowDialog()
+    End Sub
 End Class
