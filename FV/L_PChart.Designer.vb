@@ -44,13 +44,14 @@ Partial Class L_PChart
         Me.lblNoiseFactor = New System.Windows.Forms.Label()
         Me.lblUnexpectedOutput = New System.Windows.Forms.Label()
         Me.lblStatusBar = New System.Windows.Forms.Label()
+        Me.btnImportPChart = New System.Windows.Forms.Button()
         Me.pnlInput.SuspendLayout()
         Me.SuspendLayout()
         '
         'lblMainNo
         '
         Me.lblMainNo.AutoSize = True
-        Me.lblMainNo.Location = New System.Drawing.Point(273, 37)
+        Me.lblMainNo.Location = New System.Drawing.Point(194, 41)
         Me.lblMainNo.Name = "lblMainNo"
         Me.lblMainNo.Size = New System.Drawing.Size(82, 15)
         Me.lblMainNo.TabIndex = 0
@@ -59,7 +60,7 @@ Partial Class L_PChart
         'lblMainName
         '
         Me.lblMainName.AutoSize = True
-        Me.lblMainName.Location = New System.Drawing.Point(548, 37)
+        Me.lblMainName.Location = New System.Drawing.Point(436, 41)
         Me.lblMainName.Name = "lblMainName"
         Me.lblMainName.Size = New System.Drawing.Size(82, 15)
         Me.lblMainName.TabIndex = 0
@@ -67,34 +68,34 @@ Partial Class L_PChart
         '
         'txtMainNo
         '
-        Me.txtMainNo.Location = New System.Drawing.Point(361, 32)
+        Me.txtMainNo.Location = New System.Drawing.Point(268, 36)
         Me.txtMainNo.Name = "txtMainNo"
         Me.txtMainNo.ReadOnly = True
-        Me.txtMainNo.Size = New System.Drawing.Size(168, 25)
+        Me.txtMainNo.Size = New System.Drawing.Size(173, 25)
         Me.txtMainNo.TabIndex = 1
         '
         'txtMainName
         '
-        Me.txtMainName.Location = New System.Drawing.Point(636, 32)
+        Me.txtMainName.Location = New System.Drawing.Point(524, 36)
         Me.txtMainName.Name = "txtMainName"
         Me.txtMainName.ReadOnly = True
-        Me.txtMainName.Size = New System.Drawing.Size(168, 25)
+        Me.txtMainName.Size = New System.Drawing.Size(173, 25)
         Me.txtMainName.TabIndex = 1
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(812, 25)
+        Me.btnSave.Location = New System.Drawing.Point(703, 27)
         Me.btnSave.Name = "btnSave"
-        Me.btnSave.Size = New System.Drawing.Size(70, 38)
+        Me.btnSave.Size = New System.Drawing.Size(57, 38)
         Me.btnSave.TabIndex = 2
         Me.btnSave.Text = "保存"
         Me.btnSave.UseVisualStyleBackColor = True
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(888, 25)
+        Me.btnClose.Location = New System.Drawing.Point(766, 27)
         Me.btnClose.Name = "btnClose"
-        Me.btnClose.Size = New System.Drawing.Size(81, 38)
+        Me.btnClose.Size = New System.Drawing.Size(57, 38)
         Me.btnClose.TabIndex = 2
         Me.btnClose.Text = "关闭"
         Me.btnClose.UseVisualStyleBackColor = True
@@ -267,18 +268,28 @@ Partial Class L_PChart
         'lblStatusBar
         '
         Me.lblStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.lblStatusBar.Location = New System.Drawing.Point(12, 27)
+        Me.lblStatusBar.Location = New System.Drawing.Point(12, 33)
         Me.lblStatusBar.Name = "lblStatusBar"
-        Me.lblStatusBar.Size = New System.Drawing.Size(241, 31)
+        Me.lblStatusBar.Size = New System.Drawing.Size(176, 31)
         Me.lblStatusBar.TabIndex = 22
         Me.lblStatusBar.Text = "                         "
         Me.lblStatusBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'btnImportPChart
+        '
+        Me.btnImportPChart.Location = New System.Drawing.Point(828, 27)
+        Me.btnImportPChart.Name = "btnImportPChart"
+        Me.btnImportPChart.Size = New System.Drawing.Size(141, 38)
+        Me.btnImportPChart.TabIndex = 23
+        Me.btnImportPChart.Text = "从Excel导入P图"
+        Me.btnImportPChart.UseVisualStyleBackColor = True
         '
         'L_PChart
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(981, 1055)
+        Me.Controls.Add(Me.btnImportPChart)
         Me.Controls.Add(Me.lblStatusBar)
         Me.Controls.Add(Me.pnlInput)
         Me.Controls.Add(Me.btnClose)
@@ -318,4 +329,5 @@ Partial Class L_PChart
     Friend WithEvents lblNoiseFactor As Windows.Forms.Label
     Friend WithEvents lblUnexpectedOutput As Windows.Forms.Label
     Friend WithEvents lblRemark As Windows.Forms.Label
+    Friend WithEvents btnImportPChart As Windows.Forms.Button
 End Class

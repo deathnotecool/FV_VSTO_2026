@@ -1,13 +1,21 @@
 ﻿Imports System.Data.OleDb
 Imports System.Data
 Imports System.Windows.Forms
-
+Imports System.Drawing
+Imports System.Diagnostics
 ''' <summary>
 ''' 功能：FMEA 失效模式明细维护窗体
 ''' </summary>
 Public Class L_FmeaDetail
 
     ' ========== 窗体级变量 ==========
+
+    ''' <summary>
+    ''' 功能:图片路径
+    ''' </summary>
+    Private strImagePath As String = ""
+    Private strPicDir As String = "\\192.168.3.250\Erpupgrade\王飞共享体系资料\1 Pictures\FMEA_Pictures\FMEA_Detail\"
+
 
     ''' <summary>
     ''' 功能：当前主表 ID，由主窗体传入
@@ -178,7 +186,6 @@ Public Class L_FmeaDetail
         txtFailureModeName.Text = If(IsDBNull(dr("strFailureModeName")), "", dr("strFailureModeName").ToString())
         txtProductChar.Text = If(IsDBNull(dr("strProductChar")), "", dr("strProductChar").ToString())
         txtProcessChar.Text = If(IsDBNull(dr("strProcessChar")), "", dr("strProcessChar").ToString())
-
         txtFailureEffect.Text = If(IsDBNull(dr("memFailureEffect")), "", dr("memFailureEffect").ToString())
         txtFailureCause.Text = If(IsDBNull(dr("memFailureCause")), "", dr("memFailureCause").ToString())
         txtPrevention.Text = If(IsDBNull(dr("memPrevention")), "", dr("memPrevention").ToString())
@@ -191,15 +198,17 @@ Public Class L_FmeaDetail
         txtDetailOrder.Text = If(IsDBNull(dr("lngProcessOrder")), "0", dr("lngProcessOrder").ToString())
         txtRemark.Text = If(IsDBNull(dr("memRemark")), "", dr("memRemark").ToString())
 
-        ' 非新增模式：编码只读
         cboFailureModeNo.Enabled = blnIsNew
 
-        ' 同步表格高亮
         If dgvDetail.Rows.Count > intCurrentRow Then
             dgvDetail.ClearSelection()
             dgvDetail.Rows(intCurrentRow).Selected = True
         End If
 
+
+        ' 显示图片
+        strImagePath = If(IsDBNull(dr("strImagePath")), "", dr("strImagePath").ToString())
+        ShowImage(strImagePath)
         lblStatusBar.Text = "当前第 " & (intCurrentRow + 1) & " 条 / 共 " & dtDetail.Rows.Count & " 条"
     End Sub
 
@@ -222,7 +231,12 @@ Public Class L_FmeaDetail
         txtRemark.Text = ""
         txtProductChar.Text = ""
         txtProcessChar.Text = ""
-
+        strImagePath = ""
+        If picImage.Image IsNot Nothing Then
+            picImage.Image.Dispose()
+            picImage.Image = Nothing
+        End If
+        lblImagePath.Text = "无图片"
 
         cboFailureModeNo.Enabled = True
         lblStatusBar.Text = "新增模式，请填写后保存"
@@ -289,11 +303,27 @@ Public Class L_FmeaDetail
     End Sub
 
     ''' <summary>
+    ''' 功能：按失效模式编码查找 dtDetail 中的行号，找不到返回 -1
+    ''' </summary>
+    Private Function FindRowByModeNo(ByVal strNo As String) As Integer
+        For i As Integer = 0 To dtDetail.Rows.Count - 1
+            If dtDetail.Rows(i)("strFailureModeNo").ToString() = strNo Then Return i
+        Next
+        Return -1
+    End Function
+
+    ''' <summary>
     ''' 功能：保存按钮，校验后 INSERT 或 UPDATE
     ''' </summary>
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
         Try
             If Not ValidateInput() Then Return
+
+            ' 先记下当前选中的失效模式编码，保存后定位用
+            Dim strNo As String = ""
+            If cboFailureModeNo.Text.Contains("|") Then
+                strNo = cboFailureModeNo.Text.Split("|"c)(0).Trim()
+            End If
 
             If blnIsNew Then
                 InsertRecord()
@@ -303,9 +333,17 @@ Public Class L_FmeaDetail
 
             LoadData()
             BindGrid()
+
+            ' 按刚保存的编码定位
+            If Not String.IsNullOrEmpty(strNo) Then
+                intCurrentRow = FindRowByModeNo(strNo)
+            End If
+            If intCurrentRow < 0 Then intCurrentRow = 0
             If dtDetail.Rows.Count > 0 Then
-                intCurrentRow = dtDetail.Rows.Count - 1
                 ShowRecord()
+            Else
+                ClearControls()
+                blnIsNew = True
             End If
             blnIsNew = False
             lblStatusBar.Text = "保存成功"
@@ -382,10 +420,16 @@ Public Class L_FmeaDetail
     End Sub
 
     ''' <summary>
-    ''' 功能：点表格行，上方控件显示该行详情
+    ''' 功能：点表格行，上方控件显示该行详情（退出新增模式）
     ''' </summary>
     Private Sub dgvDetail_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvDetail.CellClick
+
+
         If e.RowIndex < 0 Then Return
+
+        ' 从新增模式切回浏览模式
+        blnIsNew = False
+
         intCurrentRow = e.RowIndex
         ShowRecord()
     End Sub
@@ -393,7 +437,7 @@ Public Class L_FmeaDetail
     ''' <summary>
     ''' 功能：失效模式编码改变时，自动带出名称
     ''' </summary>
-    Private Sub cboFailureModeNo_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboFailureModeNo.SelectedIndexChanged
+    Private Sub cboFailureModeNo_SelectedIndexChanged(sender As Object, e As EventArgs)
         If cboFailureModeNo.SelectedIndex < 0 Then Return
         Dim strNo As String = GetModeNoFromCombo()
         If strNo = "" Then Return
@@ -460,15 +504,15 @@ Public Class L_FmeaDetail
         End If
     End Sub
 
-    Private Sub txtSeverity_TextChanged(sender As Object, e As EventArgs) Handles txtSeverity.TextChanged
+    Private Sub txtSeverity_TextChanged(sender As Object, e As EventArgs)
         CalcRPN()
     End Sub
 
-    Private Sub txtOccurrence_TextChanged(sender As Object, e As EventArgs) Handles txtOccurrence.TextChanged
+    Private Sub txtOccurrence_TextChanged(sender As Object, e As EventArgs)
         CalcRPN()
     End Sub
 
-    Private Sub txtDetectionScore_TextChanged(sender As Object, e As EventArgs) Handles txtDetectionScore.TextChanged
+    Private Sub txtDetectionScore_TextChanged(sender As Object, e As EventArgs)
         CalcRPN()
     End Sub
 
@@ -479,18 +523,31 @@ Public Class L_FmeaDetail
     ''' </summary>
     Private Sub InsertRecord()
         SyncLock WriteLock
+            ' 从 "FM-001 | 尺寸超差" 拆出编号和名称
+            Dim arr As String() = cboFailureModeNo.Text.Split("|"c)
+            Dim strNo As String = arr(0).Trim()
+            Dim strName As String = If(arr.Length > 1, arr(1).Trim(), "")
+
+            'Dim strSql As String = "INSERT INTO tblFMEA_Detail " &
+            '"(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
+            '"memFailureEffect, memFailureCause, memPrevention, memDetection, " &
+            '"intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
+            '"lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark) " &
+            '"VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
             Dim strSql As String = "INSERT INTO tblFMEA_Detail " &
-            "(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
-            "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
-            "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
-            "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark) " &
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    "(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
+    "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
+    "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
+    "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark, strImagePath) " &
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
 
             Using conn As OleDbConnection = GetConnection()
                 Using cmd As New OleDbCommand(strSql, conn)
                     cmd.Parameters.Add("p1", OleDbType.Integer).Value = MainID
-                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = cboFailureModeNo.Text.Trim()
-                    cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = txtFailureModeName.Text.Trim()
+                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strNo
+                    cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = strName
                     cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = txtProductChar.Text.Trim()
                     cmd.Parameters.Add("p5", OleDbType.VarWChar).Value = txtProcessChar.Text.Trim()
                     cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
@@ -506,6 +563,8 @@ Public Class L_FmeaDetail
                     cmd.Parameters.Add("p16", OleDbType.Date).Value = Now
                     cmd.Parameters.Add("p17", OleDbType.Date).Value = Now
                     cmd.Parameters.Add("p18", OleDbType.LongVarWChar).Value = txtRemark.Text
+                    cmd.Parameters.Add("p19", OleDbType.VarWChar).Value = If(strImagePath Is Nothing, "", strImagePath)
+
                     conn.Open()
                     cmd.ExecuteNonQuery()
                 End Using
@@ -521,18 +580,24 @@ Public Class L_FmeaDetail
         If intCurrentRow < 0 OrElse intCurrentRow >= dtDetail.Rows.Count Then Return
 
         SyncLock WriteLock
+            ' 从 "FM-001 | 尺寸超差" 拆出编号和名称
+            Dim arr As String() = cboFailureModeNo.Text.Split("|"c)
+            Dim strNo As String = arr(0).Trim()
+            Dim strName As String = If(arr.Length > 1, arr(1).Trim(), "")
+
             Dim lngID As Long = CLng(dtDetail.Rows(intCurrentRow)("lngID"))
+
             Dim strSql As String = "UPDATE tblFMEA_Detail SET " &
             "strFailureModeNo=?, strFailureModeName=?, strProductChar=?, strProcessChar=?, " &
             "memFailureEffect=?, memFailureCause=?, memPrevention=?, memDetection=?, " &
             "intSeverity=?, intOccurrence=?, intDetection=?, intRPN=?, strAP=?, " &
-            "lngProcessOrder=?, dtmUpdateTime=?, memRemark=? " &
+            "lngProcessOrder=?, dtmUpdateTime=?, memRemark=?, strImagePath=? " &
             "WHERE lngID=?"
 
             Using conn As OleDbConnection = GetConnection()
                 Using cmd As New OleDbCommand(strSql, conn)
-                    cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = cboFailureModeNo.Text.Trim()
-                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = txtFailureModeName.Text.Trim()
+                    cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNo
+                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strName
                     cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = txtProductChar.Text.Trim()
                     cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = txtProcessChar.Text.Trim()
                     cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
@@ -547,7 +612,8 @@ Public Class L_FmeaDetail
                     cmd.Parameters.Add("p14", OleDbType.Integer).Value = CInt(txtDetailOrder.Text.Trim())
                     cmd.Parameters.Add("p15", OleDbType.Date).Value = Now
                     cmd.Parameters.Add("p16", OleDbType.LongVarWChar).Value = txtRemark.Text
-                    cmd.Parameters.Add("p17", OleDbType.Integer).Value = lngID
+                    cmd.Parameters.Add("p17", OleDbType.VarWChar).Value = If(strImagePath Is Nothing, "", strImagePath)
+                    cmd.Parameters.Add("p18", OleDbType.Integer).Value = lngID
                     conn.Open()
                     cmd.ExecuteNonQuery()
                 End Using
@@ -568,7 +634,7 @@ Public Class L_FmeaDetail
     End Function
 
     ''' <summary>
-    ''' 功能：按编码在下拉框中定位选中项
+    ''' 功能：按失效模式编码选中下拉框
     ''' </summary>
     Private Sub SetComboByModeNo(ByVal strNo As String)
         For i As Integer = 0 To cboFailureModeNo.Items.Count - 1
@@ -582,5 +648,328 @@ Public Class L_FmeaDetail
         cboFailureModeNo.SelectedIndex = -1
     End Sub
 
+    ''' <summary>
+    ''' 功能：按名称查失效模式编号（精确→去空格→模糊）
+    ''' </summary>
+    Private Function GetModeNoByName(ByVal strName As String) As String
+        Dim strClean As String = strName.Trim().Replace("　", "").Replace(" ", "")
+
+        Using conn As OleDbConnection = GetConnection()
+            conn.Open()
+
+            Using cmd As New OleDbCommand("SELECT strFailureModeNo, strFailureModeName FROM tblFailureModeDict WHERE blnIsDeleted=False", conn)
+                Using rd As OleDbDataReader = cmd.ExecuteReader()
+                    Dim strFuzzyNo As String = ""
+                    Dim strFuzzyName As String = ""
+
+                    While rd.Read()
+                        Dim strDbNo As String = rd("strFailureModeNo").ToString()
+                        Dim strDbName As String = rd("strFailureModeName").ToString()
+                        Dim strDbClean As String = strDbName.Trim().Replace("　", "").Replace(" ", "")
+
+                        If strDbClean = strClean Then
+                            Return strDbNo
+                        End If
+
+                        If strFuzzyNo = "" Then
+                            If strDbClean.Contains(strClean) OrElse strClean.Contains(strDbClean) Then
+                                strFuzzyNo = strDbNo
+                                strFuzzyName = strDbName
+                            End If
+                        End If
+                    End While
+
+                    If strFuzzyNo <> "" Then
+                        If MessageBox.Show("Excel 里的名称：" & strName & vbCrLf &
+                                           "模糊匹配到：" & strFuzzyNo & " | " & strFuzzyName & vbCrLf &
+                                           "是否使用？", "模糊匹配", MessageBoxButtons.YesNo) = DialogResult.Yes Then
+                            Return strFuzzyNo
+                        End If
+                    End If
+                End Using
+            End Using
+        End Using
+
+        Return ""
+    End Function
+
+    ''' <summary>
+    ''' 功能：安全转数字，空或非数字返回 0
+    ''' </summary>
+    Private Function ParseInt(ByVal str As String) As Integer
+        Dim intVal As Integer = 0
+        Integer.TryParse(str, intVal)
+        Return intVal
+    End Function
+
+    ''' <summary>
+    ''' 功能：按 S/O/D 查 AP 等级（区间匹配）
+    ''' </summary>
+    Private Function GetAPBySOD(ByVal intS As Integer, ByVal intO As Integer, ByVal intD As Integer) As String
+        Using conn As OleDbConnection = GetConnection()
+            Dim strSql As String = "SELECT strAP FROM tblAP_Rule " &
+            "WHERE blnIsDeleted=False " &
+            "AND intSMin<=? AND intSMax>=? " &
+            "AND intOMin<=? AND intOMax>=? " &
+            "AND intDMin<=? AND intDMax>=?"
+            Using cmd As New OleDbCommand(strSql, conn)
+                cmd.Parameters.Add("p1", OleDbType.Integer).Value = intS
+                cmd.Parameters.Add("p2", OleDbType.Integer).Value = intS
+                cmd.Parameters.Add("p3", OleDbType.Integer).Value = intO
+                cmd.Parameters.Add("p4", OleDbType.Integer).Value = intO
+                cmd.Parameters.Add("p5", OleDbType.Integer).Value = intD
+                cmd.Parameters.Add("p6", OleDbType.Integer).Value = intD
+                conn.Open()
+                Dim result As Object = cmd.ExecuteScalar()
+                If result Is Nothing Then Return ""
+                If IsDBNull(result) Then Return ""
+                Return result.ToString()
+            End Using
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' 功能：安全读取 Excel 单元格文本
+    ''' </summary>
+    Private Function GetCellText(ByVal ws As Excel.Worksheet, ByVal strAddr As String) As String
+        Dim rng As Excel.Range = ws.Range(strAddr)
+        If rng.Value Is Nothing Then Return ""
+        Return rng.Value.ToString().Trim()
+    End Function
+
+    ''' <summary>
+    ''' 功能：从 Excel 选中区域导入 FMEA 明细
+    ''' </summary>
+    Private Sub ImportDetailFromExcel()
+        If MainID = 0 Then
+            MessageBox.Show("请先选择工序")
+            Return
+        End If
+
+        ' 弹出输入框，让用户选区域，默认定位当前选区
+        Dim rngInput As Excel.Range = Nothing
+        Try
+            Dim strDefault As String = ""
+            If xlapp.Selection IsNot Nothing Then
+                Try
+                    strDefault = xlapp.Selection.Address
+                Catch
+                    strDefault = ""
+                End Try
+            End If
+
+            Dim obj As Object = xlapp.InputBox("请用鼠标选择要导入的区域，然后点确定", "选择导入区域", strDefault, Type:=8)
+            If obj Is Nothing Then Return
+            rngInput = CType(obj, Excel.Range)
+        Catch
+            Return
+        End Try
+
+        If rngInput Is Nothing Then Return
+
+        If rngInput.Rows.Count < 1 Then
+            MessageBox.Show("请至少选择一行")
+            Return
+        End If
+
+        If MessageBox.Show("即将导入 " & rngInput.Rows.Count & " 行，是否继续？", "确认", MessageBoxButtons.YesNo) <> DialogResult.Yes Then
+            Return
+        End If
+
+        Dim ws As Excel.Worksheet = rngInput.Worksheet
+        Dim intStartRow As Integer = rngInput.Row
+        Dim intRowCount As Integer = rngInput.Rows.Count
+        Dim intSuccess As Integer = 0
+        Dim intFail As Integer = 0
+
+        For i As Integer = 0 To intRowCount - 1
+            Dim intRow As Integer = intStartRow + i
+
+            Dim strProductChar As String = GetCellText(ws, "C" & intRow)
+            Dim strProcessChar As String = GetCellText(ws, "D" & intRow)
+            Dim strModeName As String = GetCellText(ws, "E" & intRow)
+            Dim strEffect As String = GetCellText(ws, "F" & intRow)
+            Dim intS As Integer = ParseInt(GetCellText(ws, "G" & intRow))
+            Dim strCause As String = GetCellText(ws, "H" & intRow)
+            Dim strPrevention As String = GetCellText(ws, "I" & intRow)
+            Dim intO As Integer = ParseInt(GetCellText(ws, "J" & intRow))
+            Dim strDetection As String = GetCellText(ws, "K" & intRow)
+            Dim intD As Integer = ParseInt(GetCellText(ws, "L" & intRow))
+
+            If strProductChar Is Nothing Then strProductChar = ""
+            If strProcessChar Is Nothing Then strProcessChar = ""
+            If strModeName Is Nothing Then strModeName = ""
+            If strEffect Is Nothing Then strEffect = ""
+            If strCause Is Nothing Then strCause = ""
+            If strPrevention Is Nothing Then strPrevention = ""
+            If strDetection Is Nothing Then strDetection = ""
+
+            If strModeName = "" Then
+                intFail += 1
+                Continue For
+            End If
+
+            Dim strModeNo As String = GetModeNoByName(strModeName)
+            If strModeNo Is Nothing Then strModeNo = ""
+            If strModeNo = "" Then
+                intFail += 1
+                Continue For
+            End If
+
+            Dim intRPN As Integer = intS * intO * intD
+            Dim strAP As String = GetAPBySOD(intS, intO, intD)
+            If strAP Is Nothing Then strAP = ""
+
+            SyncLock WriteLock
+                Using conn As OleDbConnection = GetConnection()
+                    conn.Open()
+                    Dim strSql As String = "INSERT INTO tblFMEA_Detail " &
+                    "(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
+                    "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
+                    "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
+                    "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark) " &
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                    Using cmd As New OleDbCommand(strSql, conn)
+                        cmd.Parameters.Add("p1", OleDbType.Integer).Value = MainID
+                        cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strModeNo
+                        cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = strModeName
+                        cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = strProductChar
+                        cmd.Parameters.Add("p5", OleDbType.VarWChar).Value = strProcessChar
+                        cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = strEffect
+                        cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = strCause
+                        cmd.Parameters.Add("p8", OleDbType.LongVarWChar).Value = strPrevention
+                        cmd.Parameters.Add("p9", OleDbType.LongVarWChar).Value = strDetection
+                        cmd.Parameters.Add("p10", OleDbType.Integer).Value = intS
+                        cmd.Parameters.Add("p11", OleDbType.Integer).Value = intO
+                        cmd.Parameters.Add("p12", OleDbType.Integer).Value = intD
+                        cmd.Parameters.Add("p13", OleDbType.Integer).Value = intRPN
+                        cmd.Parameters.Add("p14", OleDbType.VarWChar).Value = strAP
+                        cmd.Parameters.Add("p15", OleDbType.Integer).Value = 0
+                        cmd.Parameters.Add("p16", OleDbType.Date).Value = Now
+                        cmd.Parameters.Add("p17", OleDbType.Date).Value = Now
+                        cmd.Parameters.Add("p18", OleDbType.LongVarWChar).Value = ""
+                        cmd.ExecuteNonQuery()
+                    End Using
+                End Using
+            End SyncLock
+
+            intSuccess += 1
+        Next
+
+        LoadData()
+        BindGrid()
+        lblStatusBar.Text = "导入完成，成功 " & intSuccess & " 条，失败 " & intFail & " 条"
+        MessageBox.Show("导入完成" & vbCrLf & "成功：" & intSuccess & " 条" & vbCrLf & "失败：" & intFail & " 条")
+    End Sub
+    ''' <summary>
+    ''' 功能：从 Excel 导入明细按钮
+    ''' </summary>
+    Private Sub btnImportDetail_Click(sender As Object, e As EventArgs) Handles btnImportDetail.Click
+        Try
+            ImportDetailFromExcel()
+        Catch ex As Exception
+            MessageBox.Show("导入失败：" & ex.Message & vbCrLf & vbCrLf & ex.StackTrace)
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' 功能：根据路径显示图片，空则清空
+    ''' </summary>
+    Private Sub ShowImage(ByVal strPath As String)
+        ' 先释放旧图，防内存泄漏
+        If picImage.Image IsNot Nothing Then
+            picImage.Image.Dispose()
+            picImage.Image = Nothing
+        End If
+
+        If String.IsNullOrEmpty(strPath) Then
+            lblImagePath.Text = "无图片"
+            Return
+        End If
+
+        lblImagePath.Text = System.IO.Path.GetFileName(strPath)
+
+        Try
+            If System.IO.File.Exists(strPath) Then
+                ' 用 FileStream 读，不锁文件
+                Using fs As New System.IO.FileStream(strPath, System.IO.FileMode.Open, System.IO.FileAccess.Read)
+                    picImage.Image = Image.FromStream(fs)
+                End Using
+            Else
+                lblImagePath.Text = "图片不存在：" & System.IO.Path.GetFileName(strPath)
+            End If
+        Catch ex As Exception
+            lblImagePath.Text = "图片加载失败"
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' 功能：点图片，用系统默认程序打开大图
+    ''' </summary>
+    Private Sub picImage_Click(sender As Object, e As EventArgs) Handles picImage.Click
+        If String.IsNullOrEmpty(strImagePath) Then Return
+
+        If Not System.IO.File.Exists(strImagePath) Then
+            MessageBox.Show("图片不存在：" & strImagePath)
+            Return
+        End If
+
+        Try
+            Process.Start(strImagePath)
+        Catch ex As Exception
+            MessageBox.Show("打开图片失败：" & ex.Message)
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' 功能：选图片，复制到共享盘并显示
+    ''' </summary>
+    Private Sub btnPickImage_Click(sender As Object, e As EventArgs) Handles btnPickImage.Click
+        Using ofd As New OpenFileDialog()
+            ofd.Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp"
+            ofd.Title = "选择失效图片"
+            If ofd.ShowDialog() <> DialogResult.OK Then Return
+
+            Try
+                ' 目录不存在就建
+                If Not System.IO.Directory.Exists(strPicDir) Then
+                    System.IO.Directory.CreateDirectory(strPicDir)
+                End If
+
+                ' 自动命名：失效模式编码_日期_序号.jpg
+                Dim strModeNo As String = ""
+                If cboFailureModeNo.Text.Contains("|") Then
+                    strModeNo = cboFailureModeNo.Text.Split("|"c)(0).Trim()
+                End If
+                Dim strDate As String = DateTime.Now.ToString("yyyyMMdd")
+                Dim strExt As String = System.IO.Path.GetExtension(ofd.FileName)
+
+                ' 找不重名的序号
+                Dim intSeq As Integer = 1
+                Dim strNewFile As String = ""
+                Do
+                    strNewFile = strPicDir & strModeNo & "_" & strDate & "_" & intSeq.ToString("00") & strExt
+                    intSeq += 1
+                Loop While System.IO.File.Exists(strNewFile)
+
+                ' 复制文件
+                System.IO.File.Copy(ofd.FileName, strNewFile, False)
+
+                ' 存路径、显示
+                strImagePath = strNewFile
+                ShowImage(strImagePath)
+            Catch ex As Exception
+                MessageBox.Show("选图片失败：" & ex.Message)
+            End Try
+        End Using
+    End Sub
+
+    ''' <summary>
+    ''' 功能：清除当前图片（只清路径，不删文件）
+    ''' </summary>
+    Private Sub btnClearImage_Click(sender As Object, e As EventArgs) Handles btnClearImage.Click
+        strImagePath = ""
+        ShowImage("")
+    End Sub
 
 End Class
