@@ -89,7 +89,6 @@
         Me.btn索赔信息 = Me.Factory.CreateRibbonButton
         Me.btn索赔信息查询与导出 = Me.Factory.CreateRibbonButton
         Me.btnGetInform = Me.Factory.CreateRibbonButton
-        Me.btnOpenFmeaMain = Me.Factory.CreateRibbonButton
         Me.Menu12 = Me.Factory.CreateRibbonMenu
         Me.btn电能 = Me.Factory.CreateRibbonButton
         Me.Menu17 = Me.Factory.CreateRibbonMenu
@@ -102,6 +101,7 @@
         Me.btnSearchInspect = Me.Factory.CreateRibbonButton
         Me.btnCost = Me.Factory.CreateRibbonButton
         Me.Button2 = Me.Factory.CreateRibbonButton
+        Me.btnOpenFmeaMain = Me.Factory.CreateRibbonButton
         Me.Group2 = Me.Factory.CreateRibbonGroup
         Me.Menu4 = Me.Factory.CreateRibbonMenu
         Me.btnMergeRange = Me.Factory.CreateRibbonButton
@@ -210,6 +210,7 @@
         Me.Group3.Items.Add(Me.Menu12)
         Me.Group3.Items.Add(Me.Menu17)
         Me.Group3.Items.Add(Me.Menu16)
+        Me.Group3.Items.Add(Me.btnOpenFmeaMain)
         Me.Group3.Label = "F之数据库"
         Me.Group3.Name = "Group3"
         '
@@ -503,8 +504,7 @@
         Me.Menu14.Items.Add(Me.btn索赔信息)
         Me.Menu14.Items.Add(Me.btn索赔信息查询与导出)
         Me.Menu14.Items.Add(Me.btnGetInform)
-        Me.Menu14.Items.Add(Me.btnOpenFmeaMain)
-        Me.Menu14.Label = "失效管理系统"
+        Me.Menu14.Label = "不良品管理系统"
         Me.Menu14.Name = "Menu14"
         Me.Menu14.OfficeImageId = "FileStartWorkflow"
         Me.Menu14.ShowImage = True
@@ -552,13 +552,6 @@
         Me.btnGetInform.ScreenTip = "GN002_信息提取"
         Me.btnGetInform.ShowImage = True
         Me.btnGetInform.SuperTip = "快速 提取发生日期,不良现象及原因,管理编号,不良数量"
-        '
-        'btnOpenFmeaMain
-        '
-        Me.btnOpenFmeaMain.Image = CType(resources.GetObject("btnOpenFmeaMain.Image"), System.Drawing.Image)
-        Me.btnOpenFmeaMain.Label = "FMEA工序维护"
-        Me.btnOpenFmeaMain.Name = "btnOpenFmeaMain"
-        Me.btnOpenFmeaMain.ShowImage = True
         '
         'Menu12
         '
@@ -662,6 +655,14 @@
         Me.Button2.Label = "质量费用查询"
         Me.Button2.Name = "Button2"
         Me.Button2.ShowImage = True
+        '
+        'btnOpenFmeaMain
+        '
+        Me.btnOpenFmeaMain.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
+        Me.btnOpenFmeaMain.Image = CType(resources.GetObject("btnOpenFmeaMain.Image"), System.Drawing.Image)
+        Me.btnOpenFmeaMain.Label = "FMEA工序维护"
+        Me.btnOpenFmeaMain.Name = "btnOpenFmeaMain"
+        Me.btnOpenFmeaMain.ShowImage = True
         '
         'Group2
         '

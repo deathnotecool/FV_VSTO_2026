@@ -11,6 +11,11 @@ Public Class L_FmeaDetail
     ' ========== 窗体级变量 ==========
 
     ''' <summary>
+    ''' 功能：标记字典窗体是否已打开，防多开
+    ''' </summary>
+    Private blnDictOpen As Boolean = False
+
+    ''' <summary>
     ''' 功能:图片路径
     ''' </summary>
     Private strImagePath As String = ""
@@ -331,6 +336,8 @@ Public Class L_FmeaDetail
                 UpdateRecord()
             End If
 
+
+            RefreshFailureModeCombo()
             LoadData()
             BindGrid()
 
@@ -419,17 +426,11 @@ Public Class L_FmeaDetail
         Me.Close()
     End Sub
 
-    ''' <summary>
-    ''' 功能：点表格行，上方控件显示该行详情（退出新增模式）
-    ''' </summary>
     Private Sub dgvDetail_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvDetail.CellClick
-
-
         If e.RowIndex < 0 Then Return
 
-        ' 从新增模式切回浏览模式
         blnIsNew = False
-
+        RefreshFailureModeCombo()
         intCurrentRow = e.RowIndex
         ShowRecord()
     End Sub
@@ -437,7 +438,7 @@ Public Class L_FmeaDetail
     ''' <summary>
     ''' 功能：失效模式编码改变时，自动带出名称
     ''' </summary>
-    Private Sub cboFailureModeNo_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Private Sub cboFailureModeNo_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboFailureModeNo.SelectedIndexChanged
         If cboFailureModeNo.SelectedIndex < 0 Then Return
         Dim strNo As String = GetModeNoFromCombo()
         If strNo = "" Then Return
@@ -746,7 +747,6 @@ Public Class L_FmeaDetail
             Return
         End If
 
-        ' 弹出输入框，让用户选区域，默认定位当前选区
         Dim rngInput As Excel.Range = Nothing
         Try
             Dim strDefault As String = ""
@@ -757,7 +757,6 @@ Public Class L_FmeaDetail
                     strDefault = ""
                 End Try
             End If
-
             Dim obj As Object = xlapp.InputBox("请用鼠标选择要导入的区域，然后点确定", "选择导入区域", strDefault, Type:=8)
             If obj Is Nothing Then Return
             rngInput = CType(obj, Excel.Range)
@@ -766,7 +765,6 @@ Public Class L_FmeaDetail
         End Try
 
         If rngInput Is Nothing Then Return
-
         If rngInput.Rows.Count < 1 Then
             MessageBox.Show("请至少选择一行")
             Return
@@ -781,9 +779,14 @@ Public Class L_FmeaDetail
         Dim intRowCount As Integer = rngInput.Rows.Count
         Dim intSuccess As Integer = 0
         Dim intFail As Integer = 0
+        ' 取当前主表最大顺序号，接着排
+        Dim intMaxOrder As Integer = GetMaxOrderByMain(MainID)
+
 
         For i As Integer = 0 To intRowCount - 1
             Dim intRow As Integer = intStartRow + i
+            ' 顺序号按行号递增，10、20、30
+            Dim intOrder As Integer = intMaxOrder + (i + 1) * 10
 
             Dim strProductChar As String = GetCellText(ws, "C" & intRow)
             Dim strProcessChar As String = GetCellText(ws, "D" & intRow)
@@ -809,11 +812,33 @@ Public Class L_FmeaDetail
                 Continue For
             End If
 
+            ' 匹配编号
             Dim strModeNo As String = GetModeNoByName(strModeName)
             If strModeNo Is Nothing Then strModeNo = ""
+
+            ' 没匹配到，问是否新建
             If strModeNo = "" Then
-                intFail += 1
-                Continue For
+                Dim dr As DialogResult = MessageBox.Show("字典里找不到失效模式：" & strModeName & vbCrLf & vbCrLf &
+                                                     "是否新建一条字典记录？", "新建失效模式", MessageBoxButtons.YesNoCancel)
+                If dr = DialogResult.Cancel Then
+                    Exit For
+                ElseIf dr = DialogResult.Yes Then
+                    strModeNo = GetNextModeNo()
+                    InsertModeDict(strModeNo, strModeName)
+                Else
+                    intFail += 1
+                    Continue For
+                End If
+            Else
+                ' 匹配到了，检查名称是否一致
+                Dim strDbName As String = GetModeNameByNo(strModeNo)
+                If strDbName <> strModeName Then
+                    If MessageBox.Show("字典里该编号的名称：" & strDbName & vbCrLf &
+                                   "Excel 里的名称：" & strModeName & vbCrLf & vbCrLf &
+                                   "是否用 Excel 的名称覆盖字典？", "名称不一致", MessageBoxButtons.YesNo) = DialogResult.Yes Then
+                        UpdateModeName(strModeNo, strModeName)
+                    End If
+                End If
             End If
 
             Dim intRPN As Integer = intS * intO * intD
@@ -827,8 +852,8 @@ Public Class L_FmeaDetail
                     "(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
                     "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
                     "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
-                    "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark) " &
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                    "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark, strImagePath) " &
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
                     Using cmd As New OleDbCommand(strSql, conn)
                         cmd.Parameters.Add("p1", OleDbType.Integer).Value = MainID
                         cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strModeNo
@@ -844,10 +869,11 @@ Public Class L_FmeaDetail
                         cmd.Parameters.Add("p12", OleDbType.Integer).Value = intD
                         cmd.Parameters.Add("p13", OleDbType.Integer).Value = intRPN
                         cmd.Parameters.Add("p14", OleDbType.VarWChar).Value = strAP
-                        cmd.Parameters.Add("p15", OleDbType.Integer).Value = 0
+                        cmd.Parameters.Add("p15", OleDbType.Integer).Value = intOrder
                         cmd.Parameters.Add("p16", OleDbType.Date).Value = Now
                         cmd.Parameters.Add("p17", OleDbType.Date).Value = Now
                         cmd.Parameters.Add("p18", OleDbType.LongVarWChar).Value = ""
+                        cmd.Parameters.Add("p19", OleDbType.VarWChar).Value = ""
                         cmd.ExecuteNonQuery()
                     End Using
                 End Using
@@ -855,6 +881,9 @@ Public Class L_FmeaDetail
 
             intSuccess += 1
         Next
+
+        ' 刷新下拉框
+        RefreshFailureModeCombo()
 
         LoadData()
         BindGrid()
@@ -970,6 +999,130 @@ Public Class L_FmeaDetail
     Private Sub btnClearImage_Click(sender As Object, e As EventArgs) Handles btnClearImage.Click
         strImagePath = ""
         ShowImage("")
+    End Sub
+
+
+    ''' <summary>
+    ''' 功能：按编号查失效模式名称
+    ''' </summary>
+    Private Function GetModeNameByNo(ByVal strNo As String) As String
+        Using conn As OleDbConnection = GetConnection()
+            Using cmd As New OleDbCommand("SELECT strFailureModeName FROM tblFailureModeDict WHERE strFailureModeNo=?", conn)
+                cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNo
+                conn.Open()
+                Dim result As Object = cmd.ExecuteScalar()
+                If result Is Nothing OrElse IsDBNull(result) Then Return ""
+                Return result.ToString()
+            End Using
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' 功能：生成下一个失效模式编号，FM-001 格式
+    ''' </summary>
+    Private Function GetNextModeNo() As String
+        Using conn As OleDbConnection = GetConnection()
+            Using cmd As New OleDbCommand("SELECT MAX(strFailureModeNo) FROM tblFailureModeDict WHERE strFailureModeNo LIKE 'FM-%'", conn)
+                conn.Open()
+                Dim result As Object = cmd.ExecuteScalar()
+                If result Is Nothing OrElse IsDBNull(result) Then
+                    Return "FM-001"
+                End If
+                Dim strMax As String = result.ToString()
+                Dim intNum As Integer = 0
+                Integer.TryParse(strMax.Replace("FM-", ""), intNum)
+                Return "FM-" & (intNum + 1).ToString("000")
+            End Using
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' 功能：新建字典记录
+    ''' </summary>
+    Private Sub InsertModeDict(ByVal strNo As String, ByVal strName As String)
+        SyncLock WriteLock
+            Using conn As OleDbConnection = GetConnection()
+                Using cmd As New OleDbCommand("INSERT INTO tblFailureModeDict (strFailureModeNo, strFailureModeName, lngSortOrder, blnIsDeleted, dtmCreateTime) VALUES (?,?,?,?,?)", conn)
+                    cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNo
+                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strName
+                    cmd.Parameters.Add("p3", OleDbType.Integer).Value = 0
+                    cmd.Parameters.Add("p4", OleDbType.Boolean).Value = False
+                    cmd.Parameters.Add("p5", OleDbType.Date).Value = Now
+                    conn.Open()
+                    cmd.ExecuteNonQuery()
+                End Using
+            End Using
+        End SyncLock
+    End Sub
+
+    ''' <summary>
+    ''' 功能：更新字典表的失效模式名称
+    ''' </summary>
+    Private Sub UpdateModeName(ByVal strNo As String, ByVal strName As String)
+        SyncLock WriteLock
+            Using conn As OleDbConnection = GetConnection()
+                Using cmd As New OleDbCommand("UPDATE tblFailureModeDict SET strFailureModeName=? WHERE strFailureModeNo=?", conn)
+                    cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strName
+                    cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strNo
+                    conn.Open()
+                    cmd.ExecuteNonQuery()
+                End Using
+            End Using
+        End SyncLock
+    End Sub
+
+
+    ''' <summary>
+    ''' 功能：只刷新失效模式编码下拉框
+    ''' </summary>
+    Private Sub RefreshFailureModeCombo()
+        cboFailureModeNo.Items.Clear()
+        Try
+            Using conn As OleDbConnection = GetConnection()
+                Using cmd As New OleDbCommand("SELECT strFailureModeNo, strFailureModeName FROM tblFailureModeDict WHERE blnIsDeleted=False ORDER BY lngSortOrder", conn)
+                    conn.Open()
+                    Using rd As OleDbDataReader = cmd.ExecuteReader()
+                        While rd.Read()
+                            cboFailureModeNo.Items.Add(rd("strFailureModeNo").ToString() & " | " & rd("strFailureModeName").ToString())
+                        End While
+                    End Using
+                End Using
+            End Using
+        Catch ex As Exception
+        End Try
+    End Sub
+    ''' <summary>
+    ''' 功能：取当前主表下明细的最大顺序号
+    ''' </summary>
+    Private Function GetMaxOrderByMain(ByVal lngMainID As Long) As Integer
+        Using conn As OleDbConnection = GetConnection()
+            Using cmd As New OleDbCommand("SELECT MAX(lngProcessOrder) FROM tblFMEA_Detail WHERE lngMainID=?", conn)
+                cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngMainID
+                conn.Open()
+                Dim result As Object = cmd.ExecuteScalar()
+                If result Is Nothing OrElse IsDBNull(result) Then Return 0
+                Return CInt(result)
+            End Using
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' 功能：打开失效模式字典维护窗体（防多开）
+    ''' </summary>
+    Private Sub btnOpenDict_Click(sender As Object, e As EventArgs) Handles btnOpenDict.Click
+        If blnDictOpen Then
+            MessageBox.Show("字典窗体已打开")
+            Return
+        End If
+
+        Dim f As New L_FailureModeDict()
+        AddHandler f.FormClosed, Sub()
+                                     blnDictOpen = False
+                                     ' 关闭后刷新下拉框，新条目能选到
+                                     RefreshFailureModeCombo()
+                                 End Sub
+        blnDictOpen = True
+        f.Show()
     End Sub
 
 End Class

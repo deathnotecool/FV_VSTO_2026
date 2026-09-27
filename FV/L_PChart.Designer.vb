@@ -87,7 +87,7 @@ Partial Class L_PChart
         Me.btnSave.Location = New System.Drawing.Point(703, 27)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(57, 38)
-        Me.btnSave.TabIndex = 2
+        Me.btnSave.TabIndex = 8
         Me.btnSave.Text = "保存"
         Me.btnSave.UseVisualStyleBackColor = True
         '
@@ -179,7 +179,7 @@ Partial Class L_PChart
         Me.txtRemark.Name = "txtRemark"
         Me.txtRemark.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtRemark.Size = New System.Drawing.Size(835, 133)
-        Me.txtRemark.TabIndex = 15
+        Me.txtRemark.TabIndex = 7
         '
         'txtNoiseFactor
         '
@@ -190,7 +190,7 @@ Partial Class L_PChart
         Me.txtNoiseFactor.Name = "txtNoiseFactor"
         Me.txtNoiseFactor.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtNoiseFactor.Size = New System.Drawing.Size(835, 133)
-        Me.txtNoiseFactor.TabIndex = 16
+        Me.txtNoiseFactor.TabIndex = 6
         '
         'txtUnexpectedOutput
         '
@@ -201,7 +201,7 @@ Partial Class L_PChart
         Me.txtUnexpectedOutput.Name = "txtUnexpectedOutput"
         Me.txtUnexpectedOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtUnexpectedOutput.Size = New System.Drawing.Size(835, 133)
-        Me.txtUnexpectedOutput.TabIndex = 17
+        Me.txtUnexpectedOutput.TabIndex = 5
         '
         'txtExpectedOutput
         '
@@ -212,7 +212,7 @@ Partial Class L_PChart
         Me.txtExpectedOutput.Name = "txtExpectedOutput"
         Me.txtExpectedOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtExpectedOutput.Size = New System.Drawing.Size(835, 133)
-        Me.txtExpectedOutput.TabIndex = 18
+        Me.txtExpectedOutput.TabIndex = 4
         '
         'txtSystemFunction
         '
@@ -223,7 +223,7 @@ Partial Class L_PChart
         Me.txtSystemFunction.Name = "txtSystemFunction"
         Me.txtSystemFunction.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtSystemFunction.Size = New System.Drawing.Size(835, 133)
-        Me.txtSystemFunction.TabIndex = 19
+        Me.txtSystemFunction.TabIndex = 3
         '
         'txtControlFactor
         '
@@ -234,7 +234,7 @@ Partial Class L_PChart
         Me.txtControlFactor.Name = "txtControlFactor"
         Me.txtControlFactor.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtControlFactor.Size = New System.Drawing.Size(835, 133)
-        Me.txtControlFactor.TabIndex = 20
+        Me.txtControlFactor.TabIndex = 2
         '
         'txtInfoInput
         '
@@ -245,7 +245,7 @@ Partial Class L_PChart
         Me.txtInfoInput.Name = "txtInfoInput"
         Me.txtInfoInput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtInfoInput.Size = New System.Drawing.Size(835, 133)
-        Me.txtInfoInput.TabIndex = 21
+        Me.txtInfoInput.TabIndex = 1
         '
         'lblNoiseFactor
         '

@@ -119,7 +119,7 @@ Partial Class L_FmeaMain
         Me.cboProcessType.Location = New System.Drawing.Point(443, 88)
         Me.cboProcessType.Name = "cboProcessType"
         Me.cboProcessType.Size = New System.Drawing.Size(144, 23)
-        Me.cboProcessType.TabIndex = 37
+        Me.cboProcessType.TabIndex = 4
         Me.ToolTip1.SetToolTip(Me.cboProcessType, "选 8 类之一")
         '
         'cboStatus
@@ -129,17 +129,19 @@ Partial Class L_FmeaMain
         Me.cboStatus.Location = New System.Drawing.Point(90, 274)
         Me.cboStatus.Name = "cboStatus"
         Me.cboStatus.Size = New System.Drawing.Size(144, 23)
-        Me.cboStatus.TabIndex = 36
+        Me.cboStatus.TabIndex = 9
         Me.ToolTip1.SetToolTip(Me.cboStatus, "请选择状态：草稿/评审中/修订中/已发布/已作废")
         '
         'txtRemark
         '
-        Me.txtRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.txtRemark.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.txtRemark.Location = New System.Drawing.Point(90, 494)
         Me.txtRemark.Multiline = True
         Me.txtRemark.Name = "txtRemark"
-        Me.txtRemark.Size = New System.Drawing.Size(507, 80)
-        Me.txtRemark.TabIndex = 33
+        Me.txtRemark.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.txtRemark.Size = New System.Drawing.Size(531, 80)
+        Me.txtRemark.TabIndex = 13
         Me.ToolTip1.SetToolTip(Me.txtRemark, "备注，可多行")
         '
         'txtOwner
@@ -147,19 +149,17 @@ Partial Class L_FmeaMain
         Me.txtOwner.Location = New System.Drawing.Point(443, 211)
         Me.txtOwner.Name = "txtOwner"
         Me.txtOwner.Size = New System.Drawing.Size(144, 25)
-        Me.txtOwner.TabIndex = 32
+        Me.txtOwner.TabIndex = 8
         Me.ToolTip1.SetToolTip(Me.txtOwner, "录负责人姓名")
         '
         'txtFunctionReq
         '
-        Me.txtFunctionReq.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.txtFunctionReq.Location = New System.Drawing.Point(90, 403)
         Me.txtFunctionReq.Multiline = True
         Me.txtFunctionReq.Name = "txtFunctionReq"
         Me.txtFunctionReq.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtFunctionReq.Size = New System.Drawing.Size(531, 80)
-        Me.txtFunctionReq.TabIndex = 31
+        Me.txtFunctionReq.TabIndex = 12
         Me.ToolTip1.SetToolTip(Me.txtFunctionReq, "功能要求/技术条件，可多行")
         '
         'txtFunction
@@ -169,7 +169,7 @@ Partial Class L_FmeaMain
         Me.txtFunction.Name = "txtFunction"
         Me.txtFunction.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtFunction.Size = New System.Drawing.Size(531, 80)
-        Me.txtFunction.TabIndex = 30
+        Me.txtFunction.TabIndex = 11
         Me.ToolTip1.SetToolTip(Me.txtFunction, "工序功能描述，可多行")
         '
         'txtFmeaTeam
@@ -177,7 +177,7 @@ Partial Class L_FmeaMain
         Me.txtFmeaTeam.Location = New System.Drawing.Point(443, 274)
         Me.txtFmeaTeam.Name = "txtFmeaTeam"
         Me.txtFmeaTeam.Size = New System.Drawing.Size(144, 25)
-        Me.txtFmeaTeam.TabIndex = 27
+        Me.txtFmeaTeam.TabIndex = 10
         Me.ToolTip1.SetToolTip(Me.txtFmeaTeam, "多人用 ; 分隔，如 张三;李四;王五")
         '
         'txtVersion
@@ -185,7 +185,7 @@ Partial Class L_FmeaMain
         Me.txtVersion.Location = New System.Drawing.Point(443, 143)
         Me.txtVersion.Name = "txtVersion"
         Me.txtVersion.Size = New System.Drawing.Size(144, 25)
-        Me.txtVersion.TabIndex = 28
+        Me.txtVersion.TabIndex = 6
         Me.ToolTip1.SetToolTip(Me.txtVersion, "人工填，如 V1.0")
         '
         'txtDeptName
@@ -193,7 +193,7 @@ Partial Class L_FmeaMain
         Me.txtDeptName.Location = New System.Drawing.Point(90, 211)
         Me.txtDeptName.Name = "txtDeptName"
         Me.txtDeptName.Size = New System.Drawing.Size(144, 25)
-        Me.txtDeptName.TabIndex = 34
+        Me.txtDeptName.TabIndex = 7
         Me.ToolTip1.SetToolTip(Me.txtDeptName, "录部门名")
         '
         'txtProcessName
@@ -201,7 +201,7 @@ Partial Class L_FmeaMain
         Me.txtProcessName.Location = New System.Drawing.Point(443, 26)
         Me.txtProcessName.Name = "txtProcessName"
         Me.txtProcessName.Size = New System.Drawing.Size(144, 25)
-        Me.txtProcessName.TabIndex = 26
+        Me.txtProcessName.TabIndex = 2
         Me.ToolTip1.SetToolTip(Me.txtProcessName, "录工序名，如 入库检")
         '
         'txtProcessOrder
@@ -209,7 +209,7 @@ Partial Class L_FmeaMain
         Me.txtProcessOrder.Location = New System.Drawing.Point(90, 143)
         Me.txtProcessOrder.Name = "txtProcessOrder"
         Me.txtProcessOrder.Size = New System.Drawing.Size(144, 25)
-        Me.txtProcessOrder.TabIndex = 25
+        Me.txtProcessOrder.TabIndex = 5
         Me.ToolTip1.SetToolTip(Me.txtProcessOrder, "录排序号，如 10、20、30")
         '
         'txtProcessNo
@@ -217,7 +217,7 @@ Partial Class L_FmeaMain
         Me.txtProcessNo.Location = New System.Drawing.Point(90, 26)
         Me.txtProcessNo.Name = "txtProcessNo"
         Me.txtProcessNo.Size = New System.Drawing.Size(144, 25)
-        Me.txtProcessNo.TabIndex = 29
+        Me.txtProcessNo.TabIndex = 1
         Me.ToolTip1.SetToolTip(Me.txtProcessNo, "录 CP 编号，如 O-01")
         '
         'btnPrev
@@ -333,7 +333,7 @@ Partial Class L_FmeaMain
         Me.btnSave.Location = New System.Drawing.Point(223, 24)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 31)
-        Me.btnSave.TabIndex = 6
+        Me.btnSave.TabIndex = 14
         Me.btnSave.Text = "保存"
         Me.btnSave.UseVisualStyleBackColor = True
         '
@@ -394,7 +394,7 @@ Partial Class L_FmeaMain
         Me.cboSection.Location = New System.Drawing.Point(90, 88)
         Me.cboSection.Name = "cboSection"
         Me.cboSection.Size = New System.Drawing.Size(144, 23)
-        Me.cboSection.TabIndex = 35
+        Me.cboSection.TabIndex = 3
         '
         'lblUpdateTime
         '
@@ -408,7 +408,6 @@ Partial Class L_FmeaMain
         '
         'lblRemark
         '
-        Me.lblRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblRemark.AutoSize = True
         Me.lblRemark.Location = New System.Drawing.Point(43, 527)
         Me.lblRemark.Name = "lblRemark"

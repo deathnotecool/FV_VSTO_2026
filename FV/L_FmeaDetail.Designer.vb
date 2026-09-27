@@ -73,6 +73,7 @@ Partial Class L_FmeaDetail
         Me.lblImagePath = New System.Windows.Forms.Label()
         Me.btnPickImage = New System.Windows.Forms.Button()
         Me.btnClearImage = New System.Windows.Forms.Button()
+        Me.btnOpenDict = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         CType(Me.dgvDetail, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
@@ -169,7 +170,7 @@ Partial Class L_FmeaDetail
         Me.btnSave.Location = New System.Drawing.Point(233, 31)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 26)
-        Me.btnSave.TabIndex = 5
+        Me.btnSave.TabIndex = 16
         Me.btnSave.Text = "保存"
         Me.btnSave.UseVisualStyleBackColor = True
         '
@@ -195,31 +196,35 @@ Partial Class L_FmeaDetail
         '
         'txtFailureEffect
         '
-        Me.txtFailureEffect.Location = New System.Drawing.Point(143, 280)
+        Me.txtFailureEffect.Location = New System.Drawing.Point(143, 299)
         Me.txtFailureEffect.Multiline = True
         Me.txtFailureEffect.Name = "txtFailureEffect"
         Me.txtFailureEffect.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtFailureEffect.Size = New System.Drawing.Size(504, 110)
-        Me.txtFailureEffect.TabIndex = 34
+        Me.txtFailureEffect.TabIndex = 5
         Me.ToolTip1.SetToolTip(Me.txtFailureEffect, "失效影响：")
         '
         'txtFailureModeName
         '
-        Me.txtFailureModeName.Location = New System.Drawing.Point(464, 19)
+        Me.txtFailureModeName.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtFailureModeName.Location = New System.Drawing.Point(145, 37)
         Me.txtFailureModeName.Name = "txtFailureModeName"
         Me.txtFailureModeName.ReadOnly = True
-        Me.txtFailureModeName.Size = New System.Drawing.Size(183, 25)
-        Me.txtFailureModeName.TabIndex = 27
+        Me.txtFailureModeName.Size = New System.Drawing.Size(497, 25)
+        Me.txtFailureModeName.TabIndex = 2
         Me.ToolTip1.SetToolTip(Me.txtFailureModeName, "失效模式名称")
         '
         'cboFailureModeNo
         '
+        Me.cboFailureModeNo.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.cboFailureModeNo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cboFailureModeNo.FormattingEnabled = True
-        Me.cboFailureModeNo.Location = New System.Drawing.Point(143, 20)
+        Me.cboFailureModeNo.Location = New System.Drawing.Point(145, 7)
         Me.cboFailureModeNo.Name = "cboFailureModeNo"
-        Me.cboFailureModeNo.Size = New System.Drawing.Size(183, 23)
-        Me.cboFailureModeNo.TabIndex = 11
+        Me.cboFailureModeNo.Size = New System.Drawing.Size(497, 23)
+        Me.cboFailureModeNo.TabIndex = 1
         Me.ToolTip1.SetToolTip(Me.cboFailureModeNo, "失效模式编码")
         '
         'dgvDetail
@@ -279,27 +284,27 @@ Partial Class L_FmeaDetail
         '
         'txtDetection
         '
-        Me.txtDetection.Location = New System.Drawing.Point(143, 626)
+        Me.txtDetection.Location = New System.Drawing.Point(143, 645)
         Me.txtDetection.Multiline = True
         Me.txtDetection.Name = "txtDetection"
         Me.txtDetection.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtDetection.Size = New System.Drawing.Size(504, 110)
-        Me.txtDetection.TabIndex = 7
+        Me.txtDetection.TabIndex = 8
         '
         'txtRemark
         '
         Me.txtRemark.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.txtRemark.Location = New System.Drawing.Point(145, 831)
+        Me.txtRemark.Location = New System.Drawing.Point(145, 852)
         Me.txtRemark.Multiline = True
         Me.txtRemark.Name = "txtRemark"
-        Me.txtRemark.Size = New System.Drawing.Size(499, 65)
-        Me.txtRemark.TabIndex = 39
+        Me.txtRemark.Size = New System.Drawing.Size(499, 44)
+        Me.txtRemark.TabIndex = 15
         '
         'lblRemark
         '
         Me.lblRemark.AutoSize = True
-        Me.lblRemark.Location = New System.Drawing.Point(70, 852)
+        Me.lblRemark.Location = New System.Drawing.Point(70, 868)
         Me.lblRemark.Name = "lblRemark"
         Me.lblRemark.Size = New System.Drawing.Size(52, 15)
         Me.lblRemark.TabIndex = 38
@@ -307,80 +312,80 @@ Partial Class L_FmeaDetail
         '
         'txtProcessChar
         '
-        Me.txtProcessChar.Location = New System.Drawing.Point(143, 165)
+        Me.txtProcessChar.Location = New System.Drawing.Point(143, 184)
         Me.txtProcessChar.Multiline = True
         Me.txtProcessChar.Name = "txtProcessChar"
         Me.txtProcessChar.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtProcessChar.Size = New System.Drawing.Size(504, 110)
-        Me.txtProcessChar.TabIndex = 37
+        Me.txtProcessChar.TabIndex = 4
         '
         'txtProductChar
         '
-        Me.txtProductChar.Location = New System.Drawing.Point(143, 50)
+        Me.txtProductChar.Location = New System.Drawing.Point(143, 69)
         Me.txtProductChar.Multiline = True
         Me.txtProductChar.Name = "txtProductChar"
         Me.txtProductChar.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtProductChar.Size = New System.Drawing.Size(504, 110)
-        Me.txtProductChar.TabIndex = 36
+        Me.txtProductChar.TabIndex = 3
         '
         'txtDetailOrder
         '
-        Me.txtDetailOrder.Location = New System.Drawing.Point(461, 803)
+        Me.txtDetailOrder.Location = New System.Drawing.Point(461, 822)
         Me.txtDetailOrder.Name = "txtDetailOrder"
         Me.txtDetailOrder.Size = New System.Drawing.Size(183, 25)
-        Me.txtDetailOrder.TabIndex = 30
+        Me.txtDetailOrder.TabIndex = 14
         '
         'txtDetectionScore
         '
-        Me.txtDetectionScore.Location = New System.Drawing.Point(143, 770)
+        Me.txtDetectionScore.Location = New System.Drawing.Point(143, 789)
         Me.txtDetectionScore.Name = "txtDetectionScore"
         Me.txtDetectionScore.Size = New System.Drawing.Size(183, 25)
-        Me.txtDetectionScore.TabIndex = 35
+        Me.txtDetectionScore.TabIndex = 11
         '
         'txtOccurrence
         '
-        Me.txtOccurrence.Location = New System.Drawing.Point(459, 741)
+        Me.txtOccurrence.Location = New System.Drawing.Point(459, 760)
         Me.txtOccurrence.Name = "txtOccurrence"
         Me.txtOccurrence.Size = New System.Drawing.Size(183, 25)
-        Me.txtOccurrence.TabIndex = 31
+        Me.txtOccurrence.TabIndex = 10
         '
         'txtPrevention
         '
-        Me.txtPrevention.Location = New System.Drawing.Point(143, 395)
+        Me.txtPrevention.Location = New System.Drawing.Point(143, 414)
         Me.txtPrevention.Multiline = True
         Me.txtPrevention.Name = "txtPrevention"
         Me.txtPrevention.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtPrevention.Size = New System.Drawing.Size(504, 110)
-        Me.txtPrevention.TabIndex = 32
+        Me.txtPrevention.TabIndex = 6
         '
         'txtSeverity
         '
-        Me.txtSeverity.Location = New System.Drawing.Point(143, 739)
+        Me.txtSeverity.Location = New System.Drawing.Point(143, 758)
         Me.txtSeverity.Name = "txtSeverity"
         Me.txtSeverity.Size = New System.Drawing.Size(183, 25)
-        Me.txtSeverity.TabIndex = 33
+        Me.txtSeverity.TabIndex = 9
         '
         'txtRPN
         '
-        Me.txtRPN.Location = New System.Drawing.Point(459, 772)
+        Me.txtRPN.Location = New System.Drawing.Point(459, 791)
         Me.txtRPN.Name = "txtRPN"
         Me.txtRPN.ReadOnly = True
         Me.txtRPN.Size = New System.Drawing.Size(183, 25)
-        Me.txtRPN.TabIndex = 29
+        Me.txtRPN.TabIndex = 12
         '
         'txtFailureCause
         '
-        Me.txtFailureCause.Location = New System.Drawing.Point(145, 510)
+        Me.txtFailureCause.Location = New System.Drawing.Point(145, 529)
         Me.txtFailureCause.Multiline = True
         Me.txtFailureCause.Name = "txtFailureCause"
         Me.txtFailureCause.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtFailureCause.Size = New System.Drawing.Size(504, 110)
-        Me.txtFailureCause.TabIndex = 28
+        Me.txtFailureCause.TabIndex = 7
         '
         'lblDetailOrder
         '
         Me.lblDetailOrder.AutoSize = True
-        Me.lblDetailOrder.Location = New System.Drawing.Point(353, 806)
+        Me.lblDetailOrder.Location = New System.Drawing.Point(353, 825)
         Me.lblDetailOrder.Name = "lblDetailOrder"
         Me.lblDetailOrder.Size = New System.Drawing.Size(82, 15)
         Me.lblDetailOrder.TabIndex = 22
@@ -389,7 +394,7 @@ Partial Class L_FmeaDetail
         'lblDetectionScore
         '
         Me.lblDetectionScore.AutoSize = True
-        Me.lblDetectionScore.Location = New System.Drawing.Point(47, 775)
+        Me.lblDetectionScore.Location = New System.Drawing.Point(47, 794)
         Me.lblDetectionScore.Name = "lblDetectionScore"
         Me.lblDetectionScore.Size = New System.Drawing.Size(75, 15)
         Me.lblDetectionScore.TabIndex = 20
@@ -398,7 +403,7 @@ Partial Class L_FmeaDetail
         'lblRPN
         '
         Me.lblRPN.AutoSize = True
-        Me.lblRPN.Location = New System.Drawing.Point(383, 775)
+        Me.lblRPN.Location = New System.Drawing.Point(383, 794)
         Me.lblRPN.Name = "lblRPN"
         Me.lblRPN.Size = New System.Drawing.Size(46, 15)
         Me.lblRPN.TabIndex = 19
@@ -407,7 +412,7 @@ Partial Class L_FmeaDetail
         'lblOccurrence
         '
         Me.lblOccurrence.AutoSize = True
-        Me.lblOccurrence.Location = New System.Drawing.Point(369, 744)
+        Me.lblOccurrence.Location = New System.Drawing.Point(369, 763)
         Me.lblOccurrence.Name = "lblOccurrence"
         Me.lblOccurrence.Size = New System.Drawing.Size(60, 15)
         Me.lblOccurrence.TabIndex = 25
@@ -416,7 +421,7 @@ Partial Class L_FmeaDetail
         'lblAP
         '
         Me.lblAP.AutoSize = True
-        Me.lblAP.Location = New System.Drawing.Point(56, 806)
+        Me.lblAP.Location = New System.Drawing.Point(56, 825)
         Me.lblAP.Name = "lblAP"
         Me.lblAP.Size = New System.Drawing.Size(68, 15)
         Me.lblAP.TabIndex = 18
@@ -425,7 +430,7 @@ Partial Class L_FmeaDetail
         'lblDetection
         '
         Me.lblDetection.AutoSize = True
-        Me.lblDetection.Location = New System.Drawing.Point(40, 675)
+        Me.lblDetection.Location = New System.Drawing.Point(40, 694)
         Me.lblDetection.Name = "lblDetection"
         Me.lblDetection.Size = New System.Drawing.Size(82, 15)
         Me.lblDetection.TabIndex = 17
@@ -434,7 +439,7 @@ Partial Class L_FmeaDetail
         'lblSeverity
         '
         Me.lblSeverity.AutoSize = True
-        Me.lblSeverity.Location = New System.Drawing.Point(47, 744)
+        Me.lblSeverity.Location = New System.Drawing.Point(47, 763)
         Me.lblSeverity.Name = "lblSeverity"
         Me.lblSeverity.Size = New System.Drawing.Size(75, 15)
         Me.lblSeverity.TabIndex = 16
@@ -443,7 +448,7 @@ Partial Class L_FmeaDetail
         'lblPrevention
         '
         Me.lblPrevention.AutoSize = True
-        Me.lblPrevention.Location = New System.Drawing.Point(40, 436)
+        Me.lblPrevention.Location = New System.Drawing.Point(40, 455)
         Me.lblPrevention.Name = "lblPrevention"
         Me.lblPrevention.Size = New System.Drawing.Size(82, 15)
         Me.lblPrevention.TabIndex = 26
@@ -452,7 +457,7 @@ Partial Class L_FmeaDetail
         'lblFailureCause
         '
         Me.lblFailureCause.AutoSize = True
-        Me.lblFailureCause.Location = New System.Drawing.Point(42, 553)
+        Me.lblFailureCause.Location = New System.Drawing.Point(42, 572)
         Me.lblFailureCause.Name = "lblFailureCause"
         Me.lblFailureCause.Size = New System.Drawing.Size(82, 15)
         Me.lblFailureCause.TabIndex = 15
@@ -461,7 +466,7 @@ Partial Class L_FmeaDetail
         'lblFailureEffect
         '
         Me.lblFailureEffect.AutoSize = True
-        Me.lblFailureEffect.Location = New System.Drawing.Point(40, 316)
+        Me.lblFailureEffect.Location = New System.Drawing.Point(40, 335)
         Me.lblFailureEffect.Name = "lblFailureEffect"
         Me.lblFailureEffect.Size = New System.Drawing.Size(82, 15)
         Me.lblFailureEffect.TabIndex = 24
@@ -470,7 +475,7 @@ Partial Class L_FmeaDetail
         'lblProcessChar
         '
         Me.lblProcessChar.AutoSize = True
-        Me.lblProcessChar.Location = New System.Drawing.Point(40, 211)
+        Me.lblProcessChar.Location = New System.Drawing.Point(40, 230)
         Me.lblProcessChar.Name = "lblProcessChar"
         Me.lblProcessChar.Size = New System.Drawing.Size(82, 15)
         Me.lblProcessChar.TabIndex = 14
@@ -479,7 +484,7 @@ Partial Class L_FmeaDetail
         'lblProductChar
         '
         Me.lblProductChar.AutoSize = True
-        Me.lblProductChar.Location = New System.Drawing.Point(40, 94)
+        Me.lblProductChar.Location = New System.Drawing.Point(40, 113)
         Me.lblProductChar.Name = "lblProductChar"
         Me.lblProductChar.Size = New System.Drawing.Size(82, 15)
         Me.lblProductChar.TabIndex = 23
@@ -488,7 +493,7 @@ Partial Class L_FmeaDetail
         'lblFailureModeName
         '
         Me.lblFailureModeName.AutoSize = True
-        Me.lblFailureModeName.Location = New System.Drawing.Point(339, 24)
+        Me.lblFailureModeName.Location = New System.Drawing.Point(10, 40)
         Me.lblFailureModeName.Name = "lblFailureModeName"
         Me.lblFailureModeName.Size = New System.Drawing.Size(112, 15)
         Me.lblFailureModeName.TabIndex = 13
@@ -497,7 +502,7 @@ Partial Class L_FmeaDetail
         'lblFailureModeNo
         '
         Me.lblFailureModeNo.AutoSize = True
-        Me.lblFailureModeNo.Location = New System.Drawing.Point(10, 24)
+        Me.lblFailureModeNo.Location = New System.Drawing.Point(10, 15)
         Me.lblFailureModeNo.Name = "lblFailureModeNo"
         Me.lblFailureModeNo.Size = New System.Drawing.Size(112, 15)
         Me.lblFailureModeNo.TabIndex = 21
@@ -508,14 +513,14 @@ Partial Class L_FmeaDetail
         Me.cboAP.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cboAP.Enabled = False
         Me.cboAP.FormattingEnabled = True
-        Me.cboAP.Location = New System.Drawing.Point(145, 802)
+        Me.cboAP.Location = New System.Drawing.Point(145, 821)
         Me.cboAP.Name = "cboAP"
         Me.cboAP.Size = New System.Drawing.Size(183, 23)
-        Me.cboAP.TabIndex = 12
+        Me.cboAP.TabIndex = 13
         '
         'btnImportDetail
         '
-        Me.btnImportDetail.Location = New System.Drawing.Point(518, 14)
+        Me.btnImportDetail.Location = New System.Drawing.Point(1210, 21)
         Me.btnImportDetail.Name = "btnImportDetail"
         Me.btnImportDetail.Size = New System.Drawing.Size(155, 39)
         Me.btnImportDetail.TabIndex = 24
@@ -565,6 +570,15 @@ Partial Class L_FmeaDetail
         Me.btnClearImage.Text = "" & Global.Microsoft.VisualBasic.ChrW(9) & "清除"
         Me.btnClearImage.UseVisualStyleBackColor = True
         '
+        'btnOpenDict
+        '
+        Me.btnOpenDict.Location = New System.Drawing.Point(1025, 21)
+        Me.btnOpenDict.Name = "btnOpenDict"
+        Me.btnOpenDict.Size = New System.Drawing.Size(155, 39)
+        Me.btnOpenDict.TabIndex = 24
+        Me.btnOpenDict.Text = "失效模式字典"
+        Me.btnOpenDict.UseVisualStyleBackColor = True
+        '
         'L_FmeaDetail
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
@@ -573,6 +587,7 @@ Partial Class L_FmeaDetail
         Me.Controls.Add(Me.btnClearImage)
         Me.Controls.Add(Me.btnPickImage)
         Me.Controls.Add(Me.picImage)
+        Me.Controls.Add(Me.btnOpenDict)
         Me.Controls.Add(Me.btnImportDetail)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.lblImagePath)
@@ -644,4 +659,5 @@ Partial Class L_FmeaDetail
     Friend WithEvents lblImagePath As Windows.Forms.Label
     Friend WithEvents btnPickImage As Windows.Forms.Button
     Friend WithEvents btnClearImage As Windows.Forms.Button
+    Friend WithEvents btnOpenDict As Windows.Forms.Button
 End Class

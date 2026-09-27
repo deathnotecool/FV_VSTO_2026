@@ -8,6 +8,11 @@ Imports System.Windows.Forms
 Public Class L_FmeaMain
 
     ' ========== 窗体级变量 ==========
+    ''' <summary>
+    ''' 功能：标记 Detail 窗体是否已打开，防多开
+    ''' </summary>
+    Private blnDetailOpen As Boolean = False
+
 
     ''' <summary>
     ''' 功能：存放从数据库读出的主表数据
@@ -692,25 +697,30 @@ Public Class L_FmeaMain
 
 
     ''' <summary>
-    ''' 功能：打开当前工序的明细维护窗体
+    ''' 功能：打开 FMEA 明细维护窗体（防多开，非模态）
     ''' </summary>
     Private Sub btnOpenDetail_Click(sender As Object, e As EventArgs) Handles btnOpenDetail.Click
-        ' 新增模式下不能打开明细，因为主表还没保存，没有 lngID
-        If blnIsNew Then
-            MessageBox.Show("请先保存主表记录")
+        ' 已有 Detail 打开，不再开
+        If blnDetailOpen Then
+            MessageBox.Show("明细窗体已打开，请先关闭")
             Return
         End If
 
-        ' 主表无数据，直接返回
-        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then Return
+        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then
+            MessageBox.Show("请先选择工序")
+            Return
+        End If
 
-        ' 取当前行的 lngID，传给明细窗体
-        Dim lngID As Long = CLng(dtMain.Rows(intCurrentRow)("lngID"))
-
-        ' 新建明细窗体，传入主表 ID，模态显示
         Dim f As New L_FmeaDetail()
-        f.MainID = lngID
-        f.ShowDialog()
+        f.MainID = CLng(dtMain.Rows(intCurrentRow)("lngID"))
+
+        ' 关窗体时把标记复位
+        AddHandler f.FormClosed, Sub()
+                                     blnDetailOpen = False
+                                 End Sub
+
+        blnDetailOpen = True
+        f.Show()
     End Sub
 
     ''' <summary>
