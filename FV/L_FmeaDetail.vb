@@ -761,17 +761,23 @@ Public Class L_FmeaDetail
             Return
         End If
 
+        ' 自动算默认地址：当前选区首行到末行，拼 C~L
+        Dim strDefault As String = ""
+        Try
+            Dim rngSel As Excel.Range = xlapp.Selection
+            If rngSel IsNot Nothing Then
+                Dim intFirstRow As Integer = rngSel.Row
+                Dim intLastRow As Integer = rngSel.Row + rngSel.Rows.Count - 1
+                strDefault = "C" & intFirstRow & ":L" & intLastRow
+            End If
+        Catch
+            strDefault = ""
+        End Try
+
+        ' 弹 InputBox，默认填好地址
         Dim rngInput As Excel.Range = Nothing
         Try
-            Dim strDefault As String = ""
-            If xlapp.Selection IsNot Nothing Then
-                Try
-                    strDefault = xlapp.Selection.Address
-                Catch
-                    strDefault = ""
-                End Try
-            End If
-            Dim obj As Object = xlapp.InputBox("请用鼠标选择要导入的区域，然后点确定", "选择导入区域", strDefault, Type:=8)
+            Dim obj As Object = xlapp.InputBox("请确认导入区域（已按当前选区自动填好）", "选择导入区域", strDefault, Type:=8)
             If obj Is Nothing Then Return
             rngInput = CType(obj, Excel.Range)
         Catch
