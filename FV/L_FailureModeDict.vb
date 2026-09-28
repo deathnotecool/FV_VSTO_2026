@@ -49,7 +49,7 @@ Public Class L_FailureModeDict
         cboCategory.Items.Clear()
         cboCategory.Items.Add("尺寸")
         cboCategory.Items.Add("外观")
-        cboCategory.Items.Add("功能")
+        cboCategory.Items.Add("性能")
         cboCategory.Items.Add("材料")
         cboCategory.Items.Add("其他")
         cboCategory.DropDownStyle = ComboBoxStyle.DropDownList
@@ -451,5 +451,6 @@ Public Class L_FailureModeDict
             End Using
         End Using
     End Function
+
 
 End Class

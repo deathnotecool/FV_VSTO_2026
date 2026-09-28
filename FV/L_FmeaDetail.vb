@@ -63,6 +63,8 @@ Public Class L_FmeaDetail
         Catch ex As Exception
             MessageBox.Show("加载失败：" & ex.Message & vbCrLf & ex.StackTrace)
         End Try
+
+
     End Sub
 
     ''' <summary>
@@ -730,12 +732,24 @@ Public Class L_FmeaDetail
     End Function
 
     ''' <summary>
-    ''' 功能：安全读取 Excel 单元格文本
+    ''' 功能：安全读取 Excel 单元格文本，保留换行
     ''' </summary>
     Private Function GetCellText(ByVal ws As Excel.Worksheet, ByVal strAddr As String) As String
-        Dim rng As Excel.Range = ws.Range(strAddr)
-        If rng.Value Is Nothing Then Return ""
-        Return rng.Value.ToString().Trim()
+        Try
+            Dim rng As Excel.Range = ws.Range(strAddr)
+            If rng.Value Is Nothing Then Return ""
+            If rng.Value Is DBNull.Value Then Return ""
+
+            Dim strVal As String = rng.Value.ToString()
+            If strVal Is Nothing Then Return ""
+
+            ' 先归一成 vbLf，再统一成 vbCrLf，避免重复转换
+            strVal = strVal.Replace(vbCrLf, vbLf).Replace(vbLf, vbCrLf)
+
+            Return strVal.Trim()
+        Catch
+            Return ""
+        End Try
     End Function
 
     ''' <summary>
@@ -884,9 +898,16 @@ Public Class L_FmeaDetail
 
         ' 刷新下拉框
         RefreshFailureModeCombo()
-
         LoadData()
         BindGrid()
+
+        ' 定位到最后一条
+        If dtDetail.Rows.Count > 0 Then
+            intCurrentRow = dtDetail.Rows.Count - 1
+            ShowRecord()
+        End If
+
+        blnIsNew = False
         lblStatusBar.Text = "导入完成，成功 " & intSuccess & " 条，失败 " & intFail & " 条"
         MessageBox.Show("导入完成" & vbCrLf & "成功：" & intSuccess & " 条" & vbCrLf & "失败：" & intFail & " 条")
     End Sub
@@ -1035,20 +1056,30 @@ Public Class L_FmeaDetail
             End Using
         End Using
     End Function
-
     ''' <summary>
-    ''' 功能：新建字典记录
+    ''' 功能：新建字典记录（排序号自动取最大+10）
     ''' </summary>
     Private Sub InsertModeDict(ByVal strNo As String, ByVal strName As String)
         SyncLock WriteLock
             Using conn As OleDbConnection = GetConnection()
+                conn.Open()
+
+                ' 取最大排序号 +10
+                Dim intSort As Integer = 10
+                Using cmdMax As New OleDbCommand("SELECT MAX(lngSortOrder) FROM tblFailureModeDict WHERE blnIsDeleted=False", conn)
+                    Dim result As Object = cmdMax.ExecuteScalar()
+                    If result IsNot Nothing AndAlso Not IsDBNull(result) Then
+                        intSort = CInt(result) + 10
+                    End If
+                End Using
+
+                ' 插入
                 Using cmd As New OleDbCommand("INSERT INTO tblFailureModeDict (strFailureModeNo, strFailureModeName, lngSortOrder, blnIsDeleted, dtmCreateTime) VALUES (?,?,?,?,?)", conn)
                     cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNo
                     cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strName
-                    cmd.Parameters.Add("p3", OleDbType.Integer).Value = 0
+                    cmd.Parameters.Add("p3", OleDbType.Integer).Value = intSort
                     cmd.Parameters.Add("p4", OleDbType.Boolean).Value = False
                     cmd.Parameters.Add("p5", OleDbType.Date).Value = Now
-                    conn.Open()
                     cmd.ExecuteNonQuery()
                 End Using
             End Using
@@ -1124,5 +1155,8 @@ Public Class L_FmeaDetail
         blnDictOpen = True
         f.Show()
     End Sub
+
+
+
 
 End Class

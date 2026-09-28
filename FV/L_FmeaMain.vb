@@ -13,6 +13,10 @@ Public Class L_FmeaMain
     ''' </summary>
     Private blnDetailOpen As Boolean = False
 
+    ''' <summary>
+    ''' 功能：标记 P 图窗体是否已打开，防多开
+    ''' </summary>
+    Private blnPChartOpen As Boolean = False
 
     ''' <summary>
     ''' 功能：存放从数据库读出的主表数据
@@ -50,6 +54,8 @@ Public Class L_FmeaMain
             ClearControls()
             blnIsNew = True
         End If
+
+
     End Sub
 
     ''' <summary>
@@ -742,6 +748,9 @@ Public Class L_FmeaMain
         ' 新建 P 图窗体，传入主表 ID，模态显示
         Dim f As New L_PChart()
         f.MainID = lngID
-        f.ShowDialog()
+        f.Show()
     End Sub
+
+
+
 End Class
