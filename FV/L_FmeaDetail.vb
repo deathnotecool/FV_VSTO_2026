@@ -507,15 +507,15 @@ Public Class L_FmeaDetail
         End If
     End Sub
 
-    Private Sub txtSeverity_TextChanged(sender As Object, e As EventArgs)
+    Private Sub txtSeverity_TextChanged(sender As Object, e As EventArgs) Handles txtSeverity.TextChanged
         CalcRPN()
     End Sub
 
-    Private Sub txtOccurrence_TextChanged(sender As Object, e As EventArgs)
+    Private Sub txtOccurrence_TextChanged(sender As Object, e As EventArgs) Handles txtOccurrence.TextChanged
         CalcRPN()
     End Sub
 
-    Private Sub txtDetectionScore_TextChanged(sender As Object, e As EventArgs)
+    Private Sub txtDetectionScore_TextChanged(sender As Object, e As EventArgs) Handles txtDetectionScore.TextChanged
         CalcRPN()
     End Sub
 
@@ -551,8 +551,8 @@ Public Class L_FmeaDetail
                     cmd.Parameters.Add("p1", OleDbType.Integer).Value = MainID
                     cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strNo
                     cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = strName
-                    cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = txtProductChar.Text.Trim()
-                    cmd.Parameters.Add("p5", OleDbType.VarWChar).Value = txtProcessChar.Text.Trim()
+                    cmd.Parameters.Add("p4", OleDbType.LongVarWChar).Value = txtProductChar.Text.Trim()
+                    cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = txtProcessChar.Text.Trim()
                     cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
                     cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = txtFailureCause.Text
                     cmd.Parameters.Add("p8", OleDbType.LongVarWChar).Value = txtPrevention.Text
@@ -601,8 +601,8 @@ Public Class L_FmeaDetail
                 Using cmd As New OleDbCommand(strSql, conn)
                     cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNo
                     cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strName
-                    cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = txtProductChar.Text.Trim()
-                    cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = txtProcessChar.Text.Trim()
+                    cmd.Parameters.Add("p3", OleDbType.LongVarWChar).Value = txtProductChar.Text.Trim()
+                    cmd.Parameters.Add("p4", OleDbType.LongVarWChar).Value = txtProcessChar.Text.Trim()
                     cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = txtFailureEffect.Text
                     cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = txtFailureCause.Text
                     cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = txtPrevention.Text
@@ -878,8 +878,9 @@ Public Class L_FmeaDetail
                         cmd.Parameters.Add("p1", OleDbType.Integer).Value = MainID
                         cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strModeNo
                         cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = strModeName
-                        cmd.Parameters.Add("p4", OleDbType.VarWChar).Value = strProductChar
-                        cmd.Parameters.Add("p5", OleDbType.VarWChar).Value = strProcessChar
+                        cmd.Parameters.Add("p4", OleDbType.LongVarWChar).Value = strProductChar
+                        cmd.Parameters.Add("p5", OleDbType.LongVarWChar).Value = strProcessChar
+
                         cmd.Parameters.Add("p6", OleDbType.LongVarWChar).Value = strEffect
                         cmd.Parameters.Add("p7", OleDbType.LongVarWChar).Value = strCause
                         cmd.Parameters.Add("p8", OleDbType.LongVarWChar).Value = strPrevention
@@ -902,14 +903,23 @@ Public Class L_FmeaDetail
             intSuccess += 1
         Next
 
-        ' 刷新下拉框
-        RefreshFailureModeCombo()
+        '' 刷新下拉框
+        'RefreshFailureModeCombo()
+        'LoadData()
+        'BindGrid()
+
+        '' 定位到最后一条
+        'If dtDetail.Rows.Count > 0 Then
+        '    intCurrentRow = dtDetail.Rows.Count - 1
+        '    ShowRecord()
+        'End If
+
         LoadData()
         BindGrid()
 
-        ' 定位到最后一条
         If dtDetail.Rows.Count > 0 Then
             intCurrentRow = dtDetail.Rows.Count - 1
+            RefreshFailureModeCombo()   ' 显示前刷
             ShowRecord()
         End If
 

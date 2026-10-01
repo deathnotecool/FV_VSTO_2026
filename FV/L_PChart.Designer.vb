@@ -51,7 +51,7 @@ Partial Class L_PChart
         'lblMainNo
         '
         Me.lblMainNo.AutoSize = True
-        Me.lblMainNo.Location = New System.Drawing.Point(194, 41)
+        Me.lblMainNo.Location = New System.Drawing.Point(14, 34)
         Me.lblMainNo.Name = "lblMainNo"
         Me.lblMainNo.Size = New System.Drawing.Size(82, 15)
         Me.lblMainNo.TabIndex = 0
@@ -60,7 +60,7 @@ Partial Class L_PChart
         'lblMainName
         '
         Me.lblMainName.AutoSize = True
-        Me.lblMainName.Location = New System.Drawing.Point(436, 41)
+        Me.lblMainName.Location = New System.Drawing.Point(281, 34)
         Me.lblMainName.Name = "lblMainName"
         Me.lblMainName.Size = New System.Drawing.Size(82, 15)
         Me.lblMainName.TabIndex = 0
@@ -68,7 +68,7 @@ Partial Class L_PChart
         '
         'txtMainNo
         '
-        Me.txtMainNo.Location = New System.Drawing.Point(268, 36)
+        Me.txtMainNo.Location = New System.Drawing.Point(102, 29)
         Me.txtMainNo.Name = "txtMainNo"
         Me.txtMainNo.ReadOnly = True
         Me.txtMainNo.Size = New System.Drawing.Size(173, 25)
@@ -76,7 +76,7 @@ Partial Class L_PChart
         '
         'txtMainName
         '
-        Me.txtMainName.Location = New System.Drawing.Point(524, 36)
+        Me.txtMainName.Location = New System.Drawing.Point(369, 29)
         Me.txtMainName.Name = "txtMainName"
         Me.txtMainName.ReadOnly = True
         Me.txtMainName.Size = New System.Drawing.Size(173, 25)
@@ -84,7 +84,7 @@ Partial Class L_PChart
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(703, 27)
+        Me.btnSave.Location = New System.Drawing.Point(548, 22)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(57, 38)
         Me.btnSave.TabIndex = 8
@@ -93,7 +93,7 @@ Partial Class L_PChart
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(766, 27)
+        Me.btnClose.Location = New System.Drawing.Point(611, 22)
         Me.btnClose.Name = "btnClose"
         Me.btnClose.Size = New System.Drawing.Size(57, 38)
         Me.btnClose.TabIndex = 2
@@ -175,6 +175,7 @@ Partial Class L_PChart
         Me.txtRemark.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtRemark.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtRemark.Location = New System.Drawing.Point(113, 842)
         Me.txtRemark.Multiline = True
         Me.txtRemark.Name = "txtRemark"
@@ -186,6 +187,7 @@ Partial Class L_PChart
         '
         Me.txtNoiseFactor.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtNoiseFactor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtNoiseFactor.Location = New System.Drawing.Point(113, 703)
         Me.txtNoiseFactor.Multiline = True
         Me.txtNoiseFactor.Name = "txtNoiseFactor"
@@ -197,6 +199,7 @@ Partial Class L_PChart
         '
         Me.txtUnexpectedOutput.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtUnexpectedOutput.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtUnexpectedOutput.Location = New System.Drawing.Point(113, 564)
         Me.txtUnexpectedOutput.Multiline = True
         Me.txtUnexpectedOutput.Name = "txtUnexpectedOutput"
@@ -208,6 +211,7 @@ Partial Class L_PChart
         '
         Me.txtExpectedOutput.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtExpectedOutput.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtExpectedOutput.Location = New System.Drawing.Point(113, 425)
         Me.txtExpectedOutput.Multiline = True
         Me.txtExpectedOutput.Name = "txtExpectedOutput"
@@ -219,6 +223,7 @@ Partial Class L_PChart
         '
         Me.txtSystemFunction.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtSystemFunction.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtSystemFunction.Location = New System.Drawing.Point(113, 286)
         Me.txtSystemFunction.Multiline = True
         Me.txtSystemFunction.Name = "txtSystemFunction"
@@ -230,6 +235,7 @@ Partial Class L_PChart
         '
         Me.txtControlFactor.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtControlFactor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtControlFactor.Location = New System.Drawing.Point(113, 147)
         Me.txtControlFactor.Multiline = True
         Me.txtControlFactor.Name = "txtControlFactor"
@@ -241,6 +247,7 @@ Partial Class L_PChart
         '
         Me.txtInfoInput.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtInfoInput.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtInfoInput.Location = New System.Drawing.Point(113, 8)
         Me.txtInfoInput.Multiline = True
         Me.txtInfoInput.Name = "txtInfoInput"
@@ -268,17 +275,19 @@ Partial Class L_PChart
         '
         'lblStatusBar
         '
+        Me.lblStatusBar.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.lblStatusBar.Location = New System.Drawing.Point(12, 33)
+        Me.lblStatusBar.Location = New System.Drawing.Point(821, 26)
         Me.lblStatusBar.Name = "lblStatusBar"
-        Me.lblStatusBar.Size = New System.Drawing.Size(176, 31)
+        Me.lblStatusBar.Size = New System.Drawing.Size(143, 31)
         Me.lblStatusBar.TabIndex = 22
         Me.lblStatusBar.Text = "                         "
         Me.lblStatusBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'btnImportPChart
         '
-        Me.btnImportPChart.Location = New System.Drawing.Point(828, 27)
+        Me.btnImportPChart.Location = New System.Drawing.Point(674, 22)
         Me.btnImportPChart.Name = "btnImportPChart"
         Me.btnImportPChart.Size = New System.Drawing.Size(141, 38)
         Me.btnImportPChart.TabIndex = 23

@@ -185,6 +185,8 @@ Partial Class L_FmeaDetail
         '
         'lblStatusBar
         '
+        Me.lblStatusBar.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lblStatusBar.Location = New System.Drawing.Point(687, 665)
         Me.lblStatusBar.Name = "lblStatusBar"
@@ -542,6 +544,7 @@ Partial Class L_FmeaDetail
         '
         'lblImagePath
         '
+        Me.lblImagePath.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblImagePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lblImagePath.Font = New System.Drawing.Font("隶书", 10.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
         Me.lblImagePath.ForeColor = System.Drawing.SystemColors.GrayText
@@ -554,6 +557,7 @@ Partial Class L_FmeaDetail
         '
         'btnPickImage
         '
+        Me.btnPickImage.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnPickImage.Location = New System.Drawing.Point(1186, 664)
         Me.btnPickImage.Name = "btnPickImage"
         Me.btnPickImage.Size = New System.Drawing.Size(92, 32)
@@ -563,6 +567,7 @@ Partial Class L_FmeaDetail
         '
         'btnClearImage
         '
+        Me.btnClearImage.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnClearImage.Location = New System.Drawing.Point(1284, 664)
         Me.btnClearImage.Name = "btnClearImage"
         Me.btnClearImage.Size = New System.Drawing.Size(92, 32)

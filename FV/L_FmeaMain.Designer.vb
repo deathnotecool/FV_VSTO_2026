@@ -134,8 +134,8 @@ Partial Class L_FmeaMain
         '
         'txtRemark
         '
-        Me.txtRemark.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.txtRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.txtRemark.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtRemark.Location = New System.Drawing.Point(90, 494)
         Me.txtRemark.Multiline = True
         Me.txtRemark.Name = "txtRemark"
@@ -154,6 +154,9 @@ Partial Class L_FmeaMain
         '
         'txtFunctionReq
         '
+        Me.txtFunctionReq.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.txtFunctionReq.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtFunctionReq.Location = New System.Drawing.Point(90, 403)
         Me.txtFunctionReq.Multiline = True
         Me.txtFunctionReq.Name = "txtFunctionReq"
@@ -164,6 +167,9 @@ Partial Class L_FmeaMain
         '
         'txtFunction
         '
+        Me.txtFunction.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.txtFunction.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtFunction.Location = New System.Drawing.Point(90, 312)
         Me.txtFunction.Multiline = True
         Me.txtFunction.Name = "txtFunction"
@@ -408,6 +414,7 @@ Partial Class L_FmeaMain
         '
         'lblRemark
         '
+        Me.lblRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblRemark.AutoSize = True
         Me.lblRemark.Location = New System.Drawing.Point(43, 527)
         Me.lblRemark.Name = "lblRemark"
