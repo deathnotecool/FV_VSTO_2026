@@ -133,7 +133,7 @@ Partial Class L_FmeaDetail
         '
         Me.btnNew.Location = New System.Drawing.Point(9, 31)
         Me.btnNew.Name = "btnNew"
-        Me.btnNew.Size = New System.Drawing.Size(75, 26)
+        Me.btnNew.Size = New System.Drawing.Size(75, 30)
         Me.btnNew.TabIndex = 1
         Me.btnNew.Text = "新增"
         Me.btnNew.UseVisualStyleBackColor = True
@@ -142,7 +142,7 @@ Partial Class L_FmeaDetail
         '
         Me.btnClose.Location = New System.Drawing.Point(569, 31)
         Me.btnClose.Name = "btnClose"
-        Me.btnClose.Size = New System.Drawing.Size(75, 26)
+        Me.btnClose.Size = New System.Drawing.Size(75, 30)
         Me.btnClose.TabIndex = 2
         Me.btnClose.Text = "关闭"
         Me.btnClose.UseVisualStyleBackColor = True
@@ -151,7 +151,7 @@ Partial Class L_FmeaDetail
         '
         Me.btnRefresh.Location = New System.Drawing.Point(457, 31)
         Me.btnRefresh.Name = "btnRefresh"
-        Me.btnRefresh.Size = New System.Drawing.Size(75, 26)
+        Me.btnRefresh.Size = New System.Drawing.Size(75, 30)
         Me.btnRefresh.TabIndex = 3
         Me.btnRefresh.Text = "刷新"
         Me.btnRefresh.UseVisualStyleBackColor = True
@@ -160,7 +160,7 @@ Partial Class L_FmeaDetail
         '
         Me.btnDelete.Location = New System.Drawing.Point(345, 31)
         Me.btnDelete.Name = "btnDelete"
-        Me.btnDelete.Size = New System.Drawing.Size(75, 26)
+        Me.btnDelete.Size = New System.Drawing.Size(75, 30)
         Me.btnDelete.TabIndex = 4
         Me.btnDelete.Text = "删除"
         Me.btnDelete.UseVisualStyleBackColor = True
@@ -169,7 +169,7 @@ Partial Class L_FmeaDetail
         '
         Me.btnSave.Location = New System.Drawing.Point(233, 31)
         Me.btnSave.Name = "btnSave"
-        Me.btnSave.Size = New System.Drawing.Size(75, 26)
+        Me.btnSave.Size = New System.Drawing.Size(75, 30)
         Me.btnSave.TabIndex = 16
         Me.btnSave.Text = "保存"
         Me.btnSave.UseVisualStyleBackColor = True
@@ -178,7 +178,7 @@ Partial Class L_FmeaDetail
         '
         Me.btnCopyNew.Location = New System.Drawing.Point(121, 31)
         Me.btnCopyNew.Name = "btnCopyNew"
-        Me.btnCopyNew.Size = New System.Drawing.Size(75, 26)
+        Me.btnCopyNew.Size = New System.Drawing.Size(75, 30)
         Me.btnCopyNew.TabIndex = 6
         Me.btnCopyNew.Text = "复制新增"
         Me.btnCopyNew.UseVisualStyleBackColor = True
