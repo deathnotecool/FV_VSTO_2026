@@ -528,7 +528,7 @@ Public Class L_FmeaMain
     End Sub
 
     ''' <summary>
-    ''' 功能：删除按钮，软删除当前记录（带全局写锁）
+    ''' 功能：删除按钮，物理删主表、明细、P 图（带全局写锁）
     ''' </summary>
     Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
         Try
@@ -542,15 +542,29 @@ Public Class L_FmeaMain
                 Return
             End If
 
-            If MessageBox.Show("确定删除当前记录吗？", "确认", MessageBoxButtons.YesNo) <> DialogResult.Yes Then Return
+            If MessageBox.Show("确定删除当前工序吗？" & vbCrLf & "将同时删除其明细和 P 图，且不可恢复。", "确认删除", MessageBoxButtons.YesNo) <> DialogResult.Yes Then Return
 
             Dim lngID As Long = CLng(dtMain.Rows(intCurrentRow)("lngID"))
 
             SyncLock WriteLock
                 Using conn As OleDbConnection = GetConnection()
-                    Using cmd As New OleDbCommand("UPDATE tblFMEA_Main SET blnIsDeleted=True WHERE lngID=?", conn)
+                    conn.Open()
+
+                    ' 1. 物理删主表
+                    Using cmd As New OleDbCommand("DELETE FROM tblFMEA_Main WHERE lngID=?", conn)
                         cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngID
-                        conn.Open()
+                        cmd.ExecuteNonQuery()
+                    End Using
+
+                    ' 2. 物理删明细
+                    Using cmd As New OleDbCommand("DELETE FROM tblFMEA_Detail WHERE lngMainID=?", conn)
+                        cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngID
+                        cmd.ExecuteNonQuery()
+                    End Using
+
+                    ' 3. 物理删 P 图
+                    Using cmd As New OleDbCommand("DELETE FROM tblPChart WHERE lngMainID=?", conn)
+                        cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngID
                         cmd.ExecuteNonQuery()
                     End Using
                 End Using
@@ -564,11 +578,54 @@ Public Class L_FmeaMain
                 ClearControls()
                 blnIsNew = True
             End If
-            lblStatusBar.Text = "已删除"
+            lblStatusBar.Text = "已删除（含明细和P图）"
         Catch ex As Exception
-            MessageBox.Show("删除失败：" & ex.Message & vbCrLf & vbCrLf & ex.StackTrace)
+            MessageBox.Show("删除失败：" & ex.Message)
         End Try
     End Sub
+
+    '''' <summary>
+    '''' 功能：删除按钮，软删除当前记录（带全局写锁）
+    '''' </summary>
+    'Private Sub btnDelete_Click(sender As Object, e As EventArgs) Handles btnDelete.Click
+    '    Try
+    '        If blnIsNew Then
+    '            MessageBox.Show("新增模式下不能删除")
+    '            Return
+    '        End If
+    '        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then Return
+    '        If intCurrentRow < 0 OrElse intCurrentRow >= dtMain.Rows.Count Then
+    '            MessageBox.Show("行号越界")
+    '            Return
+    '        End If
+
+    '        If MessageBox.Show("确定删除当前记录吗？", "确认", MessageBoxButtons.YesNo) <> DialogResult.Yes Then Return
+
+    '        Dim lngID As Long = CLng(dtMain.Rows(intCurrentRow)("lngID"))
+
+    '        SyncLock WriteLock
+    '            Using conn As OleDbConnection = GetConnection()
+    '                Using cmd As New OleDbCommand("UPDATE tblFMEA_Main SET blnIsDeleted=True WHERE lngID=?", conn)
+    '                    cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngID
+    '                    conn.Open()
+    '                    cmd.ExecuteNonQuery()
+    '                End Using
+    '            End Using
+    '        End SyncLock
+
+    '        LoadData()
+    '        intCurrentRow = 0
+    '        If dtMain.Rows.Count > 0 Then
+    '            ShowRecord()
+    '        Else
+    '            ClearControls()
+    '            blnIsNew = True
+    '        End If
+    '        lblStatusBar.Text = "已删除"
+    '    Catch ex As Exception
+    '        MessageBox.Show("删除失败：" & ex.Message & vbCrLf & vbCrLf & ex.StackTrace)
+    '    End Try
+    'End Sub
 
 
     ''' <summary>
@@ -751,6 +808,122 @@ Public Class L_FmeaMain
         f.Show()
     End Sub
 
+    ''' <summary>
+    ''' 功能：复制当前工序的主表、明细、P图，生成新工序
+    ''' </summary>
+    Private Sub CopyMainWithDetail()
+        If dtMain Is Nothing OrElse dtMain.Rows.Count = 0 Then
+            MessageBox.Show("没有可复制的工序")
+            Return
+        End If
+
+        Dim lngOldMainID As Long = CLng(dtMain.Rows(intCurrentRow)("lngID"))
+
+        Dim strNewNo As String = InputBox("请输入新工序编号（如 I-05）", "复制工序", "")
+        If strNewNo.Trim() = "" Then Return
+        Dim strNewSection As String = InputBox("请输入新工序段（外圈/内圈/组装/油漆）", "复制工序", dtMain.Rows(intCurrentRow)("strSection").ToString())
+        If strNewSection.Trim() = "" Then Return
+
+        If IsProcessNoExistsForCopy(strNewNo.Trim()) Then
+            MessageBox.Show("工序编号已存在：" & strNewNo.Trim())
+            Return
+        End If
+
+        Try
+            SyncLock WriteLock
+                Using conn As OleDbConnection = GetConnection()
+                    conn.Open()
+
+                    ' 1. 复制主表
+                    Dim strSqlMain As String = "INSERT INTO tblFMEA_Main " &
+                        "(strProcessNo, strProcessName, strSection, strProcessType, lngProcessOrder, " &
+                        "memFunction, memFunctionReq, strDeptName, strOwner, strFmeaTeam, " &
+                        "strVersion, strStatus, dtmCreateTime, dtmUpdateTime, blnIsDeleted, memRemark) " &
+                        "SELECT ?, strProcessName, ?, strProcessType, lngProcessOrder, " &
+                        "memFunction, memFunctionReq, strDeptName, strOwner, strFmeaTeam, " &
+                        "strVersion, strStatus, Now, Now, False, memRemark " &
+                        "FROM tblFMEA_Main WHERE lngID=?"
+                    Using cmd As New OleDbCommand(strSqlMain, conn)
+                        cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNewNo.Trim()
+                        cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = strNewSection.Trim()
+                        cmd.Parameters.Add("p3", OleDbType.Integer).Value = lngOldMainID
+                        cmd.ExecuteNonQuery()
+                    End Using
+
+                    ' 2. 取新主表 ID
+                    Dim lngNewMainID As Long = 0
+                    Using cmd As New OleDbCommand("SELECT MAX(lngID) FROM tblFMEA_Main", conn)
+                        lngNewMainID = CLng(cmd.ExecuteScalar())
+                    End Using
+
+                    ' 3. 复制明细
+                    Dim strSqlDetail As String = "INSERT INTO tblFMEA_Detail " &
+                        "(lngMainID, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
+                        "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
+                        "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
+                        "lngProcessOrder, dtmCreateTime, dtmUpdateTime, memRemark, strImagePath) " &
+                        "SELECT ?, strFailureModeNo, strFailureModeName, strProductChar, strProcessChar, " &
+                        "memFailureEffect, memFailureCause, memPrevention, memDetection, " &
+                        "intSeverity, intOccurrence, intDetection, intRPN, strAP, " &
+                        "lngProcessOrder, Now, Now, memRemark, strImagePath " &
+                        "FROM tblFMEA_Detail WHERE lngMainID=?"
+                    Using cmd As New OleDbCommand(strSqlDetail, conn)
+                        cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngNewMainID
+                        cmd.Parameters.Add("p2", OleDbType.Integer).Value = lngOldMainID
+                        cmd.ExecuteNonQuery()
+                    End Using
+
+                    ' 4. 复制 P 图
+                    Dim strSqlPChart As String = "INSERT INTO tblPChart " &
+                        "(lngMainID, memInfoInput, memControlFactor, memSystemFunction, " &
+                        "memExpectedOutput, memUnexpectedOutput, memNoiseFactor, memRemark, " &
+                        "dtmCreateTime, dtmUpdateTime) " &
+                        "SELECT ?, memInfoInput, memControlFactor, memSystemFunction, " &
+                        "memExpectedOutput, memUnexpectedOutput, memNoiseFactor, memRemark, " &
+                        "Now, Now FROM tblPChart WHERE lngMainID=?"
+                    Using cmd As New OleDbCommand(strSqlPChart, conn)
+                        cmd.Parameters.Add("p1", OleDbType.Integer).Value = lngNewMainID
+                        cmd.Parameters.Add("p2", OleDbType.Integer).Value = lngOldMainID
+                        cmd.ExecuteNonQuery()
+                    End Using
+                End Using
+            End SyncLock
+
+            LoadData()
+            intCurrentRow = FindRowByProcessNo(strNewNo.Trim())
+            If intCurrentRow < 0 Then intCurrentRow = 0
+            ShowRecord()
+            MessageBox.Show("复制成功，新工序：" & strNewNo.Trim())
+        Catch ex As Exception
+            MessageBox.Show("复制失败：" & ex.Message)
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' 功能：复制时检查工序编号是否已存在
+    ''' </summary>
+    Private Function IsProcessNoExistsForCopy(ByVal strNo As String) As Boolean
+        Using conn As OleDbConnection = GetConnection()
+            Using cmd As New OleDbCommand("SELECT COUNT(*) FROM tblFMEA_Main WHERE strProcessNo=? AND blnIsDeleted=False", conn)
+                cmd.Parameters.Add("p1", OleDbType.VarWChar).Value = strNo
+                conn.Open()
+                Dim result As Object = cmd.ExecuteScalar()
+                If IsDBNull(result) Then Return False
+                Return CInt(result) > 0
+            End Using
+        End Using
+    End Function
+
+    ''' <summary>
+    ''' 功能：复制工序（含明细P图）按钮
+    ''' </summary>
+    Private Sub btnCopyAll_Click(sender As Object, e As EventArgs) Handles btnCopyAll.Click
+        Try
+            CopyMainWithDetail()
+        Catch ex As Exception
+            MessageBox.Show("复制失败：" & ex.Message)
+        End Try
+    End Sub
 
 
 End Class

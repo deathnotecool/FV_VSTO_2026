@@ -70,6 +70,7 @@ Partial Class L_FmeaMain
         Me.lblProcessNo = New System.Windows.Forms.Label()
         Me.btnOpenDetail = New System.Windows.Forms.Button()
         Me.btnOpenPChart = New System.Windows.Forms.Button()
+        Me.btnCopyAll = New System.Windows.Forms.Button()
         CType(Me.dgvMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -285,6 +286,7 @@ Partial Class L_FmeaMain
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.btnCopyAll)
         Me.GroupBox1.Controls.Add(Me.btnCopyNew)
         Me.GroupBox1.Controls.Add(Me.btnClose)
         Me.GroupBox1.Controls.Add(Me.btnRefresh)
@@ -300,7 +302,7 @@ Partial Class L_FmeaMain
         '
         'btnCopyNew
         '
-        Me.btnCopyNew.Location = New System.Drawing.Point(118, 24)
+        Me.btnCopyNew.Location = New System.Drawing.Point(100, 24)
         Me.btnCopyNew.Name = "btnCopyNew"
         Me.btnCopyNew.Size = New System.Drawing.Size(75, 31)
         Me.btnCopyNew.TabIndex = 9
@@ -309,7 +311,7 @@ Partial Class L_FmeaMain
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(538, 24)
+        Me.btnClose.Location = New System.Drawing.Point(535, 24)
         Me.btnClose.Name = "btnClose"
         Me.btnClose.Size = New System.Drawing.Size(75, 31)
         Me.btnClose.TabIndex = 9
@@ -318,7 +320,7 @@ Partial Class L_FmeaMain
         '
         'btnRefresh
         '
-        Me.btnRefresh.Location = New System.Drawing.Point(433, 24)
+        Me.btnRefresh.Location = New System.Drawing.Point(448, 24)
         Me.btnRefresh.Name = "btnRefresh"
         Me.btnRefresh.Size = New System.Drawing.Size(75, 31)
         Me.btnRefresh.TabIndex = 8
@@ -327,7 +329,7 @@ Partial Class L_FmeaMain
         '
         'btnDelete
         '
-        Me.btnDelete.Location = New System.Drawing.Point(328, 24)
+        Me.btnDelete.Location = New System.Drawing.Point(361, 24)
         Me.btnDelete.Name = "btnDelete"
         Me.btnDelete.Size = New System.Drawing.Size(75, 31)
         Me.btnDelete.TabIndex = 7
@@ -336,7 +338,7 @@ Partial Class L_FmeaMain
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(223, 24)
+        Me.btnSave.Location = New System.Drawing.Point(274, 24)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 31)
         Me.btnSave.TabIndex = 14
@@ -558,6 +560,15 @@ Partial Class L_FmeaMain
         Me.btnOpenPChart.Text = "P图维护"
         Me.btnOpenPChart.UseVisualStyleBackColor = True
         '
+        'btnCopyAll
+        '
+        Me.btnCopyAll.Location = New System.Drawing.Point(187, 24)
+        Me.btnCopyAll.Name = "btnCopyAll"
+        Me.btnCopyAll.Size = New System.Drawing.Size(75, 31)
+        Me.btnCopyAll.TabIndex = 15
+        Me.btnCopyAll.Text = "复制工序"
+        Me.btnCopyAll.UseVisualStyleBackColor = True
+        '
         'L_FmeaMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
@@ -629,4 +640,5 @@ Partial Class L_FmeaMain
     Friend WithEvents btnCopyNew As Windows.Forms.Button
     Friend WithEvents btnOpenDetail As Windows.Forms.Button
     Friend WithEvents btnOpenPChart As Windows.Forms.Button
+    Friend WithEvents btnCopyAll As Windows.Forms.Button
 End Class
