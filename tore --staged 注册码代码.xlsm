@@ -1,0 +1,270 @@
+[33mcommit 4ce14bc932f3b2968fb3b29f8ee24a30fcf7b3ab[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Sep 25 21:29:44 2026 +0800
+
+    转移1
+
+[33mcommit d25efd0b72c8fa1008184ff166606f2227a074af[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Sep 25 21:17:49 2026 +0800
+
+    detailFmea
+
+[33mcommit d2110a499636eb44e990f7ebbbbc237e39e1ee77[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Sep 25 11:00:49 2026 +0800
+
+    布局更新
+
+[33mcommit a24576d230d38e995071cc691468f24958df75df[m
+Author: WF <wangfei_f1@163.com>
+Date:   Thu Sep 24 19:15:23 2026 +0800
+
+    feat: 完成 FMEA 工序主表维护窗体 L_FmeaMain
+
+[33mcommit 55fd356b6588012076b0dea4175674754fea9feb[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sun Sep 20 19:17:13 2026 +0800
+
+    F01新增Excel导入功能：从选区读数据、按管理编号去重、批量INSERT；含 GetCellText/IsManageIdExists 辅助方法
+
+[33mcommit f5f69214cfc4d4e2098a2152e317739d1c065658[m
+Author: WF <wangfei_f1@163.com>
+Date:   Thu Sep 17 11:21:04 2026 +0800
+
+    F01模块注释与优化全部完成：CRUD/查询/排序/联动/图片/日期输入全流程；性能提升63%；修复多个隐患；新增绑定格式化、二次确认、Nothing检查等健壮性改进
+
+[33mcommit 23f563b88fd7fae5137feb283a64d1d64e0a544e[m
+Author: WF <wangfei_f1@163.com>
+Date:   Wed Sep 16 18:30:51 2026 +0800
+
+    注释更新26.09.16
+
+[33mcommit c434d92dde4fc4a2734f75211d33538c5aa64d5b[m
+Author: WF <wangfei_f1@163.com>
+Date:   Wed Sep 16 15:50:45 2026 +0800
+
+    F01优化完成：全部方法注释；修复多个bug（下拉框/定位/全角括号/删除逻辑）；性能提升63%；异常处理与用户体验改进
+
+[33mcommit 2a968f1c6745f14b0d8576016ac89ae17b436b54[m
+Author: WF <wangfei_f1@163.com>
+Date:   Tue Sep 15 10:37:40 2026 +0800
+
+    F01优化完成：CRUD按钮注释与优化；添加后正确定位新记录；DataView复用修复；启动性能提升63%；删除二次确认；更新/删除保留用户排序
+
+[33mcommit d91b7d3df05ab9aeafe72c2ec2d1f94815fc3e24[m
+Author: WF <wangfei_f1@163.com>
+Date:   Mon Sep 14 14:40:00 2026 +0800
+
+    F01优化：修复不良类型下拉框缺失；添加后按发生日期DESC定位新记录；SelectionChanged去除重复绑定解决3000行卡顿；开启DataGridView双缓冲改善滚动；Font对象复用；myArray移至类顶部声明
+
+[33mcommit 27b31fe1d88a071351afa82c40a3a9d32855c1c0[m
+Author: WF <wangfei_f1@163.com>
+Date:   Mon Sep 14 11:55:16 2026 +0800
+
+    更新注释
+
+[33mcommit 7239b5a95dac2382069e20b69138cc51816c4829[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Sep 11 19:42:54 2026 +0800
+
+    F01_不良品基本信息：完成 FillDataSetAndView/BindFields/ShowPosition/导航按钮/红色数据筛选切换注释与优化；修复 Grid 数据源绑定至 objDataView 使 RowFilter 生效
+
+[33mcommit 7f077d68dcd1a75486e2b740935f8c7709ad766e[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Sep 11 18:54:43 2026 +0800
+
+    添加注释260911-1
+
+[33mcommit f5eaf62a3ffc5fa5bca29d88e2087083ca9a5e25[m
+Author: WF <wangfei_f1@163.com>
+Date:   Thu Sep 10 10:41:49 2026 +0800
+
+    注释更新
+
+[33mcommit 7bfa9acd2ee70a9787998dc3b133f9afce8e1ce5[m
+Author: WF <wangfei_f1@163.com>
+Date:   Thu Sep 3 11:31:06 2026 +0800
+
+    完善注释260903
+
+[33mcommit 3f7a9ba087c7d83672427a86c226d1c025ba7d82[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 29 14:22:10 2026 +0800
+
+    完成代码笔记模块所有功能，更新查看履历
+
+[33mcommit 21b5a75951b04fdd1da90c21023ff92afa504ab6[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 29 14:11:00 2026 +0800
+
+    结束1
+
+[33mcommit a3cce41019262cf6800f6efec6fad330b0520146[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 29 11:29:16 2026 +0800
+
+    添加1
+
+[33mcommit 44aa3a0cd96c2f839084154efb327b1aa288635e[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 29 08:47:30 2026 +0800
+
+    分类颜色动态配置：支持从Categories.txt读取颜色
+
+[33mcommit ba4bf5d8fd25e1e47b1275e496e359dac89d9c44[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 29 08:11:15 2026 +0800
+
+    添加统计信息功能
+
+[33mcommit 02007a8bc0764f2fb6cb353d6e10875cf7fee045[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 28 17:21:32 2026 +0800
+
+    gai1
+
+[33mcommit 47c754ad04b3f7465f5ee1dba35c246ac89e5568[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 28 16:55:35 2026 +0800
+
+    添加导入按钮
+
+[33mcommit dee4bfa72dafd19ef6c9b87b994e6203910947f5[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 28 10:28:04 2026 +0800
+
+    add update2
+
+[33mcommit 2cdfdae8ee554107526ac2623936e3d94fcb3bd4[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 28 10:20:23 2026 +0800
+
+    添加1
+
+[33mcommit 0c3c451ce5802cbfda70d787bd8d728f1a831aea[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 28 09:39:57 2026 +0800
+
+    添加分类按钮
+
+[33mcommit 9d6b798cc4586536eeba2e515f12465319a2b256[m
+Author: WF <wangfei_f1@163.com>
+Date:   Thu Aug 27 18:15:23 2026 +0800
+
+    增加插入按钮
+
+[33mcommit e5cdaadd0811f7d72fcdc4e0c48f7c25e3548dad[m
+Author: WF <wangfei_f1@163.com>
+Date:   Wed Aug 26 12:31:35 2026 +0800
+
+    完成代码笔记模块：增删改查 + 分类筛选
+
+[33mcommit bf3e821e94b91d2e9822e7f3cfb1a4f8d71512d3[m
+Author: WF <wangfei_f1@163.com>
+Date:   Tue Aug 25 18:48:51 2026 +0800
+
+    完成代码笔记模块：添加分类字段，完善增删改查功能
+
+[33mcommit 41d50a017c5e50f281dddbffe67abe854622f93f[m
+Author: WF <wangfei_f1@163.com>
+Date:   Mon Aug 24 10:57:31 2026 +0800
+
+    完成代码笔记分类功能升级：数据结构、界面与保存逻辑
+
+[33mcommit 438e80ef50cb8aeb61e367a6088dd12d785a7d9f[m
+Author: WF <wangfei_f1@163.com>
+Date:   Mon Aug 24 10:00:06 2026 +0800
+
+    10:00
+
+[33mcommit af93ca93dcbf1a0de40410ec70aa0d3d25d926c9[m
+Author: WF <wangfei_f1@163.com>
+Date:   Mon Aug 24 08:17:12 2026 +0800
+
+    8:17
+
+[33mcommit 179c5cb8a5ffe38f4806f61911d507a0ef9df806[m
+Author: WF <wangfei_f1@163.com>
+Date:   Mon Aug 24 07:56:48 2026 +0800
+
+    7:56
+
+[33mcommit 947a3d03011e878796656ac05d8bdd1a4afed3c0[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sun Aug 23 21:13:56 2026 +0800
+
+    添加CodeNotes.txt源文件，更新代码笔记窗体
+
+[33mcommit 2d5dbeb3f4b2861f6947d9f6df26428c483f85ba[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sun Aug 23 20:52:33 2026 +0800
+
+    260823 20:52
+
+[33mcommit a18cae5e42b9f1e9aeb159a3c979868d32bab0c7[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sun Aug 23 19:28:25 2026 +0800
+
+    26082319:28
+
+[33mcommit bd9dd5c300b6b7b79ecbdde1ca3b094407b1ece9[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sun Aug 23 18:39:45 2026 +0800
+
+    26082318:39
+
+[33mcommit 24f5ecc52b8e50bb745329b7183556aec6d10dcc[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 22 17:44:50 2026 +0800
+
+    26082217:44
+
+[33mcommit b79f0be4107d3fd7fd83e2f348dfada5cfaeb58f[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 22 13:39:09 2026 +0800
+
+    完成代码笔记迁移：支持查询、查看和复制代码
+
+[33mcommit d6f0ea24e591a466aa12db16d783fd0850a53fe9[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 22 11:02:22 2026 +0800
+
+    260822-1102
+
+[33mcommit 993ae561111ce3b6eb9f0a525e7041fe0a08ba91[m
+Author: WF <wangfei_f1@163.com>
+Date:   Sat Aug 22 10:29:47 2026 +0800
+
+    260822-1
+
+[33mcommit 346f20a84f528988c5f6a840ec5fe2cc3e029f7f[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 21 19:40:02 2026 +0800
+
+    阶段2 资源文件
+
+[33mcommit 01546dbefca595cad8a557241d4733e683104c0c[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 21 19:09:44 2026 +0800
+
+    阶段一完成：创建CodeNotes.resx资源文件
+
+[33mcommit de8e1422050d42d9ac86e4869004088b6b9099b8[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 21 18:21:29 2026 +0800
+
+    B2次修改了
+
+[33mcommit 36810df04cdac3751d9623303dbb2c179e77e1ab[m
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 21 18:19:38 2026 +0800
+
+    A修改
+
+[33mcommit 84e8415c3836d0359980210c2734479a0ada4145[m
+Merge: cc11510 35aead4
+Author: WF <wangfei_f1@163.com>
+Date:   Fri Aug 21 18:15:49 2026 +0800
+
+    Merge branch 'master' of 

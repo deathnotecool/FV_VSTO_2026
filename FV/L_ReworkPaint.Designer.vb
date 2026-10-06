@@ -39,13 +39,13 @@ Partial Class L_ReworkPaint
         Me.lblInspector = New System.Windows.Forms.Label()
         Me.btnDelRow = New System.Windows.Forms.Button()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.txtTotalQty = New System.Windows.Forms.TextBox()
+        Me.lblTotalCheck = New System.Windows.Forms.Label()
         Me.lblShift = New System.Windows.Forms.Label()
         Me.dgvDetail = New System.Windows.Forms.DataGridView()
         Me.lblStatusBar = New System.Windows.Forms.Label()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.btnAddRow = New System.Windows.Forms.Button()
-        Me.txtTotalQty = New System.Windows.Forms.TextBox()
-        Me.lblTotalCheck = New System.Windows.Forms.Label()
         CType(Me.dgvHead, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -58,14 +58,14 @@ Partial Class L_ReworkPaint
             Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.dgvHead.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvHead.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvHead.Location = New System.Drawing.Point(95, 530)
+        Me.dgvHead.Location = New System.Drawing.Point(12, 446)
         Me.dgvHead.MultiSelect = False
         Me.dgvHead.Name = "dgvHead"
         Me.dgvHead.ReadOnly = True
         Me.dgvHead.RowHeadersVisible = False
         Me.dgvHead.RowTemplate.Height = 27
         Me.dgvHead.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.dgvHead.Size = New System.Drawing.Size(627, 200)
+        Me.dgvHead.Size = New System.Drawing.Size(641, 268)
         Me.dgvHead.TabIndex = 67
         '
         'btnNew
@@ -84,9 +84,9 @@ Partial Class L_ReworkPaint
         Me.GroupBox1.Controls.Add(Me.btnDelete)
         Me.GroupBox1.Controls.Add(Me.btnSave)
         Me.GroupBox1.Controls.Add(Me.btnNew)
-        Me.GroupBox1.Location = New System.Drawing.Point(94, 46)
+        Me.GroupBox1.Location = New System.Drawing.Point(12, 12)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(628, 69)
+        Me.GroupBox1.Size = New System.Drawing.Size(641, 75)
         Me.GroupBox1.TabIndex = 63
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "工具栏"
@@ -132,7 +132,7 @@ Partial Class L_ReworkPaint
         Me.dtpDate.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.dtpDate.CustomFormat = "yyyy-MM-dd HH:mm:ss"
         Me.dtpDate.Format = System.Windows.Forms.DateTimePickerFormat.Custom
-        Me.dtpDate.Location = New System.Drawing.Point(67, 32)
+        Me.dtpDate.Location = New System.Drawing.Point(103, 32)
         Me.dtpDate.Name = "dtpDate"
         Me.dtpDate.Size = New System.Drawing.Size(200, 25)
         Me.dtpDate.TabIndex = 61
@@ -143,7 +143,7 @@ Partial Class L_ReworkPaint
         Me.cboShift.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.cboShift.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cboShift.FormattingEnabled = True
-        Me.cboShift.Location = New System.Drawing.Point(407, 33)
+        Me.cboShift.Location = New System.Drawing.Point(414, 33)
         Me.cboShift.Name = "cboShift"
         Me.cboShift.Size = New System.Drawing.Size(200, 23)
         Me.cboShift.TabIndex = 53
@@ -153,11 +153,11 @@ Partial Class L_ReworkPaint
         '
         Me.txtHeadRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.txtHeadRemark.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.txtHeadRemark.Location = New System.Drawing.Point(79, 122)
+        Me.txtHeadRemark.Location = New System.Drawing.Point(103, 129)
         Me.txtHeadRemark.Multiline = True
         Me.txtHeadRemark.Name = "txtHeadRemark"
         Me.txtHeadRemark.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.txtHeadRemark.Size = New System.Drawing.Size(542, 80)
+        Me.txtHeadRemark.Size = New System.Drawing.Size(511, 185)
         Me.txtHeadRemark.TabIndex = 55
         Me.ToolTip1.SetToolTip(Me.txtHeadRemark, "备注，可多行")
         '
@@ -165,7 +165,7 @@ Partial Class L_ReworkPaint
         '
         Me.cboInspector.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cboInspector.FormattingEnabled = True
-        Me.cboInspector.Location = New System.Drawing.Point(79, 79)
+        Me.cboInspector.Location = New System.Drawing.Point(103, 78)
         Me.cboInspector.Name = "cboInspector"
         Me.cboInspector.Size = New System.Drawing.Size(200, 23)
         Me.cboInspector.TabIndex = 52
@@ -174,7 +174,7 @@ Partial Class L_ReworkPaint
         '
         Me.lblHeadRemark.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.lblHeadRemark.AutoSize = True
-        Me.lblHeadRemark.Location = New System.Drawing.Point(9, 148)
+        Me.lblHeadRemark.Location = New System.Drawing.Point(35, 216)
         Me.lblHeadRemark.Name = "lblHeadRemark"
         Me.lblHeadRemark.Size = New System.Drawing.Size(45, 15)
         Me.lblHeadRemark.TabIndex = 60
@@ -184,7 +184,7 @@ Partial Class L_ReworkPaint
         '
         Me.lblDate.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.lblDate.AutoSize = True
-        Me.lblDate.Location = New System.Drawing.Point(13, 37)
+        Me.lblDate.Location = New System.Drawing.Point(28, 37)
         Me.lblDate.Name = "lblDate"
         Me.lblDate.Size = New System.Drawing.Size(52, 15)
         Me.lblDate.TabIndex = 57
@@ -193,7 +193,7 @@ Partial Class L_ReworkPaint
         'lblInspector
         '
         Me.lblInspector.AutoSize = True
-        Me.lblInspector.Location = New System.Drawing.Point(9, 83)
+        Me.lblInspector.Location = New System.Drawing.Point(13, 82)
         Me.lblInspector.Name = "lblInspector"
         Me.lblInspector.Size = New System.Drawing.Size(67, 15)
         Me.lblInspector.TabIndex = 58
@@ -202,7 +202,7 @@ Partial Class L_ReworkPaint
         'btnDelRow
         '
         Me.btnDelRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnDelRow.Location = New System.Drawing.Point(1369, 736)
+        Me.btnDelRow.Location = New System.Drawing.Point(1420, 736)
         Me.btnDelRow.Name = "btnDelRow"
         Me.btnDelRow.Size = New System.Drawing.Size(75, 31)
         Me.btnDelRow.TabIndex = 66
@@ -221,18 +221,35 @@ Partial Class L_ReworkPaint
         Me.GroupBox2.Controls.Add(Me.lblDate)
         Me.GroupBox2.Controls.Add(Me.lblShift)
         Me.GroupBox2.Controls.Add(Me.lblInspector)
-        Me.GroupBox2.Location = New System.Drawing.Point(95, 143)
+        Me.GroupBox2.Location = New System.Drawing.Point(12, 97)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(627, 343)
+        Me.GroupBox2.Size = New System.Drawing.Size(641, 343)
         Me.GroupBox2.TabIndex = 64
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = " 表头信息："
+        '
+        'txtTotalQty
+        '
+        Me.txtTotalQty.Location = New System.Drawing.Point(414, 77)
+        Me.txtTotalQty.Name = "txtTotalQty"
+        Me.txtTotalQty.Size = New System.Drawing.Size(200, 25)
+        Me.txtTotalQty.TabIndex = 62
+        Me.ToolTip1.SetToolTip(Me.txtTotalQty, "录排序号，如 10、20、30")
+        '
+        'lblTotalCheck
+        '
+        Me.lblTotalCheck.AutoSize = True
+        Me.lblTotalCheck.Location = New System.Drawing.Point(318, 82)
+        Me.lblTotalCheck.Name = "lblTotalCheck"
+        Me.lblTotalCheck.Size = New System.Drawing.Size(82, 15)
+        Me.lblTotalCheck.TabIndex = 63
+        Me.lblTotalCheck.Text = "检验总数："
         '
         'lblShift
         '
         Me.lblShift.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.lblShift.AutoSize = True
-        Me.lblShift.Location = New System.Drawing.Point(335, 37)
+        Me.lblShift.Location = New System.Drawing.Point(348, 37)
         Me.lblShift.Name = "lblShift"
         Me.lblShift.Size = New System.Drawing.Size(52, 15)
         Me.lblShift.TabIndex = 56
@@ -246,13 +263,13 @@ Partial Class L_ReworkPaint
         Me.dgvDetail.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.dgvDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvDetail.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter
-        Me.dgvDetail.Location = New System.Drawing.Point(743, 58)
+        Me.dgvDetail.Location = New System.Drawing.Point(662, 12)
         Me.dgvDetail.MultiSelect = False
         Me.dgvDetail.Name = "dgvDetail"
         Me.dgvDetail.RowHeadersVisible = False
         Me.dgvDetail.RowTemplate.Height = 27
         Me.dgvDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.dgvDetail.Size = New System.Drawing.Size(701, 672)
+        Me.dgvDetail.Size = New System.Drawing.Size(833, 702)
         Me.dgvDetail.TabIndex = 62
         '
         'lblStatusBar
@@ -260,7 +277,7 @@ Partial Class L_ReworkPaint
         Me.lblStatusBar.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.lblStatusBar.Location = New System.Drawing.Point(95, 736)
+        Me.lblStatusBar.Location = New System.Drawing.Point(12, 736)
         Me.lblStatusBar.Name = "lblStatusBar"
         Me.lblStatusBar.Size = New System.Drawing.Size(1179, 31)
         Me.lblStatusBar.TabIndex = 61
@@ -271,29 +288,12 @@ Partial Class L_ReworkPaint
         'btnAddRow
         '
         Me.btnAddRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnAddRow.Location = New System.Drawing.Point(1288, 736)
+        Me.btnAddRow.Location = New System.Drawing.Point(1339, 736)
         Me.btnAddRow.Name = "btnAddRow"
         Me.btnAddRow.Size = New System.Drawing.Size(75, 31)
         Me.btnAddRow.TabIndex = 65
         Me.btnAddRow.Text = "加一行"
         Me.btnAddRow.UseVisualStyleBackColor = True
-        '
-        'txtTotalQty
-        '
-        Me.txtTotalQty.Location = New System.Drawing.Point(407, 77)
-        Me.txtTotalQty.Name = "txtTotalQty"
-        Me.txtTotalQty.Size = New System.Drawing.Size(200, 25)
-        Me.txtTotalQty.TabIndex = 62
-        Me.ToolTip1.SetToolTip(Me.txtTotalQty, "录排序号，如 10、20、30")
-        '
-        'lblTotalCheck
-        '
-        Me.lblTotalCheck.AutoSize = True
-        Me.lblTotalCheck.Location = New System.Drawing.Point(305, 82)
-        Me.lblTotalCheck.Name = "lblTotalCheck"
-        Me.lblTotalCheck.Size = New System.Drawing.Size(82, 15)
-        Me.lblTotalCheck.TabIndex = 63
-        Me.lblTotalCheck.Text = "检验总数："
         '
         'L_ReworkPaint
         '
