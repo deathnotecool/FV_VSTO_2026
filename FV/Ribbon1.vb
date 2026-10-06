@@ -3336,5 +3336,14 @@ Public Class Ribbon1
         btnOpenReworkAssy.Enabled = False
     End Sub
 
+    ''' <summary>
+    ''' 功能：Ribbon 按钮点击，打开油漆QC返工录入窗体
+    ''' </summary>
+    Private Sub btnOpenReworkPaint_Click(sender As Object, e As RibbonControlEventArgs) Handles btnOpenReworkPaint.Click
+        Dim f As New L_ReworkPaint()
+        f.Show()
+        btnOpenReworkPaint.Enabled = False
+    End Sub
+
 
 End Class

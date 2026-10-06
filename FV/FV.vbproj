@@ -489,6 +489,12 @@
     <Compile Include="L_ReworkAssy.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_ReworkPaint.Designer.vb">
+      <DependentUpon>L_ReworkPaint.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_ReworkPaint.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="M_FmeaDb.vb" />
     <Compile Include="M_ReworkExport.vb" />
     <Compile Include="Spec.Designer.vb">
@@ -752,6 +758,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="L_ReworkAssy.resx">
       <DependentUpon>L_ReworkAssy.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="L_ReworkPaint.resx">
+      <DependentUpon>L_ReworkPaint.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Spec.resx">
       <CustomToolNamespace>My.Resources</CustomToolNamespace>

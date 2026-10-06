@@ -9,24 +9,32 @@ Imports Excel = Microsoft.Office.Interop.Excel
 Module M_ReworkExport
 
     ''' <summary>
-    ''' 功能：导出组装QC和油漆QC返工数据到 Excel（两个 Sheet）
+    ''' 功能：导出组装和油漆返工数据到 Excel（4 个 Sheet）
     ''' </summary>
     Public Sub ExportReworkToExcel()
         Try
             Dim xlApp As Excel.Application = Globals.ThisAddIn.Application
             Dim xlBook As Excel.Workbook = xlApp.Workbooks.Add()
-            Dim xlSheetAssy As Excel.Worksheet = CType(xlBook.Sheets(1), Excel.Worksheet)
-            xlSheetAssy.Name = "组装QC"
 
-            ' 导出组装
+            ' 第 1 个 Sheet 默认存在，改成组装明细
+            Dim xlSheetAssy As Excel.Worksheet = CType(xlBook.Sheets(1), Excel.Worksheet)
+            xlSheetAssy.Name = "组装明细"
             ExportAssySheet(xlSheetAssy)
 
-            ' 加第二个 Sheet
+            ' 第 2 个 Sheet：油漆明细
             Dim xlSheetPaint As Excel.Worksheet = CType(xlBook.Sheets.Add(After:=xlBook.Sheets(xlBook.Sheets.Count)), Excel.Worksheet)
-            xlSheetPaint.Name = "油漆QC"
-
-            ' 导出油漆
+            xlSheetPaint.Name = "油漆明细"
             ExportPaintSheet(xlSheetPaint)
+
+            ' 第 3 个 Sheet：组装缺陷汇总
+            Dim xlSheetAssySum As Excel.Worksheet = CType(xlBook.Sheets.Add(After:=xlBook.Sheets(xlBook.Sheets.Count)), Excel.Worksheet)
+            xlSheetAssySum.Name = "组装缺陷汇总"
+            ExportAssySummary(xlSheetAssySum)
+
+            ' 第 4 个 Sheet：油漆缺陷汇总
+            Dim xlSheetPaintSum As Excel.Worksheet = CType(xlBook.Sheets.Add(After:=xlBook.Sheets(xlBook.Sheets.Count)), Excel.Worksheet)
+            xlSheetPaintSum.Name = "油漆缺陷汇总"
+            ExportPaintSummary(xlSheetPaintSum)
 
             ' 激活第一个 Sheet
             xlSheetAssy.Activate()
@@ -38,7 +46,59 @@ Module M_ReworkExport
     End Sub
 
 
+    ''' <summary>
+    ''' 功能：导出组装缺陷汇总到 Sheet
+    ''' </summary>
+    Private Sub ExportAssySummary(ByVal xlSheet As Excel.Worksheet)
+        Dim dt As New DataTable()
+        Dim strSql As String =
+            "SELECT strDefectType, COUNT(*) AS 出现次数, SUM(lngQty) AS 总数量, " &
+            "SUM(IIF(strHandleType='抛磨放行', lngQty, 0)) AS 抛磨放行, " &
+            "SUM(IIF(strHandleType='放行', lngQty, 0)) AS 放行, " &
+            "SUM(IIF(strHandleType='返工', lngQty, 0)) AS 返工, " &
+            "SUM(IIF(strHandleType='报废', lngQty, 0)) AS 报废 " &
+            "FROM tblReworkAssyDetail d " &
+            "INNER JOIN tblReworkAssyHead h ON d.lngHeadID = h.lngID " &
+            "WHERE h.blnIsDeleted = False " &
+            "GROUP BY strDefectType " &
+            "ORDER BY SUM(lngQty) DESC"
 
+        Using conn As OleDbConnection = GetConnection()
+            Using da As New OleDbDataAdapter(strSql, conn)
+                da.Fill(dt)
+            End Using
+        End Using
+
+        Dim strHeaders() As String = {"缺陷类型", "出现次数", "总数量", "抛磨放行", "放行", "返工", "报废"}
+        WriteSheet(xlSheet, dt, strHeaders)
+    End Sub
+
+    ''' <summary>
+    ''' 功能：导出油漆缺陷汇总到 Sheet
+    ''' </summary>
+    Private Sub ExportPaintSummary(ByVal xlSheet As Excel.Worksheet)
+        Dim dt As New DataTable()
+        Dim strSql As String =
+            "SELECT strDefectType, COUNT(*) AS 出现次数, SUM(lngQty) AS 总数量, " &
+            "SUM(IIF(strHandleType='抛磨放行', lngQty, 0)) AS 抛磨放行, " &
+            "SUM(IIF(strHandleType='放行', lngQty, 0)) AS 放行, " &
+            "SUM(IIF(strHandleType='返工', lngQty, 0)) AS 返工, " &
+            "SUM(IIF(strHandleType='报废', lngQty, 0)) AS 报废 " &
+            "FROM tblReworkPaintDetail d " &
+            "INNER JOIN tblReworkPaintHead h ON d.lngHeadID = h.lngID " &
+            "WHERE h.blnIsDeleted = False " &
+            "GROUP BY strDefectType " &
+            "ORDER BY SUM(lngQty) DESC"
+
+        Using conn As OleDbConnection = GetConnection()
+            Using da As New OleDbDataAdapter(strSql, conn)
+                da.Fill(dt)
+            End Using
+        End Using
+
+        Dim strHeaders() As String = {"缺陷类型", "出现次数", "总数量", "抛磨放行", "放行", "返工", "报废"}
+        WriteSheet(xlSheet, dt, strHeaders)
+    End Sub
 
     ''' <summary>
     ''' 功能：把 DataTable 写入 Sheet
@@ -69,7 +129,8 @@ Module M_ReworkExport
         Dim dt As New DataTable()
         Dim strSql As String =
             "SELECT h.dtmDate, h.strShift, h.strInspector, h.lngTotalCheck, " &
-            "d.strSerialNo, d.strModel, d.strDefectType, d.strHandleType, d.lngQty, d.memRemark " &
+            "d.strSerialNo, d.strDrawingNo, d.strCustomerPartNo, " &
+            "d.strDefectType, d.strHandleType, d.lngQty, d.memRemark " &
             "FROM tblReworkAssyHead h " &
             "LEFT JOIN tblReworkAssyDetail d ON h.lngID = d.lngHeadID " &
             "WHERE h.blnIsDeleted = False " &
@@ -81,17 +142,16 @@ Module M_ReworkExport
             End Using
         End Using
 
-        ' ★ 这里 ★
-        Dim strHeaders() As String = {"日期", "班次", "检验员", "总检验数", "系列号", "型号", "缺陷类型", "处理方式", "数量", "备注"}
+        Dim strHeaders() As String = {"日期", "班次", "检验员", "总检验数", "系列号", "图号", "客户品号", "缺陷类型", "处理方式", "数量", "备注"}
         WriteSheet(xlSheet, dt, strHeaders)
     End Sub
 
     Private Sub ExportPaintSheet(ByVal xlSheet As Excel.Worksheet)
         Dim dt As New DataTable()
         Dim strSql As String =
-            "SELECT h.dtmDate, h.strShift, h.strInspector, h.strCheckType, " &
-            "h.lngIncomingCheck, h.lngIncomingFail, h.lngPaintTotal, h.lngPaintFail, " &
-            "d.strSerialNo, d.strModel, d.strDefectType, d.strHandleType, d.lngQty, d.memRemark " &
+            "SELECT h.dtmDate, h.strShift, h.strInspector, h.lngTotalQty, " &
+            "d.strCheckType, d.strSerialNo, d.strDrawingNo, d.strCustomerPartNo, " &
+            "d.strDefectType, d.strHandleType, d.lngQty, d.memRemark " &
             "FROM tblReworkPaintHead h " &
             "LEFT JOIN tblReworkPaintDetail d ON h.lngID = d.lngHeadID " &
             "WHERE h.blnIsDeleted = False " &
@@ -103,8 +163,7 @@ Module M_ReworkExport
             End Using
         End Using
 
-        ' ★ 这里 ★
-        Dim strHeaders() As String = {"日期", "班次", "检验员", "检查类型", "来料抽检", "来料不合格", "喷漆总数", "油漆不合格", "系列号", "型号", "缺陷类型", "处理方式", "数量", "备注"}
+        Dim strHeaders() As String = {"日期", "班次", "检验员", "检验总数", "检查类型", "系列号", "图号", "客户品号", "缺陷类型", "处理方式", "数量", "备注"}
         WriteSheet(xlSheet, dt, strHeaders)
     End Sub
 
