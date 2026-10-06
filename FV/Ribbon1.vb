@@ -3320,4 +3320,21 @@ Public Class Ribbon1
     End Sub
 
 
+    ''' <summary>
+    ''' 功能：导出返工表按钮
+    ''' </summary>
+    Private Sub btnExportRework_Click(sender As Object, e As RibbonControlEventArgs) Handles btnExportRework.Click
+        M_ReworkExport.ExportReworkToExcel()
+    End Sub
+
+    ''' <summary>
+    ''' 功能：Ribbon 按钮点击，打开组装QC返工录入窗体
+    ''' </summary>
+    Private Sub btnOpenReworkAssy_Click(sender As Object, e As RibbonControlEventArgs) Handles btnOpenReworkAssy.Click
+        Dim f As New L_ReworkAssy()
+        f.Show()
+        btnOpenReworkAssy.Enabled = False
+    End Sub
+
+
 End Class

@@ -45,6 +45,7 @@ Partial Class L_FmeaMain
         Me.btnFirst = New System.Windows.Forms.Button()
         Me.btnLast = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.btnCopyAll = New System.Windows.Forms.Button()
         Me.btnCopyNew = New System.Windows.Forms.Button()
         Me.btnClose = New System.Windows.Forms.Button()
         Me.btnRefresh = New System.Windows.Forms.Button()
@@ -70,7 +71,7 @@ Partial Class L_FmeaMain
         Me.lblProcessNo = New System.Windows.Forms.Label()
         Me.btnOpenDetail = New System.Windows.Forms.Button()
         Me.btnOpenPChart = New System.Windows.Forms.Button()
-        Me.btnCopyAll = New System.Windows.Forms.Button()
+        Me.btnExport = New System.Windows.Forms.Button()
         CType(Me.dgvMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -229,9 +230,9 @@ Partial Class L_FmeaMain
         '
         'btnPrev
         '
-        Me.btnPrev.Location = New System.Drawing.Point(655, 164)
+        Me.btnPrev.Location = New System.Drawing.Point(640, 144)
         Me.btnPrev.Name = "btnPrev"
-        Me.btnPrev.Size = New System.Drawing.Size(75, 31)
+        Me.btnPrev.Size = New System.Drawing.Size(90, 31)
         Me.btnPrev.TabIndex = 10
         Me.btnPrev.Text = "上一条"
         Me.btnPrev.UseVisualStyleBackColor = True
@@ -239,9 +240,9 @@ Partial Class L_FmeaMain
         'btnNext
         '
         Me.btnNext.BackColor = System.Drawing.SystemColors.Control
-        Me.btnNext.Location = New System.Drawing.Point(655, 207)
+        Me.btnNext.Location = New System.Drawing.Point(640, 188)
         Me.btnNext.Name = "btnNext"
-        Me.btnNext.Size = New System.Drawing.Size(75, 31)
+        Me.btnNext.Size = New System.Drawing.Size(90, 31)
         Me.btnNext.TabIndex = 10
         Me.btnNext.Text = "下一条"
         Me.btnNext.UseVisualStyleBackColor = False
@@ -267,9 +268,9 @@ Partial Class L_FmeaMain
         '
         'btnFirst
         '
-        Me.btnFirst.Location = New System.Drawing.Point(655, 121)
+        Me.btnFirst.Location = New System.Drawing.Point(640, 100)
         Me.btnFirst.Name = "btnFirst"
-        Me.btnFirst.Size = New System.Drawing.Size(75, 31)
+        Me.btnFirst.Size = New System.Drawing.Size(90, 31)
         Me.btnFirst.TabIndex = 10
         Me.btnFirst.Text = "第一条"
         Me.btnFirst.UseVisualStyleBackColor = True
@@ -277,9 +278,9 @@ Partial Class L_FmeaMain
         'btnLast
         '
         Me.btnLast.BackColor = System.Drawing.SystemColors.Control
-        Me.btnLast.Location = New System.Drawing.Point(655, 250)
+        Me.btnLast.Location = New System.Drawing.Point(640, 232)
         Me.btnLast.Name = "btnLast"
-        Me.btnLast.Size = New System.Drawing.Size(75, 31)
+        Me.btnLast.Size = New System.Drawing.Size(90, 31)
         Me.btnLast.TabIndex = 10
         Me.btnLast.Text = "最后一条"
         Me.btnLast.UseVisualStyleBackColor = False
@@ -299,6 +300,15 @@ Partial Class L_FmeaMain
         Me.GroupBox1.TabIndex = 12
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "工具栏"
+        '
+        'btnCopyAll
+        '
+        Me.btnCopyAll.Location = New System.Drawing.Point(187, 24)
+        Me.btnCopyAll.Name = "btnCopyAll"
+        Me.btnCopyAll.Size = New System.Drawing.Size(75, 31)
+        Me.btnCopyAll.TabIndex = 15
+        Me.btnCopyAll.Text = "复制工序"
+        Me.btnCopyAll.UseVisualStyleBackColor = True
         '
         'btnCopyNew
         '
@@ -544,36 +554,37 @@ Partial Class L_FmeaMain
         '
         'btnOpenDetail
         '
-        Me.btnOpenDetail.Location = New System.Drawing.Point(655, 293)
+        Me.btnOpenDetail.Location = New System.Drawing.Point(640, 276)
         Me.btnOpenDetail.Name = "btnOpenDetail"
-        Me.btnOpenDetail.Size = New System.Drawing.Size(75, 31)
+        Me.btnOpenDetail.Size = New System.Drawing.Size(90, 31)
         Me.btnOpenDetail.TabIndex = 14
         Me.btnOpenDetail.Text = "明细维护"
         Me.btnOpenDetail.UseVisualStyleBackColor = True
         '
         'btnOpenPChart
         '
-        Me.btnOpenPChart.Location = New System.Drawing.Point(655, 336)
+        Me.btnOpenPChart.Location = New System.Drawing.Point(640, 320)
         Me.btnOpenPChart.Name = "btnOpenPChart"
-        Me.btnOpenPChart.Size = New System.Drawing.Size(75, 31)
+        Me.btnOpenPChart.Size = New System.Drawing.Size(90, 31)
         Me.btnOpenPChart.TabIndex = 15
         Me.btnOpenPChart.Text = "P图维护"
         Me.btnOpenPChart.UseVisualStyleBackColor = True
         '
-        'btnCopyAll
+        'btnExport
         '
-        Me.btnCopyAll.Location = New System.Drawing.Point(187, 24)
-        Me.btnCopyAll.Name = "btnCopyAll"
-        Me.btnCopyAll.Size = New System.Drawing.Size(75, 31)
-        Me.btnCopyAll.TabIndex = 15
-        Me.btnCopyAll.Text = "复制工序"
-        Me.btnCopyAll.UseVisualStyleBackColor = True
+        Me.btnExport.Location = New System.Drawing.Point(640, 364)
+        Me.btnExport.Name = "btnExport"
+        Me.btnExport.Size = New System.Drawing.Size(90, 31)
+        Me.btnExport.TabIndex = 16
+        Me.btnExport.Text = "导出FMEA"
+        Me.btnExport.UseVisualStyleBackColor = True
         '
         'L_FmeaMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1529, 720)
+        Me.Controls.Add(Me.btnExport)
         Me.Controls.Add(Me.btnOpenPChart)
         Me.Controls.Add(Me.btnOpenDetail)
         Me.Controls.Add(Me.GroupBox2)
@@ -641,4 +652,5 @@ Partial Class L_FmeaMain
     Friend WithEvents btnOpenDetail As Windows.Forms.Button
     Friend WithEvents btnOpenPChart As Windows.Forms.Button
     Friend WithEvents btnCopyAll As Windows.Forms.Button
+    Friend WithEvents btnExport As Windows.Forms.Button
 End Class

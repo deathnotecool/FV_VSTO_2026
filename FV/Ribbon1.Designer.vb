@@ -88,6 +88,7 @@
         Me.btn不良信息分析 = Me.Factory.CreateRibbonButton
         Me.btn索赔信息 = Me.Factory.CreateRibbonButton
         Me.btn索赔信息查询与导出 = Me.Factory.CreateRibbonButton
+        Me.btnExportRework = Me.Factory.CreateRibbonButton
         Me.btnGetInform = Me.Factory.CreateRibbonButton
         Me.Menu12 = Me.Factory.CreateRibbonMenu
         Me.btn电能 = Me.Factory.CreateRibbonButton
@@ -179,6 +180,7 @@
         Me.Button1 = Me.Factory.CreateRibbonButton
         Me.TEST = Me.Factory.CreateRibbonButton
         Me.ntyRibbon = New System.Windows.Forms.NotifyIcon(Me.components)
+        Me.btnOpenReworkAssy = Me.Factory.CreateRibbonButton
         Me.Tab1.SuspendLayout()
         Me.Group3.SuspendLayout()
         Me.Group2.SuspendLayout()
@@ -503,6 +505,8 @@
         Me.Menu14.Items.Add(Me.btn不良信息分析)
         Me.Menu14.Items.Add(Me.btn索赔信息)
         Me.Menu14.Items.Add(Me.btn索赔信息查询与导出)
+        Me.Menu14.Items.Add(Me.btnOpenReworkAssy)
+        Me.Menu14.Items.Add(Me.btnExportRework)
         Me.Menu14.Items.Add(Me.btnGetInform)
         Me.Menu14.Label = "不良品管理系统"
         Me.Menu14.Name = "Menu14"
@@ -543,6 +547,12 @@
         Me.btn索赔信息查询与导出.Label = "索赔信息查询与导出"
         Me.btn索赔信息查询与导出.Name = "btn索赔信息查询与导出"
         Me.btn索赔信息查询与导出.ShowImage = True
+        '
+        'btnExportRework
+        '
+        Me.btnExportRework.Label = "导出返工表"
+        Me.btnExportRework.Name = "btnExportRework"
+        Me.btnExportRework.ShowImage = True
         '
         'btnGetInform
         '
@@ -1340,6 +1350,12 @@
         Me.ntyRibbon.Text = "NotifyIcon1"
         Me.ntyRibbon.Visible = True
         '
+        'btnOpenReworkAssy
+        '
+        Me.btnOpenReworkAssy.Label = "组装返工录入"
+        Me.btnOpenReworkAssy.Name = "btnOpenReworkAssy"
+        Me.btnOpenReworkAssy.ShowImage = True
+        '
         'Ribbon1
         '
         Me.Name = "Ribbon1"
@@ -1490,6 +1506,8 @@
     Friend WithEvents btnAutoFontSize As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents btnAnalyzeHeatTreatmentData As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents btnOpenFmeaMain As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents btnExportRework As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents btnOpenReworkAssy As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection

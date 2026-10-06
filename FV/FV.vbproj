@@ -483,7 +483,14 @@
     <Compile Include="L_PChart.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_ReworkAssy.Designer.vb">
+      <DependentUpon>L_ReworkAssy.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_ReworkAssy.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="M_FmeaDb.vb" />
+    <Compile Include="M_ReworkExport.vb" />
     <Compile Include="Spec.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -742,6 +749,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="L_PChart.resx">
       <DependentUpon>L_PChart.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="L_ReworkAssy.resx">
+      <DependentUpon>L_ReworkAssy.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Spec.resx">
       <CustomToolNamespace>My.Resources</CustomToolNamespace>

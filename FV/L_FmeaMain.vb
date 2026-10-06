@@ -925,5 +925,102 @@ Public Class L_FmeaMain
         End Try
     End Sub
 
+    ''' <summary>
+    ''' 功能：导出 FMEA 汇总表到 Excel
+    ''' </summary>
+    Private Sub ExportFmeaToExcel()
+        ' 1. 查数据
+        Dim dtExport As New DataTable()
+        Dim strSql As String =
+            "SELECT m.strProcessNo, m.strProcessName, m.strSection, m.strProcessType, " &
+            "d.strFailureModeNo, d.strFailureModeName, d.strProductChar, d.strProcessChar, " &
+            "d.memFailureEffect, d.memFailureCause, d.memPrevention, d.memDetection, " &
+            "d.intSeverity, d.intOccurrence, d.intDetection, d.intRPN, d.strAP " &
+            "FROM tblFMEA_Main m " &
+            "LEFT JOIN tblFMEA_Detail d ON m.lngID = d.lngMainID " &
+            "WHERE m.blnIsDeleted = False " &
+            "ORDER BY m.lngProcessOrder, d.lngProcessOrder"
+
+        Using conn As OleDbConnection = GetConnection()
+            Using da As New OleDbDataAdapter(strSql, conn)
+                da.Fill(dtExport)
+            End Using
+        End Using
+
+        If dtExport.Rows.Count = 0 Then
+            MessageBox.Show("没有可导出的数据")
+            Return
+        End If
+
+        ' 2. 新建 Excel 工作簿
+        Dim xlBook As Excel.Workbook = xlapp.Workbooks.Add()
+        Dim xlSheet As Excel.Worksheet = CType(xlBook.Sheets(1), Excel.Worksheet)
+        xlSheet.Name = "FMEA汇总"
+
+        ' 3. 写表头
+        Dim strHeaders() As String = {"工序编号", "工序名称", "工序段", "工序类型", "失效模式编码", "失效模式名称",
+                                       "产品特性", "过程特性", "失效影响", "失效原因", "预防措施", "探测措施",
+                                       "S", "O", "D", "RPN", "AP"}
+        For i As Integer = 0 To strHeaders.Length - 1
+            xlSheet.Cells(1, i + 1) = strHeaders(i)
+        Next
+
+        ' 表头加粗
+        Dim rngHeader As Excel.Range = xlSheet.Range(xlSheet.Cells(1, 1), xlSheet.Cells(1, strHeaders.Length))
+        rngHeader.Font.Bold = True
+        rngHeader.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray)
+
+        ' 4. 写数据
+        For i As Integer = 0 To dtExport.Rows.Count - 1
+            Dim dr As DataRow = dtExport.Rows(i)
+            Dim intRow As Integer = i + 2
+
+            xlSheet.Cells(intRow, 1) = SafeStr(dr("strProcessNo"))
+            xlSheet.Cells(intRow, 2) = SafeStr(dr("strProcessName"))
+            xlSheet.Cells(intRow, 3) = SafeStr(dr("strSection"))
+            xlSheet.Cells(intRow, 4) = SafeStr(dr("strProcessType"))
+            xlSheet.Cells(intRow, 5) = SafeStr(dr("strFailureModeNo"))
+            xlSheet.Cells(intRow, 6) = SafeStr(dr("strFailureModeName"))
+            xlSheet.Cells(intRow, 7) = SafeStr(dr("strProductChar"))
+            xlSheet.Cells(intRow, 8) = SafeStr(dr("strProcessChar"))
+            xlSheet.Cells(intRow, 9) = SafeStr(dr("memFailureEffect"))
+            xlSheet.Cells(intRow, 10) = SafeStr(dr("memFailureCause"))
+            xlSheet.Cells(intRow, 11) = SafeStr(dr("memPrevention"))
+            xlSheet.Cells(intRow, 12) = SafeStr(dr("memDetection"))
+            xlSheet.Cells(intRow, 13) = SafeStr(dr("intSeverity"))
+            xlSheet.Cells(intRow, 14) = SafeStr(dr("intOccurrence"))
+            xlSheet.Cells(intRow, 15) = SafeStr(dr("intDetection"))
+            xlSheet.Cells(intRow, 16) = SafeStr(dr("intRPN"))
+            xlSheet.Cells(intRow, 17) = SafeStr(dr("strAP"))
+        Next
+
+        ' 5. 自动列宽
+        xlSheet.Columns.AutoFit()
+
+        ' 6. 冻结首行
+        xlSheet.Application.ActiveWindow.SplitRow = 1
+        xlSheet.Application.ActiveWindow.FreezePanes = True
+
+        MessageBox.Show("导出成功，共 " & dtExport.Rows.Count & " 条")
+    End Sub
+
+    ''' <summary>
+    ''' 功能：安全转字符串，DBNull 转空
+    ''' </summary>
+    Private Function SafeStr(ByVal obj As Object) As String
+        If obj Is Nothing OrElse IsDBNull(obj) Then Return ""
+        Return obj.ToString()
+    End Function
+
+    ''' <summary>
+    ''' 功能：导出 FMEA 按钮
+    ''' </summary>
+    Private Sub btnExport_Click(sender As Object, e As EventArgs) Handles btnExport.Click
+        Try
+            ExportFmeaToExcel()
+        Catch ex As Exception
+            MessageBox.Show("导出失败：" & ex.Message)
+        End Try
+    End Sub
 
 End Class
