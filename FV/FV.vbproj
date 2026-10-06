@@ -816,7 +816,6 @@
       <DependentUpon>WN18081502_随机数产生.vb</DependentUpon>
     </EmbeddedResource>
     <None Include="ClassDiagram1.cd" />
-    <None Include="FV_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="ThisAddIn.Designer.xml">
       <DependentUpon>ThisAddIn.vb</DependentUpon>
