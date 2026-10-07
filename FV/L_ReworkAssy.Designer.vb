@@ -46,6 +46,7 @@ Partial Class L_ReworkAssy
         Me.btnNew = New System.Windows.Forms.Button()
         Me.dgvDetail = New System.Windows.Forms.DataGridView()
         Me.dgvHead = New System.Windows.Forms.DataGridView()
+        Me.btnOpenModelDict = New System.Windows.Forms.Button()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         CType(Me.dgvDetail, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -55,7 +56,7 @@ Partial Class L_ReworkAssy
         'btnAddRow
         '
         Me.btnAddRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnAddRow.Location = New System.Drawing.Point(1206, 702)
+        Me.btnAddRow.Location = New System.Drawing.Point(1199, 702)
         Me.btnAddRow.Name = "btnAddRow"
         Me.btnAddRow.Size = New System.Drawing.Size(75, 31)
         Me.btnAddRow.TabIndex = 58
@@ -69,7 +70,7 @@ Partial Class L_ReworkAssy
         Me.lblStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lblStatusBar.Location = New System.Drawing.Point(13, 702)
         Me.lblStatusBar.Name = "lblStatusBar"
-        Me.lblStatusBar.Size = New System.Drawing.Size(1179, 31)
+        Me.lblStatusBar.Size = New System.Drawing.Size(1064, 31)
         Me.lblStatusBar.TabIndex = 54
         Me.lblStatusBar.Text = "                         "
         Me.lblStatusBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -120,7 +121,7 @@ Partial Class L_ReworkAssy
         'btnDelRow
         '
         Me.btnDelRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnDelRow.Location = New System.Drawing.Point(1287, 702)
+        Me.btnDelRow.Location = New System.Drawing.Point(1286, 702)
         Me.btnDelRow.Name = "btnDelRow"
         Me.btnDelRow.Size = New System.Drawing.Size(75, 31)
         Me.btnDelRow.TabIndex = 59
@@ -295,11 +296,21 @@ Partial Class L_ReworkAssy
         Me.dgvHead.Size = New System.Drawing.Size(627, 348)
         Me.dgvHead.TabIndex = 60
         '
+        'btnOpenModelDict
+        '
+        Me.btnOpenModelDict.Location = New System.Drawing.Point(1112, 702)
+        Me.btnOpenModelDict.Name = "btnOpenModelDict"
+        Me.btnOpenModelDict.Size = New System.Drawing.Size(75, 31)
+        Me.btnOpenModelDict.TabIndex = 61
+        Me.btnOpenModelDict.Text = "型号字典"
+        Me.btnOpenModelDict.UseVisualStyleBackColor = True
+        '
         'L_ReworkAssy
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1388, 745)
+        Me.Controls.Add(Me.btnOpenModelDict)
         Me.Controls.Add(Me.dgvHead)
         Me.Controls.Add(Me.btnAddRow)
         Me.Controls.Add(Me.lblStatusBar)
@@ -341,4 +352,5 @@ Partial Class L_ReworkAssy
     Friend WithEvents btnNew As Windows.Forms.Button
     Friend WithEvents dgvDetail As Windows.Forms.DataGridView
     Friend WithEvents dgvHead As Windows.Forms.DataGridView
+    Friend WithEvents btnOpenModelDict As Windows.Forms.Button
 End Class

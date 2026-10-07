@@ -6,7 +6,7 @@ Imports System.Windows.Forms
 ''' 功能：组装QC返工记录录入窗体
 ''' </summary>
 Public Class L_ReworkAssy
-
+    Private blnModelDictOpen As Boolean = False
     Private lngHeadID As Long = 0
     Private blnIsNew As Boolean = True
 
@@ -519,5 +519,24 @@ Public Class L_ReworkAssy
     Private Sub dgvDetail_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles dgvDetail.DataError
         e.ThrowException = False
     End Sub
+
+    ''' <summary>
+    ''' 功能：打开型号字典窗体
+    ''' </summary>
+    Private Sub btnOpenModelDict_Click(sender As Object, e As EventArgs) Handles btnOpenModelDict.Click
+        If blnModelDictOpen Then
+            MessageBox.Show("型号字典已打开")
+            Return
+        End If
+        Dim f As New L_ModelDict()
+        AddHandler f.FormClosed, Sub()
+                                     blnModelDictOpen = False
+                                     ' 关闭后刷新下拉框
+                                     InitGrid()
+                                 End Sub
+        blnModelDictOpen = True
+        f.Show()
+    End Sub
+
 
 End Class

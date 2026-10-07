@@ -477,6 +477,12 @@
     <Compile Include="L_FmeaMain.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_ModelDict.Designer.vb">
+      <DependentUpon>L_ModelDict.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_ModelDict.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="L_PChart.Designer.vb">
       <DependentUpon>L_PChart.vb</DependentUpon>
     </Compile>
@@ -752,6 +758,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="L_FmeaMain.resx">
       <DependentUpon>L_FmeaMain.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="L_ModelDict.resx">
+      <DependentUpon>L_ModelDict.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="L_PChart.resx">
       <DependentUpon>L_PChart.vb</DependentUpon>
