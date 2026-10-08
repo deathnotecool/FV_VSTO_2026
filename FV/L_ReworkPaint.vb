@@ -183,7 +183,7 @@ Public Class L_ReworkPaint
                             "(dtmDate, strShift, strInspector, lngTotalQty, dtmCreateTime, dtmUpdateTime, blnIsDeleted, memRemark) " &
                             "VALUES (?,?,?,?,?,?,False,?)"
                         Using cmd As New OleDbCommand(strSqlHead, conn)
-                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value
+                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value.Date
                             cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = cboShift.Text
                             cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = cboInspector.Text.Trim()
                             cmd.Parameters.Add("p4", OleDbType.Integer).Value = intTotal
@@ -201,7 +201,7 @@ Public Class L_ReworkPaint
                             "dtmDate=?, strShift=?, strInspector=?, lngTotalQty=?, dtmUpdateTime=?, memRemark=? " &
                             "WHERE lngID=?"
                         Using cmd As New OleDbCommand(strSqlHead, conn)
-                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value
+                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value.Date
                             cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = cboShift.Text
                             cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = cboInspector.Text.Trim()
                             cmd.Parameters.Add("p4", OleDbType.Integer).Value = intTotal

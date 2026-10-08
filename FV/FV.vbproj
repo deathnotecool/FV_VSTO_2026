@@ -459,6 +459,12 @@
     <Compile Include="K04_发注编号信息管理.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="L_DateRange.Designer.vb">
+      <DependentUpon>L_DateRange.vb</DependentUpon>
+    </Compile>
+    <Compile Include="L_DateRange.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="L_FailureModeDict.Designer.vb">
       <DependentUpon>L_FailureModeDict.vb</DependentUpon>
     </Compile>
@@ -749,6 +755,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="K04_发注编号信息管理.resx">
       <DependentUpon>K04_发注编号信息管理.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="L_DateRange.resx">
+      <DependentUpon>L_DateRange.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="L_FailureModeDict.resx">
       <DependentUpon>L_FailureModeDict.vb</DependentUpon>

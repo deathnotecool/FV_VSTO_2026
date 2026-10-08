@@ -552,18 +552,21 @@
         '
         'btnOpenReworkAssy
         '
+        Me.btnOpenReworkAssy.Image = CType(resources.GetObject("btnOpenReworkAssy.Image"), System.Drawing.Image)
         Me.btnOpenReworkAssy.Label = "组装返工录入"
         Me.btnOpenReworkAssy.Name = "btnOpenReworkAssy"
         Me.btnOpenReworkAssy.ShowImage = True
         '
         'btnOpenReworkPaint
         '
+        Me.btnOpenReworkPaint.Image = CType(resources.GetObject("btnOpenReworkPaint.Image"), System.Drawing.Image)
         Me.btnOpenReworkPaint.Label = "油漆返工录入"
         Me.btnOpenReworkPaint.Name = "btnOpenReworkPaint"
         Me.btnOpenReworkPaint.ShowImage = True
         '
         'btnExportRework
         '
+        Me.btnExportRework.Image = CType(resources.GetObject("btnExportRework.Image"), System.Drawing.Image)
         Me.btnExportRework.Label = "导出返工表"
         Me.btnExportRework.Name = "btnExportRework"
         Me.btnExportRework.ShowImage = True

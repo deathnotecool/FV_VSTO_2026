@@ -58,17 +58,17 @@ Partial Class L_ModelDict
         '
         Me.txtRemark.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.txtRemark.Location = New System.Drawing.Point(135, 194)
+        Me.txtRemark.Location = New System.Drawing.Point(146, 203)
         Me.txtRemark.Multiline = True
         Me.txtRemark.Name = "txtRemark"
         Me.txtRemark.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.txtRemark.Size = New System.Drawing.Size(458, 80)
+        Me.txtRemark.Size = New System.Drawing.Size(458, 333)
         Me.txtRemark.TabIndex = 13
         '
         'lblRemark
         '
         Me.lblRemark.AutoSize = True
-        Me.lblRemark.Location = New System.Drawing.Point(67, 234)
+        Me.lblRemark.Location = New System.Drawing.Point(58, 357)
         Me.lblRemark.Name = "lblRemark"
         Me.lblRemark.Size = New System.Drawing.Size(45, 15)
         Me.lblRemark.TabIndex = 41
@@ -87,7 +87,7 @@ Partial Class L_ModelDict
         '
         Me.txtSortOrder.Location = New System.Drawing.Point(146, 144)
         Me.txtSortOrder.Name = "txtSortOrder"
-        Me.txtSortOrder.Size = New System.Drawing.Size(144, 25)
+        Me.txtSortOrder.Size = New System.Drawing.Size(458, 25)
         Me.txtSortOrder.TabIndex = 11
         '
         'txtCustomerPartNo
@@ -100,7 +100,7 @@ Partial Class L_ModelDict
         'lblCustomerPartNo
         '
         Me.lblCustomerPartNo.AutoSize = True
-        Me.lblCustomerPartNo.Location = New System.Drawing.Point(18, 94)
+        Me.lblCustomerPartNo.Location = New System.Drawing.Point(21, 94)
         Me.lblCustomerPartNo.Name = "lblCustomerPartNo"
         Me.lblCustomerPartNo.Size = New System.Drawing.Size(82, 15)
         Me.lblCustomerPartNo.TabIndex = 38
@@ -216,7 +216,7 @@ Partial Class L_ModelDict
         'lblDrawingNo
         '
         Me.lblDrawingNo.AutoSize = True
-        Me.lblDrawingNo.Location = New System.Drawing.Point(18, 30)
+        Me.lblDrawingNo.Location = New System.Drawing.Point(51, 30)
         Me.lblDrawingNo.Name = "lblDrawingNo"
         Me.lblDrawingNo.Size = New System.Drawing.Size(52, 15)
         Me.lblDrawingNo.TabIndex = 36

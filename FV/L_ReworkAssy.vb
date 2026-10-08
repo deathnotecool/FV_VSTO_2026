@@ -81,9 +81,11 @@ Public Class L_ReworkAssy
         Dim colDefect As New DataGridViewComboBoxColumn()
         colDefect.Name = "colDefectType"
         colDefect.HeaderText = "缺陷类型"
-        colDefect.Items.AddRange("轻微划伤", "中度划伤", "重度划伤", "漏攻丝", "生锈",
-                                 "S点问题", "钢印问题", "间隙超差", "塞子凸出", "隔离块缺失",
-                                 "注脂孔铁屑", "旋转困难", "加工面台阶纹路异常")
+        colDefect.Items.AddRange("轻微划伤", "中度划伤", "重度划伤", "车加工面刀痕纹路异常", "车加工面毛刺", "生锈",
+                                 "孔位置度不良", "孔倒角不良", "孔边毛刺/毛边", "孔尺寸不良",
+                                 "铰孔不良", "漏攻丝", "攻丝不良", "注脂孔铁屑",
+                                 "S点问题", "钢印问题", "间隙问题", "塞子问题", "隔离块问题",
+                                  "旋转困难", "其他")
         colDefect.Width = 130
         dgvDetail.Columns.Add(colDefect)
 
@@ -175,7 +177,7 @@ Public Class L_ReworkAssy
                             "(dtmDate, strShift, strInspector, lngTotalCheck, dtmCreateTime, dtmUpdateTime, blnIsDeleted, memRemark) " &
                             "VALUES (?,?,?,?,?,?,False,?)"
                         Using cmd As New OleDbCommand(strSqlHead, conn)
-                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value
+                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value.Date
                             cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = cboShift.Text
                             cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = cboInspector.Text.Trim()
                             cmd.Parameters.Add("p4", OleDbType.Integer).Value = intTotal
@@ -193,7 +195,7 @@ Public Class L_ReworkAssy
                             "dtmDate=?, strShift=?, strInspector=?, lngTotalCheck=?, dtmUpdateTime=?, memRemark=? " &
                             "WHERE lngID=?"
                         Using cmd As New OleDbCommand(strSqlHead, conn)
-                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value
+                            cmd.Parameters.Add("p1", OleDbType.Date).Value = dtpDate.Value.Date
                             cmd.Parameters.Add("p2", OleDbType.VarWChar).Value = cboShift.Text
                             cmd.Parameters.Add("p3", OleDbType.VarWChar).Value = cboInspector.Text.Trim()
                             cmd.Parameters.Add("p4", OleDbType.Integer).Value = intTotal

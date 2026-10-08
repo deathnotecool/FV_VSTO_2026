@@ -56,9 +56,9 @@ Partial Class L_ReworkAssy
         'btnAddRow
         '
         Me.btnAddRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnAddRow.Location = New System.Drawing.Point(1199, 702)
+        Me.btnAddRow.Location = New System.Drawing.Point(1167, 702)
         Me.btnAddRow.Name = "btnAddRow"
-        Me.btnAddRow.Size = New System.Drawing.Size(75, 31)
+        Me.btnAddRow.Size = New System.Drawing.Size(99, 31)
         Me.btnAddRow.TabIndex = 58
         Me.btnAddRow.Text = "加一行"
         Me.btnAddRow.UseVisualStyleBackColor = True
@@ -70,7 +70,7 @@ Partial Class L_ReworkAssy
         Me.lblStatusBar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lblStatusBar.Location = New System.Drawing.Point(13, 702)
         Me.lblStatusBar.Name = "lblStatusBar"
-        Me.lblStatusBar.Size = New System.Drawing.Size(1064, 31)
+        Me.lblStatusBar.Size = New System.Drawing.Size(1042, 31)
         Me.lblStatusBar.TabIndex = 54
         Me.lblStatusBar.Text = "                         "
         Me.lblStatusBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -121,9 +121,9 @@ Partial Class L_ReworkAssy
         'btnDelRow
         '
         Me.btnDelRow.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnDelRow.Location = New System.Drawing.Point(1286, 702)
+        Me.btnDelRow.Location = New System.Drawing.Point(1266, 702)
         Me.btnDelRow.Name = "btnDelRow"
-        Me.btnDelRow.Size = New System.Drawing.Size(75, 31)
+        Me.btnDelRow.Size = New System.Drawing.Size(99, 31)
         Me.btnDelRow.TabIndex = 59
         Me.btnDelRow.Text = "删一行"
         Me.btnDelRow.UseVisualStyleBackColor = True
@@ -298,9 +298,10 @@ Partial Class L_ReworkAssy
         '
         'btnOpenModelDict
         '
-        Me.btnOpenModelDict.Location = New System.Drawing.Point(1112, 702)
+        Me.btnOpenModelDict.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnOpenModelDict.Location = New System.Drawing.Point(1068, 702)
         Me.btnOpenModelDict.Name = "btnOpenModelDict"
-        Me.btnOpenModelDict.Size = New System.Drawing.Size(75, 31)
+        Me.btnOpenModelDict.Size = New System.Drawing.Size(99, 31)
         Me.btnOpenModelDict.TabIndex = 61
         Me.btnOpenModelDict.Text = "型号字典"
         Me.btnOpenModelDict.UseVisualStyleBackColor = True
